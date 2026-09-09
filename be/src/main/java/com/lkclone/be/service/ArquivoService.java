@@ -24,6 +24,13 @@ public class ArquivoService {
     @Value("${supabase.service-key}")
     private String supabaseServiceKey;
 
+    // O endpoint do Storage tenta decodificar o header Authorization como
+    // JWT, e a chave nova (sb_secret_...) não é um JWT — por isso precisa
+    // do service_role JWT legado especificamente aqui, mesmo usando a
+    // chave nova no apikey.
+    @Value("${supabase.service-role-jwt}")
+    private String supabaseServiceRoleJwt;
+
     @Value("${supabase.storage-bucket:avatars}")
     private String bucket;
 
@@ -64,12 +71,8 @@ public class ArquivoService {
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(supabaseUrl + "/storage/v1/object/" + bucket + "/" + nomeArquivo))
-                // O Storage API exige os dois headers: apikey (é quem de fato
-                // autoriza com a chave nova sb_secret_...) e Authorization
-                // (só precisa existir — a validação de schema do endpoint
-                // rejeita a requisição se ele estiver ausente).
                 .header("apikey", supabaseServiceKey)
-                .header("Authorization", "Bearer " + supabaseServiceKey)
+                .header("Authorization", "Bearer " + supabaseServiceRoleJwt)
                 .header("Content-Type", contentType)
                 .POST(HttpRequest.BodyPublishers.ofByteArray(bytes))
                 .build();
@@ -96,7 +99,7 @@ public class ArquivoService {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(supabaseUrl + "/storage/v1/object/" + bucket + "/" + nomeArquivo))
                 .header("apikey", supabaseServiceKey)
-                .header("Authorization", "Bearer " + supabaseServiceKey)
+                .header("Authorization", "Bearer " + supabaseServiceRoleJwt)
                 .DELETE()
                 .build();
 
