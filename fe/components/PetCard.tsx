@@ -20,6 +20,7 @@ export default function PetCard({
   const [estado, setEstado] = useState(pet);
   const [curtindo, setCurtindo] = useState(false);
   const [jaCurtiuHoje, setJaCurtiuHoje] = useState(false);
+  const [comemorando, setComemorando] = useState(false);
 
   async function handleCurtir() {
     setCurtindo(true);
@@ -32,6 +33,9 @@ export default function PetCard({
         estagioVisual: resultado.estagioVisual,
       }));
       setJaCurtiuHoje(resultado.jaCurtiuHoje);
+
+      setComemorando(true);
+      setTimeout(() => setComemorando(false), 1400);
     } finally {
       setCurtindo(false);
     }
@@ -45,6 +49,7 @@ export default function PetCard({
         chapeu={estado.chapeu}
         rosto={estado.rosto}
         acessorioCorpo={estado.acessorioCorpo}
+        comemorando={comemorando}
         className="mx-auto h-24 w-24 transition-transform"
       />
       <p className={`mt-2 text-sm ${subtextoClassName}`}>

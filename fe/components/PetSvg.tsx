@@ -1,3 +1,5 @@
+import { useId } from "react";
+
 export const CORES: Record<string, string> = {
   laranja: "#f97316",
   azul: "#3b82f6",
@@ -22,6 +24,7 @@ interface PetSvgProps {
   chapeu?: string;
   rosto?: string;
   acessorioCorpo?: string;
+  comemorando?: boolean; // levanta os bracinhos por um instante, ao receber uma curtida
   className?: string;
 }
 
@@ -31,58 +34,132 @@ export default function PetSvg({
   chapeu = "nenhum",
   rosto = "nenhum",
   acessorioCorpo = "nenhum",
+  comemorando = false,
   className,
 }: PetSvgProps) {
   const acento = CORES[cor] ?? CORES.laranja;
   const dormindo = estagioVisual === 0;
   const radiante = estagioVisual === 2;
+  const gradId = `pet-corpo-${useId().replace(/:/g, "")}`;
 
   return (
     <svg viewBox="0 0 100 100" className={className} role="img" aria-label="Pet robô">
-      {radiante && (
-        <g className="animate-pulse" opacity={0.8}>
-          <path d="M12 30 l1.6 4 4 1.6 -4 1.6 -1.6 4 -1.6 -4 -4 -1.6 4 -1.6 Z" fill={acento} />
-          <path d="M88 24 l1.2 3 3 1.2 -3 1.2 -1.2 3 -1.2 -3 -3 -1.2 3 -1.2 Z" fill={acento} />
-        </g>
-      )}
+      <defs>
+        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={CASCO} stopOpacity={1} />
+          <stop offset="55%" stopColor={CASCO} stopOpacity={0.85} />
+          <stop offset="100%" stopColor={CASCO} stopOpacity={0.2} />
+        </linearGradient>
+      </defs>
 
-      {/* brilho de flutuação */}
+      {/* brilho no chão — fica parado enquanto o corpo flutua por cima, reforça a ilusão */}
       <ellipse cx="50" cy="93" rx="18" ry="3.5" fill={acento} opacity={0.25} />
 
-      {/* bracinhos, só aparecem animado/radiante */}
-      {radiante && (
-        <>
-          <rect x="4" y="46" width="16" height="7" rx="3.5" fill={CASCO} stroke={CASCO_SOMBRA} strokeWidth="1.5" />
-          <rect x="80" y="46" width="16" height="7" rx="3.5" fill={CASCO} stroke={CASCO_SOMBRA} strokeWidth="1.5" />
-        </>
-      )}
+      <g className="pet-flutuar">
+        {radiante && (
+          <g className="animate-pulse" opacity={0.8}>
+            <path d="M12 30 l1.6 4 4 1.6 -4 1.6 -1.6 4 -1.6 -4 -4 -1.6 4 -1.6 Z" fill={acento} />
+            <path d="M88 24 l1.2 3 3 1.2 -3 1.2 -1.2 3 -1.2 -3 -3 -1.2 3 -1.2 Z" fill={acento} />
+          </g>
+        )}
 
-      {/* corpo: cápsula lisa e arredondada, estilo EVE */}
-      <rect x="21" y="6" width="58" height="86" rx="29" fill={CASCO} stroke={CASCO_SOMBRA} strokeWidth="1.5" />
+        {/* bracinhos, só aparecem animado/radiante — sobem quando recebe uma curtida */}
+        {radiante && (
+          <>
+            <rect
+              x="4"
+              y="46"
+              width="16"
+              height="7"
+              rx="3.5"
+              fill={CASCO}
+              stroke={CASCO_SOMBRA}
+              strokeWidth="1.5"
+              style={{
+                transformOrigin: "20px 49.5px",
+                transform: comemorando ? "rotate(-35deg)" : "rotate(35deg)",
+                transition: "transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              }}
+            />
+            <rect
+              x="80"
+              y="46"
+              width="16"
+              height="7"
+              rx="3.5"
+              fill={CASCO}
+              stroke={CASCO_SOMBRA}
+              strokeWidth="1.5"
+              style={{
+                transformOrigin: "80px 49.5px",
+                transform: comemorando ? "rotate(35deg)" : "rotate(-35deg)",
+                transition: "transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              }}
+            />
+          </>
+        )}
 
-      {/* reflexo sutil */}
-      <ellipse cx="38" cy="26" rx="10" ry="16" fill="#ffffff" opacity={0.5} />
+        {/* corpo: fantasminha - topo arredondado, base ondulada e animada, gradiente esmaecendo pra baixo */}
+        <path fill={`url(#${gradId})`} stroke={CASCO_SOMBRA} strokeWidth="1.5"
+          d="M21,35 A29,29 0 0 1 79,35 L79,82 q-7.25,7 -14.5,0 q-7.25,-7 -14.5,0 q-7.25,7 -14.5,0 q-7.25,-7 -14.5,0 L21,35 Z">
+          <animate
+            attributeName="d"
+            dur="3s"
+            repeatCount="indefinite"
+            values="M21,35 A29,29 0 0 1 79,35 L79,82 q-7.25,7 -14.5,0 q-7.25,-7 -14.5,0 q-7.25,7 -14.5,0 q-7.25,-7 -14.5,0 L21,35 Z;
+                    M21,35 A29,29 0 0 1 79,35 L79,82 q-7.25,-7 -14.5,0 q-7.25,7 -14.5,0 q-7.25,-7 -14.5,0 q-7.25,7 -14.5,0 L21,35 Z;
+                    M21,35 A29,29 0 0 1 79,35 L79,82 q-7.25,7 -14.5,0 q-7.25,-7 -14.5,0 q-7.25,7 -14.5,0 q-7.25,-7 -14.5,0 L21,35 Z"
+          />
+        </path>
 
-      {/* bochechas */}
-      <ellipse cx="30" cy="48" rx="5" ry="3.5" fill={acento} opacity={0.25} />
-      <ellipse cx="70" cy="48" rx="5" ry="3.5" fill={acento} opacity={0.25} />
+        {/* reflexo sutil */}
+        <ellipse cx="38" cy="26" rx="10" ry="16" fill="#ffffff" opacity={0.5} />
 
-      {/* olhos (LEDs em amêndoa, como a EVE) */}
-      {dormindo ? (
-        <>
-          <rect x="29" y="41" width="14" height="3" rx="1.5" fill={acento} opacity={0.7} />
-          <rect x="57" y="41" width="14" height="3" rx="1.5" fill={acento} opacity={0.7} />
-        </>
-      ) : (
-        <>
-          <ellipse cx="36" cy="41" rx={radiante ? 9 : 7.5} ry={radiante ? 12 : 10} fill={acento} opacity={0.18} />
-          <ellipse cx="64" cy="41" rx={radiante ? 9 : 7.5} ry={radiante ? 12 : 10} fill={acento} opacity={0.18} />
-          <ellipse cx="36" cy="41" rx={radiante ? 6.5 : 5.5} ry={radiante ? 9 : 7.5} fill={acento} />
-          <ellipse cx="64" cy="41" rx={radiante ? 6.5 : 5.5} ry={radiante ? 9 : 7.5} fill={acento} />
-          <circle cx="34" cy="37" r="1.6" fill="#ffffff" opacity={0.9} />
-          <circle cx="62" cy="37" r="1.6" fill="#ffffff" opacity={0.9} />
-        </>
-      )}
+        {/* bochechas */}
+        <ellipse cx="30" cy="48" rx="5" ry="3.5" fill={acento} opacity={0.25} />
+        <ellipse cx="70" cy="48" rx="5" ry="3.5" fill={acento} opacity={0.25} />
+
+        {/* olhos (LEDs em amêndoa, como a EVE) — fecham felizes ao comemorar */}
+        {dormindo ? (
+          <>
+            <rect x="29" y="41" width="14" height="3" rx="1.5" fill={acento} opacity={0.7} />
+            <rect x="57" y="41" width="14" height="3" rx="1.5" fill={acento} opacity={0.7} />
+          </>
+        ) : (
+          <>
+            <g
+              style={{
+                transformOrigin: "36px 41px",
+                transform: comemorando ? "scaleY(0.12)" : "scaleY(1)",
+                transition: "transform 0.25s ease",
+              }}
+            >
+              <ellipse cx="36" cy="41" rx={radiante ? 9 : 7.5} ry={radiante ? 12 : 10} fill={acento} opacity={0.18} />
+              <ellipse cx="36" cy="41" rx={radiante ? 6.5 : 5.5} ry={radiante ? 9 : 7.5} fill={acento} />
+              <circle cx="34" cy="37" r="1.6" fill="#ffffff" opacity={0.9} />
+            </g>
+            <g
+              style={{
+                transformOrigin: "64px 41px",
+                transform: comemorando ? "scaleY(0.12)" : "scaleY(1)",
+                transition: "transform 0.25s ease",
+              }}
+            >
+              <ellipse cx="64" cy="41" rx={radiante ? 9 : 7.5} ry={radiante ? 12 : 10} fill={acento} opacity={0.18} />
+              <ellipse cx="64" cy="41" rx={radiante ? 6.5 : 5.5} ry={radiante ? 9 : 7.5} fill={acento} />
+              <circle cx="62" cy="37" r="1.6" fill="#ffffff" opacity={0.9} />
+            </g>
+            <g
+              style={{
+                opacity: comemorando ? 1 : 0,
+                transition: comemorando ? "opacity 0.2s ease 0.15s" : "opacity 0.1s ease",
+              }}
+            >
+              <path d="M31,42 Q36,37 41,42" stroke={acento} strokeWidth="2" fill="none" strokeLinecap="round" />
+              <path d="M59,42 Q64,37 69,42" stroke={acento} strokeWidth="2" fill="none" strokeLinecap="round" />
+            </g>
+          </>
+        )}
 
       {/* acessório de rosto */}
       {rosto === "oculos" && (
@@ -160,6 +237,7 @@ export default function PetSvg({
           <ellipse cx="40" cy="15.5" rx="15" ry="3" fill={acento} opacity={0.85} />
         </g>
       )}
+      </g>
     </svg>
   );
 }
