@@ -19,6 +19,7 @@ import {
   uploadFoto,
   historicoCliques,
   urlImagem,
+  reenviarConfirmacaoEmail,
   LinkResponseDTO,
   LinkCliqueDiaDTO,
   PetResponseDTO,
@@ -127,6 +128,8 @@ export default function DashboardPage() {
   const { usuario, carregando, erro: erroAuth } = useAuth();
 
   const [aba, setAba] = useState<Aba>("links");
+  const [confirmacaoEnviada, setConfirmacaoEnviada] = useState(false);
+  const [enviandoConfirmacao, setEnviandoConfirmacao] = useState(false);
 
   const [links, setLinks] = useState<LinkResponseDTO[]>([]);
   const [carregandoLinks, setCarregandoLinks] = useState(true);
@@ -445,6 +448,17 @@ export default function DashboardPage() {
     router.push("/login");
   }
 
+  async function handleReenviarConfirmacao() {
+    if (!usuario) return;
+    setEnviandoConfirmacao(true);
+    try {
+      await reenviarConfirmacaoEmail(usuario.userEmail);
+      setConfirmacaoEnviada(true);
+    } finally {
+      setEnviandoConfirmacao(false);
+    }
+  }
+
   if (carregando) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-neutral-950">
@@ -488,6 +502,27 @@ export default function DashboardPage() {
           </button>
         </div>
       </div>
+
+      {!usuario.emailVerificado && (
+        <div className="border-b border-orange-900/40 bg-orange-950/30">
+          <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-2 px-4 py-2.5 text-sm">
+            <p className="text-orange-300">
+              Confirme seu e-mail para garantir o acesso à sua conta.
+            </p>
+            {confirmacaoEnviada ? (
+              <p className="text-orange-400">E-mail reenviado — confira sua caixa de entrada.</p>
+            ) : (
+              <button
+                onClick={handleReenviarConfirmacao}
+                disabled={enviandoConfirmacao}
+                className="font-medium text-orange-300 underline hover:text-orange-200 disabled:opacity-50"
+              >
+                {enviandoConfirmacao ? "Enviando..." : "Reenviar e-mail"}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="mx-auto max-w-3xl px-4 py-8">
         <div className="flex items-start gap-4">

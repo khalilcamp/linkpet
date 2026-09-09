@@ -1,8 +1,16 @@
 package com.lkclone.be.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+
 public class RedefinirSenhaDTO {
 
+    @NotBlank(message = "Token inválido")
     private String token;
+
+    @NotBlank(message = "Informe uma senha")
+    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d).{8,}$",
+            message = "A senha deve ter no mínimo 8 caracteres e conter letras e números")
     private String novaSenha;
 
     public String getToken() {

@@ -2,13 +2,13 @@ package com.lkclone.be.service;
 
 import com.lkclone.be.exception.CredenciaisInvalidasException;
 import com.lkclone.be.exception.RecursoNaoEncontradoException;
+import com.lkclone.be.model.EmailVerificationToken;
 import com.lkclone.be.model.PasswordResetToken;
 import com.lkclone.be.model.Usuario;
+import com.lkclone.be.repository.EmailVerificationTokenRepository;
 import com.lkclone.be.repository.PasswordResetTokenRepository;
 import com.lkclone.be.repository.UsuarioRepository;
 import com.lkclone.be.security.JwtUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,22 +16,25 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 @Service
 public class UsuarioService {
 
-    private static final Logger logger = LoggerFactory.getLogger(UsuarioService.class);
-
     private static final Set<String> TEMAS_PERMITIDOS = Set.of("escuro", "claro", "roxo", "verde", "sunset");
     private static final int BIO_TAMANHO_MAXIMO = 280;
-    private static final int SENHA_TAMANHO_MINIMO = 6;
+    private static final int SENHA_TAMANHO_MINIMO = 8;
+    // Exige ao menos uma letra e um número, sem restringir caracteres especiais.
+    private static final Pattern SENHA_PADRAO = Pattern.compile("^(?=.*[A-Za-z])(?=.*\\d).+$");
     private static final long TOKEN_VALIDADE_HORAS = 1;
 
     private PasswordEncoder passwordEncoder;
     private UsuarioRepository usuarioRepository;
     private PasswordResetTokenRepository passwordResetTokenRepository;
+    private EmailVerificationTokenRepository emailVerificationTokenRepository;
     private JwtUtil jwtUtil;
     private PetService petService;
+    private EmailService emailService;
 
     @Value("${app.frontend-url:http://localhost:3000}")
     private String frontendUrl;
@@ -43,6 +46,7 @@ public class UsuarioService {
         if (usuarioRepository.existsByUserEmail(email)) {
             throw new IllegalArgumentException("Esse e-mail já está cadastrado");
         }
+        validarSenha(senhaCrua);
 
         Usuario novoUsuario = new Usuario();
         novoUsuario.setUserEmail(email);
@@ -51,6 +55,7 @@ public class UsuarioService {
 
         Usuario salvo = usuarioRepository.save(novoUsuario);
         petService.criarPetParaUsuario(salvo);
+        enviarEmailConfirmacao(salvo);
 
         return salvo;
     }
@@ -61,12 +66,25 @@ public class UsuarioService {
     }
 
     public UsuarioService(PasswordEncoder passwordEncoder, UsuarioRepository usuarioRepository,
-                           PasswordResetTokenRepository passwordResetTokenRepository, JwtUtil jwtUtil, PetService petService) {
+                           PasswordResetTokenRepository passwordResetTokenRepository,
+                           EmailVerificationTokenRepository emailVerificationTokenRepository,
+                           JwtUtil jwtUtil, PetService petService, EmailService emailService) {
         this.passwordEncoder = passwordEncoder;
         this.usuarioRepository = usuarioRepository;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
+        this.emailVerificationTokenRepository = emailVerificationTokenRepository;
         this.jwtUtil = jwtUtil;
         this.petService = petService;
+        this.emailService = emailService;
+    }
+
+    private void validarSenha(String senha) {
+        if (senha == null || senha.length() < SENHA_TAMANHO_MINIMO) {
+            throw new IllegalArgumentException("A senha deve ter no mínimo " + SENHA_TAMANHO_MINIMO + " caracteres");
+        }
+        if (!SENHA_PADRAO.matcher(senha).matches()) {
+            throw new IllegalArgumentException("A senha deve conter letras e números");
+        }
     }
 
     public String autenticar(String userName, String senhaCrua) {
@@ -126,17 +144,12 @@ public class UsuarioService {
             passwordResetTokenRepository.save(resetToken);
 
             String link = frontendUrl + "/redefinir-senha?token=" + resetToken.getToken();
-
-            // TODO: plugar um provedor de e-mail real (SMTP/SendGrid/etc) antes
-            // de usar isso em produção. Por enquanto, o link só vai pro log.
-            logger.info("Link de redefinição de senha para {}: {}", email, link);
+            emailService.enviarEmailRedefinicaoSenha(email, link);
         });
     }
 
     public void redefinirSenha(String token, String novaSenha) {
-        if (novaSenha == null || novaSenha.length() < SENHA_TAMANHO_MINIMO) {
-            throw new IllegalArgumentException("A senha deve ter no mínimo " + SENHA_TAMANHO_MINIMO + " caracteres");
-        }
+        validarSenha(novaSenha);
 
         PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(token)
                 .orElseThrow(() -> new IllegalArgumentException("Link inválido ou expirado"));
@@ -151,5 +164,40 @@ public class UsuarioService {
 
         resetToken.setUsado(true);
         passwordResetTokenRepository.save(resetToken);
+    }
+
+    private void enviarEmailConfirmacao(Usuario usuario) {
+        EmailVerificationToken verificationToken = new EmailVerificationToken();
+        verificationToken.setUsuario(usuario);
+        verificationToken.setToken(UUID.randomUUID().toString());
+        verificationToken.setExpiraEm(LocalDateTime.now().plusHours(24));
+        verificationToken.setUsado(false);
+        emailVerificationTokenRepository.save(verificationToken);
+
+        String link = frontendUrl + "/confirmar-email?token=" + verificationToken.getToken();
+        emailService.enviarEmailConfirmacao(usuario.getUserEmail(), link);
+    }
+
+    public void reenviarConfirmacaoEmail(String email) {
+        // Mesmo padrão silencioso do esqueci-senha: não revela se o e-mail existe.
+        usuarioRepository.getUsuarioByUserEmail(email)
+                .filter(usuario -> !usuario.isEmailVerificado())
+                .ifPresent(this::enviarEmailConfirmacao);
+    }
+
+    public void confirmarEmail(String token) {
+        EmailVerificationToken verificationToken = emailVerificationTokenRepository.findByToken(token)
+                .orElseThrow(() -> new IllegalArgumentException("Link inválido ou expirado"));
+
+        if (verificationToken.isUsado() || verificationToken.getExpiraEm().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Link inválido ou expirado");
+        }
+
+        Usuario usuario = verificationToken.getUsuario();
+        usuario.setEmailVerificado(true);
+        usuarioRepository.save(usuario);
+
+        verificationToken.setUsado(true);
+        emailVerificationTokenRepository.save(verificationToken);
     }
 }

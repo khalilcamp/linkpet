@@ -11,6 +11,7 @@ export interface UsuarioResponseDTO {
   bio: string | null;
   tema: string;
   perfilVisualizacoes: number;
+  emailVerificado: boolean;
 }
 
 export interface LinkResponseDTO {
@@ -168,6 +169,20 @@ export function redefinirSenha(token: string, novaSenha: string) {
   return request<void>("/usuarios/redefinir-senha", {
     method: "POST",
     body: JSON.stringify({ token, novaSenha }),
+  });
+}
+
+export function confirmarEmail(token: string) {
+  return request<void>("/usuarios/confirmar-email", {
+    method: "POST",
+    body: JSON.stringify({ token }),
+  });
+}
+
+export function reenviarConfirmacaoEmail(userEmail: string) {
+  return request<void>("/usuarios/reenviar-confirmacao", {
+    method: "POST",
+    body: JSON.stringify({ userEmail }),
   });
 }
 

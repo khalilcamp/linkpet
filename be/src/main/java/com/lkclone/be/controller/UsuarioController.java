@@ -3,6 +3,7 @@ package com.lkclone.be.controller;
 import com.lkclone.be.dto.AtualizarBioDTO;
 import com.lkclone.be.dto.AtualizarTemaDTO;
 import com.lkclone.be.dto.CadastroUsuarioDTO;
+import com.lkclone.be.dto.ConfirmarEmailDTO;
 import com.lkclone.be.dto.EsqueciSenhaDTO;
 import com.lkclone.be.dto.LoginDTO;
 import com.lkclone.be.dto.RedefinirSenhaDTO;
@@ -63,8 +64,22 @@ public class UsuarioController {
 
     @PostMapping("/redefinir-senha")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void redefinirSenha(@RequestBody RedefinirSenhaDTO dados) {
+    public void redefinirSenha(@Valid @RequestBody RedefinirSenhaDTO dados) {
         usuarioService.redefinirSenha(dados.getToken(), dados.getNovaSenha());
+    }
+
+    @PostMapping("/confirmar-email")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void confirmarEmail(@RequestBody ConfirmarEmailDTO dados) {
+        usuarioService.confirmarEmail(dados.getToken());
+    }
+
+    @PostMapping("/reenviar-confirmacao")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void reenviarConfirmacao(@RequestBody EsqueciSenhaDTO dados, HttpServletRequest request) {
+        rateLimiter.verificar("reenviar-confirmacao:" + request.getRemoteAddr(), 3, Duration.ofMinutes(15));
+
+        usuarioService.reenviarConfirmacaoEmail(dados.getUserEmail());
     }
 
     @GetMapping("/me")
@@ -116,6 +131,7 @@ public class UsuarioController {
 
     private UsuarioResponseDTO paraDTO(Usuario usuario) {
         return new UsuarioResponseDTO(usuario.getId(), usuario.getUserName(), usuario.getUserEmail(),
-                usuario.getUserPfp(), usuario.getBio(), usuario.getTema(), usuario.getPerfilVisualizacoes());
+                usuario.getUserPfp(), usuario.getBio(), usuario.getTema(), usuario.getPerfilVisualizacoes(),
+                usuario.isEmailVerificado());
     }
 }

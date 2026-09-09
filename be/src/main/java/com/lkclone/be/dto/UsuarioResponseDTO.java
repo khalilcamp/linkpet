@@ -9,9 +9,10 @@ public class UsuarioResponseDTO {
     private String bio;
     private String tema;
     private Long perfilVisualizacoes;
+    private boolean emailVerificado;
 
     public UsuarioResponseDTO(Long id, String userName, String userEmail, String userPfp, String bio,
-                              String tema, Long perfilVisualizacoes) {
+                              String tema, Long perfilVisualizacoes, boolean emailVerificado) {
         this.id = id;
         this.userName = userName;
         this.userEmail = userEmail;
@@ -19,6 +20,7 @@ public class UsuarioResponseDTO {
         this.bio = bio;
         this.tema = tema;
         this.perfilVisualizacoes = perfilVisualizacoes;
+        this.emailVerificado = emailVerificado;
     }
 
     public Long getId() {
@@ -47,5 +49,9 @@ public class UsuarioResponseDTO {
 
     public Long getPerfilVisualizacoes() {
         return perfilVisualizacoes;
+    }
+
+    public boolean isEmailVerificado() {
+        return emailVerificado;
     }
 }

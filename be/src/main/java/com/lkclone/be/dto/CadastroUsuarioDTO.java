@@ -2,6 +2,7 @@ package com.lkclone.be.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public class CadastroUsuarioDTO {
@@ -15,7 +16,8 @@ public class CadastroUsuarioDTO {
     private String userEmail;
 
     @NotBlank(message = "Informe uma senha")
-    @Size(min = 6, message = "A senha deve ter no mínimo 6 caracteres")
+    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d).{8,}$",
+            message = "A senha deve ter no mínimo 8 caracteres e conter letras e números")
     private String senha;
 
     public String getUserName() {
