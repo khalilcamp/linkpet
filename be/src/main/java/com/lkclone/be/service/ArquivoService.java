@@ -64,7 +64,10 @@ public class ArquivoService {
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(supabaseUrl + "/storage/v1/object/" + bucket + "/" + nomeArquivo))
-                .header("Authorization", "Bearer " + supabaseServiceKey)
+                // As chaves novas do Supabase (sb_secret_...) não são JWT — vão
+                // só no header apikey. Mandar em Authorization: Bearer faz o
+                // Supabase tentar decodificar como JWT e rejeitar com 403.
+                .header("apikey", supabaseServiceKey)
                 .header("Content-Type", contentType)
                 .POST(HttpRequest.BodyPublishers.ofByteArray(bytes))
                 .build();
@@ -90,7 +93,7 @@ public class ArquivoService {
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(supabaseUrl + "/storage/v1/object/" + bucket + "/" + nomeArquivo))
-                .header("Authorization", "Bearer " + supabaseServiceKey)
+                .header("apikey", supabaseServiceKey)
                 .DELETE()
                 .build();
 

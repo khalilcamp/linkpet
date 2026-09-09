@@ -290,7 +290,7 @@ export default function DashboardPage() {
 
     setGerandoQr(true);
     try {
-      const urlPerfil = `${window.location.origin}/p/${usuario.userName}`;
+      const urlPerfil = `${window.location.origin}/${usuario.userName}`;
       const dataUrl = await QRCode.toDataURL(urlPerfil, { margin: 1, width: 240 });
       setQrCodeUrl(dataUrl);
     } finally {
@@ -517,7 +517,7 @@ export default function DashboardPage() {
               Olá, {usuario.userName}
             </h1>
             <a
-              href={`/p/${usuario.userName}`}
+              href={`/${usuario.userName}`}
               target="_blank"
               className="text-sm text-orange-400 hover:text-orange-300"
             >
@@ -1018,7 +1018,7 @@ export default function DashboardPage() {
           <div className="mt-6">
             <h2 className="mb-1 text-sm font-medium text-neutral-300">Sua página pública</h2>
             <a
-              href={`/p/${usuario.userName}`}
+              href={`/${usuario.userName}`}
               target="_blank"
               className="text-sm text-orange-400 hover:text-orange-300"
             >

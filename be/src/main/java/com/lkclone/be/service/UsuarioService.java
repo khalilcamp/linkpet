@@ -1,5 +1,6 @@
 package com.lkclone.be.service;
 
+import com.lkclone.be.exception.CredenciaisInvalidasException;
 import com.lkclone.be.exception.RecursoNaoEncontradoException;
 import com.lkclone.be.model.PasswordResetToken;
 import com.lkclone.be.model.Usuario;
@@ -70,10 +71,10 @@ public class UsuarioService {
 
     public String autenticar(String userName, String senhaCrua) {
         Usuario usuario = usuarioRepository.getUsuarioByUserName(userName)
-                .orElseThrow(() -> new RuntimeException("Usuário ou senha inválidos"));
+                .orElseThrow(() -> new CredenciaisInvalidasException("Usuário ou senha inválidos"));
 
         if (!passwordEncoder.matches(senhaCrua, usuario.getUserSenha())) {
-            throw new RuntimeException("Usuário ou senha inválidos");
+            throw new CredenciaisInvalidasException("Usuário ou senha inválidos");
         }
 
         return jwtUtil.gerarToken(usuario.getUserName());

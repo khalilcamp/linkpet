@@ -1,5 +1,6 @@
 package com.lkclone.be.config;
 
+import com.lkclone.be.exception.CredenciaisInvalidasException;
 import com.lkclone.be.exception.RateLimitExcedidoException;
 import com.lkclone.be.exception.RecursoNaoEncontradoException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -23,6 +24,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RecursoNaoEncontradoException.class)
     public ResponseEntity<Map<String, String>> tratarNaoEncontrado(RecursoNaoEncontradoException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", e.getMessage()));
+    }
+
+    @ExceptionHandler(CredenciaisInvalidasException.class)
+    public ResponseEntity<Map<String, String>> tratarCredenciaisInvalidas(CredenciaisInvalidasException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", e.getMessage()));
     }
 
     @ExceptionHandler(RateLimitExcedidoException.class)
