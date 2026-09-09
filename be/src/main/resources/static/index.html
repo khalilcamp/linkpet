@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LinkPet API</title>
+  <meta name="description" content="Backend Spring Boot que alimenta o LinkPet — sua página de links com temas, analytics e um pet virtual gamificado." />
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card: #171717;
+      --border: #292929;
+      --border-soft: #1f1f1f;
+      --text: #fafafa;
+      --muted: #a3a3a3;
+      --accent: #f97316;
+      --ok: #22c55e;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .accent-bar {
+      height: 4px;
+      background: var(--accent);
+    }
+
+    header {
+      position: sticky;
+      top: 4px;
+      z-index: 10;
+      border-bottom: 1px solid var(--border-soft);
+      background: var(--bg);
+    }
+
+    .nav {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      text-decoration: none;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--ok);
+      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
+    }
+
+    .hero {
+      padding: 88px 24px 64px;
+    }
+
+    .hero-inner {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-family: "Fredoka", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.01em;
+      margin: 0 0 16px;
+    }
+
+    .hero p.lead {
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.6;
+      max-width: 480px;
+      margin: 0;
+    }
+
+    .cta-row {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 32px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 13px 22px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+
+    .btn-primary {
+      background: #fff;
+      color: #000;
+    }
+
+    .btn-primary:hover {
+      background: #e5e5e5;
+    }
+
+    .btn-link {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: underline;
+      text-decoration-color: var(--border);
+      text-underline-offset: 4px;
+    }
+
+    .btn-link:hover {
+      color: var(--text);
+    }
+
+    section {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 56px 24px;
+      border-top: 1px solid var(--border-soft);
+    }
+
+    section h2 {
+      font-family: "Fredoka", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 26px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      margin: 0 0 6px;
+    }
+
+    section .subtitle {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 0 0 28px;
+    }
+
+    .endpoints {
+      display: grid;
+      gap: 10px;
+    }
+
+    .endpoint {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 12px;
+      padding: 14px 16px;
+      flex-wrap: wrap;
+    }
+
+    .method {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 6px;
+      padding: 3px 8px;
+      min-width: 52px;
+      text-align: center;
+    }
+
+    .method.get {
+      background: rgba(59, 130, 246, 0.15);
+      color: #93c5fd;
+    }
+
+    .method.post {
+      background: rgba(34, 197, 94, 0.15);
+      color: #86efac;
+    }
+
+    .path {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .desc {
+      color: var(--muted);
+      font-size: 13px;
+      margin-left: auto;
+    }
+
+    .stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    footer {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 24px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    footer a {
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      color: var(--text);
+    }
+
+    @media (max-width: 560px) {
+      h1 {
+        font-size: 34px;
+      }
+
+      .desc {
+        margin-left: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="accent-bar"></div>
+  <header>
+    <div class="nav">
+      <a class="brand" href="/">
+        <svg width="22" height="22" viewBox="0 0 100 100" aria-hidden="true">
+          <rect x="21" y="6" width="58" height="86" rx="29" fill="#f8fafc" stroke="#dbe2ea" stroke-width="1.5" />
+          <ellipse cx="36" cy="41" rx="6.5" ry="9" fill="#f97316" />
+          <ellipse cx="64" cy="41" rx="6.5" ry="9" fill="#f97316" />
+        </svg>
+        LinkPet API
+      </a>
+      <span class="badge"><span class="dot"></span>Serviço ativo</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" style="border-top: none;">
+      <div class="hero-inner">
+        <h1>API do LinkPet.</h1>
+        <p class="lead">
+          Serviço REST em Java que autentica usuários, guarda seus links e faz
+          o pet virtual evoluir a cada curtida. Esta é a raiz da API — o app
+          de verdade fica no frontend.
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="http://localhost:3000">Abrir o app</a>
+          <a class="btn-link" href="#endpoints">Ver endpoints</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="endpoints">
+      <h2>Endpoints principais</h2>
+      <p class="subtitle">Uma amostra da API — payloads completos no código-fonte.</p>
+      <div class="endpoints">
+        <div class="endpoint">
+          <span class="method post">POST</span>
+          <span class="path">/usuarios</span>
+          <span class="desc">cria uma conta</span>
+        </div>
+        <div class="endpoint">
+          <span class="method post">POST</span>
+          <span class="path">/usuarios/login</span>
+          <span class="desc">autentica e devolve um JWT</span>
+        </div>
+        <div class="endpoint">
+          <span class="method get">GET</span>
+          <span class="path">/usuarios/me</span>
+          <span class="desc">dados do usuário autenticado</span>
+        </div>
+        <div class="endpoint">
+          <span class="method get">GET</span>
+          <span class="path">/p/{username}</span>
+          <span class="desc">página pública de links, sem autenticação</span>
+        </div>
+        <div class="endpoint">
+          <span class="method post">POST</span>
+          <span class="path">/p/{username}/pet/like</span>
+          <span class="desc">alimenta o pet virtual</span>
+        </div>
+        <div class="endpoint">
+          <span class="method post">POST</span>
+          <span class="path">/usuarios/{id}/links</span>
+          <span class="desc">cria um link (autenticado)</span>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Stack</h2>
+      <p class="subtitle">O que roda por trás dessa API.</p>
+      <div class="stack">
+        <span class="chip">Java</span>
+        <span class="chip">Spring Boot</span>
+        <span class="chip">Spring Security · JWT</span>
+        <span class="chip">PostgreSQL</span>
+        <span class="chip">Flyway</span>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>LinkPet — projeto de portfólio.</span>
+    <a href="#endpoints">Endpoints</a>
+  </footer>
+</body>
+</html>

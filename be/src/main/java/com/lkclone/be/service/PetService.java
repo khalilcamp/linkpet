@@ -1,0 +1,130 @@
+package com.lkclone.be.service;
+
+import com.lkclone.be.exception.RecursoNaoEncontradoException;
+import com.lkclone.be.model.Pet;
+import com.lkclone.be.model.PetLikeLog;
+import com.lkclone.be.model.Usuario;
+import com.lkclone.be.repository.PetLikeLogRepository;
+import com.lkclone.be.repository.PetRepository;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.Set;
+
+@Service
+public class PetService {
+
+    private static final int XP_POR_LIKE = 10;
+
+    private static final Set<String> CORES_PERMITIDAS = Set.of("laranja", "azul", "verde", "rosa", "roxo", "cinza");
+    private static final Set<String> CHAPEUS_PERMITIDOS = Set.of("nenhum", "festa", "coroa", "bone");
+    private static final Set<String> ROSTOS_PERMITIDOS = Set.of("nenhum", "oculos", "oculos_sol", "bigode");
+    private static final Set<String> ACESSORIOS_PERMITIDOS = Set.of("nenhum", "gravata", "cachecol", "colar");
+
+    private PetRepository petRepository;
+    private PetLikeLogRepository petLikeLogRepository;
+
+    public PetService(PetRepository petRepository, PetLikeLogRepository petLikeLogRepository) {
+        this.petRepository = petRepository;
+        this.petLikeLogRepository = petLikeLogRepository;
+    }
+
+    public Pet criarPetParaUsuario(Usuario usuario) {
+        Pet pet = new Pet();
+        pet.setUsuario(usuario);
+        pet.setEspecie("gato");
+        pet.setCor("laranja");
+        pet.setXp(0);
+        pet.setChapeu("nenhum");
+        pet.setRosto("nenhum");
+        pet.setAcessorioCorpo("nenhum");
+
+        return petRepository.save(pet);
+    }
+
+    public Pet buscarPetPorUsuario(Usuario usuario) {
+        return petRepository.getPetByUsuario(usuario)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado"));
+    }
+
+    public Pet customizarPet(Usuario usuario, String cor, String chapeu, String rosto, String acessorioCorpo) {
+        if (cor == null || !CORES_PERMITIDAS.contains(cor)) {
+            throw new IllegalArgumentException("Cor inválida. Escolha uma de: " + CORES_PERMITIDAS);
+        }
+        if (chapeu == null || !CHAPEUS_PERMITIDOS.contains(chapeu)) {
+            throw new IllegalArgumentException("Chapéu inválido. Escolha um de: " + CHAPEUS_PERMITIDOS);
+        }
+        if (rosto == null || !ROSTOS_PERMITIDOS.contains(rosto)) {
+            throw new IllegalArgumentException("Rosto inválido. Escolha um de: " + ROSTOS_PERMITIDOS);
+        }
+        if (acessorioCorpo == null || !ACESSORIOS_PERMITIDOS.contains(acessorioCorpo)) {
+            throw new IllegalArgumentException("Acessório inválido. Escolha um de: " + ACESSORIOS_PERMITIDOS);
+        }
+
+        Pet pet = buscarPetPorUsuario(usuario);
+        pet.setCor(cor);
+        pet.setChapeu(chapeu);
+        pet.setRosto(rosto);
+        pet.setAcessorioCorpo(acessorioCorpo);
+
+        return petRepository.save(pet);
+    }
+
+    public ResultadoCurtida curtir(Usuario usuario, String visitorId) {
+        Pet pet = buscarPetPorUsuario(usuario);
+        LocalDate hoje = LocalDate.now();
+
+        boolean jaCurtiu = petLikeLogRepository.existsByPetAndVisitorIdAndCurtidaData(pet, visitorId, hoje);
+
+        if (!jaCurtiu) {
+            PetLikeLog log = new PetLikeLog();
+            log.setPet(pet);
+            log.setVisitorId(visitorId);
+            log.setCurtidaData(hoje);
+
+            try {
+                petLikeLogRepository.save(log);
+                pet.setXp(pet.getXp() + XP_POR_LIKE);
+                pet = petRepository.save(pet);
+            } catch (DataIntegrityViolationException e) {
+                jaCurtiu = true;
+            }
+        }
+
+        return new ResultadoCurtida(pet, jaCurtiu);
+    }
+
+    public int calcularNivel(int xp) {
+        return xp / 100;
+    }
+
+    public int calcularEstagio(int xp) {
+        if (xp >= 500) {
+            return 2;
+        }
+        if (xp >= 100) {
+            return 1;
+        }
+        return 0;
+    }
+
+    public static class ResultadoCurtida {
+
+        private final Pet pet;
+        private final boolean jaCurtiuHoje;
+
+        public ResultadoCurtida(Pet pet, boolean jaCurtiuHoje) {
+            this.pet = pet;
+            this.jaCurtiuHoje = jaCurtiuHoje;
+        }
+
+        public Pet getPet() {
+            return pet;
+        }
+
+        public boolean isJaCurtiuHoje() {
+            return jaCurtiuHoje;
+        }
+    }
+}

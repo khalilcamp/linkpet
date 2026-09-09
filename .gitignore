@@ -1,0 +1,29 @@
+# --- Frontend (Next.js) ---
+fe/AGENTS.md
+fe/CLAUDE.md
+fe/node_modules/
+fe/.next/
+fe/out/
+fe/build/
+fe/.env*.local
+fe/tsconfig.tsbuildinfo
+fe/next-env.d.ts
+
+# --- Backend (Maven / Spring Boot) ---
+be/target/
+be/uploads/
+be/.mvn/wrapper/maven-wrapper.jar
+be/HELP.md
+
+# --- IDE / editor ---
+.idea/
+.claude/
+*.iws
+*.iml
+*.ipr
+.vscode/
+.DS_Store
+
+# --- Misc ---
+*.log
+.env

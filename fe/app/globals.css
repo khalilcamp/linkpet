@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-fredoka);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Só anima se o visitante não pediu menos movimento. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes hero-pop-in {
+    0% {
+      opacity: 0;
+      transform: scale(0.6) rotate(-6deg);
+    }
+    60% {
+      opacity: 1;
+      transform: scale(1.08) rotate(-6deg);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) rotate(-6deg);
+    }
+  }
+
+  @keyframes hero-fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .hero-pet-entrance {
+    animation: hero-pop-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s both;
+  }
+
+  .hero-badge-entrance {
+    animation: hero-fade-up 0.5s ease-out both;
+  }
+}

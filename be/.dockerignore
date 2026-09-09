@@ -1,0 +1,7 @@
+target
+uploads
+.idea
+.mvn
+mvnw
+mvnw.cmd
+*.md
