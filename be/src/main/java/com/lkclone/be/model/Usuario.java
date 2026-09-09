@@ -4,6 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "usuario")
@@ -34,5 +39,9 @@ public class Usuario {
 
     @Column(nullable = false)
     private boolean emailVerificado = false;
+
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    @Column(name = "user_badges", columnDefinition = "text[]", nullable = false)
+    private List<String> userBadges = new ArrayList<>();
 
 }

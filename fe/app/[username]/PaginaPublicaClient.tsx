@@ -4,6 +4,7 @@ import { registrarClique, urlImagem, PaginaPublicaDTO } from "@/lib/api";
 import { classesDoTema } from "@/lib/temas";
 import PetCard from "@/components/PetCard";
 import IconeSocial from "@/components/IconeSocial";
+import Badges from "@/components/Badges";
 
 export default function PaginaPublicaClient({
   username,
@@ -46,6 +47,7 @@ export default function PaginaPublicaClient({
           <h1 className={`text-lg font-semibold ${tema.texto}`}>
             @{dados.userName}
           </h1>
+          {dados.badges && <Badges codigos={dados.badges} />}
           {dados.bio && (
             <p className={`text-sm ${tema.subtexto}`}>{dados.bio}</p>
           )}

@@ -35,6 +35,7 @@ public class UsuarioService {
     private JwtUtil jwtUtil;
     private PetService petService;
     private EmailService emailService;
+    private BadgeService badgeService;
 
     @Value("${app.frontend-url:http://localhost:3000}")
     private String frontendUrl;
@@ -56,6 +57,7 @@ public class UsuarioService {
         Usuario salvo = usuarioRepository.save(novoUsuario);
         petService.criarPetParaUsuario(salvo);
         enviarEmailConfirmacao(salvo);
+        badgeService.avaliarBadgesIniciais(salvo);
 
         return salvo;
     }
@@ -68,7 +70,7 @@ public class UsuarioService {
     public UsuarioService(PasswordEncoder passwordEncoder, UsuarioRepository usuarioRepository,
                            PasswordResetTokenRepository passwordResetTokenRepository,
                            EmailVerificationTokenRepository emailVerificationTokenRepository,
-                           JwtUtil jwtUtil, PetService petService, EmailService emailService) {
+                           JwtUtil jwtUtil, PetService petService, EmailService emailService, BadgeService badgeService) {
         this.passwordEncoder = passwordEncoder;
         this.usuarioRepository = usuarioRepository;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
@@ -76,6 +78,7 @@ public class UsuarioService {
         this.jwtUtil = jwtUtil;
         this.petService = petService;
         this.emailService = emailService;
+        this.badgeService = badgeService;
     }
 
     private void validarSenha(String senha) {

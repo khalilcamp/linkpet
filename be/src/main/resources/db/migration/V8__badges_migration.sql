@@ -1,0 +1,1 @@
+ALTER TABLE usuario ADD COLUMN user_badges TEXT[] NOT NULL DEFAULT '{}';

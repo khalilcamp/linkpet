@@ -61,6 +61,7 @@ export interface PaginaPublicaDTO {
   tema: string;
   links: LinkResponseDTO[];
   pet: PetResponseDTO;
+  badges: string[];
 }
 
 // ---- Armazenamento do token ----

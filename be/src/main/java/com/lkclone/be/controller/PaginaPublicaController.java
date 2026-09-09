@@ -32,7 +32,8 @@ public class PaginaPublicaController {
     private final PetService petService;
     private final RateLimiter rateLimiter;
 
-    public PaginaPublicaController(UsuarioService usuarioService, LinkService linkService, PetService petService, RateLimiter rateLimiter) {
+    public PaginaPublicaController(UsuarioService usuarioService, LinkService linkService, PetService petService,
+                                    RateLimiter rateLimiter) {
         this.usuarioService = usuarioService;
         this.linkService = linkService;
         this.petService = petService;
@@ -56,7 +57,8 @@ public class PaginaPublicaController {
                 petService.calcularNivel(pet.getXp()), petService.calcularEstagio(pet.getXp()),
                 pet.getChapeu(), pet.getRosto(), pet.getAcessorioCorpo());
 
-        return new PaginaPublicaDTO(usuario.getUserName(), usuario.getUserPfp(), usuario.getBio(), usuario.getTema(), linksDTO, petDTO);
+        return new PaginaPublicaDTO(usuario.getUserName(), usuario.getUserPfp(), usuario.getBio(), usuario.getTema(),
+                linksDTO, petDTO, usuario.getUserBadges());
     }
 
     @PostMapping("/p/{username}/pet/like")
