@@ -16,6 +16,7 @@ import {
   customizarPet,
   atualizarTema,
   atualizarBio,
+  atualizarTagsPerfil,
   uploadFoto,
   historicoCliques,
   urlImagem,
@@ -33,6 +34,7 @@ import PetSvg, {
 } from "@/components/PetSvg";
 import GraficoCliques from "@/components/GraficoCliques";
 import { TEMAS_DISPONIVEIS } from "@/lib/temas";
+import { TAGS_DISPONIVEIS, TAGS_MAXIMO } from "@/lib/perfilTags";
 import QRCode from "qrcode";
 
 const ABAS = ["links", "personalizar", "compartilhar"] as const;
@@ -107,6 +109,7 @@ function IconeChevronDown() {
 
 export default function DashboardPage() {
   const t = useTranslations("dashboard");
+  const tTags = useTranslations("perfilTags");
   const router = useRouter();
   const { usuario, carregando, erro: erroAuth } = useAuth();
 
@@ -163,6 +166,10 @@ export default function DashboardPage() {
   const [erroBio, setErroBio] = useState<string | null>(null);
   const bioValor = bioOverride ?? usuario?.bio ?? "";
 
+  const [tagsSelecionadas, setTagsSelecionadas] = useState<string[]>([]);
+  const [salvandoTags, setSalvandoTags] = useState(false);
+  const [erroTags, setErroTags] = useState<string | null>(null);
+
   const [enviandoFoto, setEnviandoFoto] = useState(false);
   const [erroFoto, setErroFoto] = useState<string | null>(null);
   const [fotoOverride, setFotoOverride] = useState<string | null>(null);
@@ -195,6 +202,10 @@ export default function DashboardPage() {
         setAcessorioCorpo(dados.pet.acessorioCorpo);
       })
       .catch(() => setErroPet(t("customize.genericPetError")));
+  }, [usuario]);
+
+  useEffect(() => {
+    if (usuario) setTagsSelecionadas(usuario.tags ?? []);
   }, [usuario]);
 
   const petSemAlteracoes =
@@ -234,6 +245,33 @@ export default function DashboardPage() {
       setErroTema(err instanceof Error ? err.message : t("customize.genericThemeError"));
     } finally {
       setSalvandoTema(false);
+    }
+  }
+
+  function alternarTag(codigo: string) {
+    setTagsSelecionadas((atual) =>
+      atual.includes(codigo)
+        ? atual.filter((t) => t !== codigo)
+        : atual.length >= TAGS_MAXIMO
+        ? atual
+        : [...atual, codigo]
+    );
+  }
+
+  async function handleSalvarTags(e: FormEvent) {
+    e.preventDefault();
+    if (!usuario) return;
+
+    setErroTags(null);
+    setSalvandoTags(true);
+
+    try {
+      const atualizado = await atualizarTagsPerfil(usuario.id, tagsSelecionadas);
+      setTagsSelecionadas(atualizado.tags ?? []);
+    } catch (err) {
+      setErroTags(err instanceof Error ? err.message : t("customize.genericTagsError"));
+    } finally {
+      setSalvandoTags(false);
     }
   }
 
@@ -1003,6 +1041,44 @@ export default function DashboardPage() {
                 {erroBio && (
                   <p className="rounded-lg bg-red-950 px-3 py-2 text-sm text-red-400">
                     {erroBio}
+                  </p>
+                )}
+              </form>
+            </section>
+
+            <section>
+              <h2 className="mb-1 text-sm font-medium text-neutral-300">{t("customize.tagsTitle")}</h2>
+              <p className="mb-3 text-xs text-neutral-500">{t("customize.tagsHint", { max: TAGS_MAXIMO })}</p>
+              <form onSubmit={handleSalvarTags} className="space-y-2">
+                <div className="flex flex-wrap gap-2">
+                  {TAGS_DISPONIVEIS.map((opcao) => (
+                    <button
+                      key={opcao}
+                      type="button"
+                      onClick={() => alternarTag(opcao)}
+                      className={`rounded-full border px-3 py-1 text-xs ${
+                        tagsSelecionadas.includes(opcao)
+                          ? "border-orange-500 text-orange-400"
+                          : "border-neutral-700 text-neutral-400"
+                      }`}
+                    >
+                      {tTags(opcao)}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-neutral-600">{tagsSelecionadas.length}/{TAGS_MAXIMO}</span>
+                  <button
+                    type="submit"
+                    disabled={salvandoTags}
+                    className="rounded-lg bg-orange-500 px-4 py-1.5 text-sm font-medium text-black transition hover:bg-orange-400 disabled:opacity-50"
+                  >
+                    {salvandoTags ? t("customize.savingTags") : t("customize.saveTags")}
+                  </button>
+                </div>
+                {erroTags && (
+                  <p className="rounded-lg bg-red-950 px-3 py-2 text-sm text-red-400">
+                    {erroTags}
                   </p>
                 )}
               </form>

@@ -143,6 +143,29 @@
       "description": "Membro da equipe do Skyrim: The history"
     }
   },
+  "perfilTags": {
+    "developer": "Desenvolvedor(a)",
+    "designer": "Designer",
+    "artist": "Artista",
+    "illustrator": "Ilustrador(a)",
+    "photographer": "Fotógrafo(a)",
+    "video_editor": "Editor(a) de vídeo",
+    "music_producer": "Produtor(a) musical",
+    "writer": "Escritor(a)",
+    "game_dev": "Game dev",
+    "streamer": "Streamer",
+    "vtuber": "VTuber",
+    "cosplayer": "Cosplayer",
+    "roleplayer": "RPer",
+    "commissions_open": "Comissões abertas",
+    "commissions_closed": "Comissões fechadas",
+    "freelancer_available": "Freelancer disponível",
+    "job_hunting": "Buscando emprego",
+    "open_to_collab": "Aberto a collabs",
+    "volunteer": "Voluntário(a)",
+    "mentor": "Mentor(a)",
+    "lgbtq_friendly": "LGBTQ+ friendly"
+  },
   "dashboard": {
     "loading": "Carregando...",
     "authErrorHint": "Veja as instruções no README do projeto para criar esse endpoint no backend.",
@@ -215,6 +238,11 @@
       "genericBioError": "Erro ao salvar bio",
       "theme": "Tema da página pública",
       "genericThemeError": "Erro ao salvar tema",
+      "tagsTitle": "Eu sou...",
+      "tagsHint": "Escolha até {max} tags que te descrevem — aparecem no seu perfil público.",
+      "saveTags": "Salvar tags",
+      "savingTags": "Salvando...",
+      "genericTagsError": "Erro ao salvar tags",
       "hats": {
         "nenhum": "Nenhum",
         "festa": "Festa",

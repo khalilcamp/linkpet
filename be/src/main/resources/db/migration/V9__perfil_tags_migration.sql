@@ -1,0 +1,1 @@
+ALTER TABLE usuario ADD COLUMN perfil_tags TEXT[] NOT NULL DEFAULT '{}';

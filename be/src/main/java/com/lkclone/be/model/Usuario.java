@@ -44,4 +44,11 @@ public class Usuario {
     @Column(name = "user_badges", columnDefinition = "text[]", nullable = false)
     private List<String> userBadges = new ArrayList<>();
 
+    // Tags auto-declaradas pelo usuário ("Eu sou..."), diferente de userBadges
+    // (que são conquistas/concessões manuais). Ver PerfilTagService pro catálogo
+    // de valores permitidos.
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    @Column(name = "perfil_tags", columnDefinition = "text[]", nullable = false)
+    private List<String> perfilTags = new ArrayList<>();
+
 }

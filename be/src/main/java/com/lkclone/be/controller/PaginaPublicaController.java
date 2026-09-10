@@ -58,7 +58,7 @@ public class PaginaPublicaController {
                 pet.getChapeu(), pet.getRosto(), pet.getAcessorioCorpo());
 
         return new PaginaPublicaDTO(usuario.getUserName(), usuario.getUserPfp(), usuario.getBio(), usuario.getTema(),
-                linksDTO, petDTO, usuario.getUserBadges());
+                linksDTO, petDTO, usuario.getUserBadges(), usuario.getPerfilTags());
     }
 
     @PostMapping("/p/{username}/pet/like")

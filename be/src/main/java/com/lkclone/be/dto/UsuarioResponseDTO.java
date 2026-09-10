@@ -13,9 +13,11 @@ public class UsuarioResponseDTO {
     private Long perfilVisualizacoes;
     private boolean emailVerificado;
     private List<String> badges;
+    private List<String> tags;
 
     public UsuarioResponseDTO(Long id, String userName, String userEmail, String userPfp, String bio,
-                              String tema, Long perfilVisualizacoes, boolean emailVerificado, List<String> badges) {
+                              String tema, Long perfilVisualizacoes, boolean emailVerificado, List<String> badges,
+                              List<String> tags) {
         this.id = id;
         this.userName = userName;
         this.userEmail = userEmail;
@@ -25,6 +27,7 @@ public class UsuarioResponseDTO {
         this.perfilVisualizacoes = perfilVisualizacoes;
         this.emailVerificado = emailVerificado;
         this.badges = badges;
+        this.tags = tags;
     }
 
     public Long getId() {
@@ -61,5 +64,9 @@ public class UsuarioResponseDTO {
 
     public List<String> getBadges() {
         return badges;
+    }
+
+    public List<String> getTags() {
+        return tags;
     }
 }

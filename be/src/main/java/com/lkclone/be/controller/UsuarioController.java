@@ -1,6 +1,7 @@
 package com.lkclone.be.controller;
 
 import com.lkclone.be.dto.AtualizarBioDTO;
+import com.lkclone.be.dto.AtualizarTagsPerfilDTO;
 import com.lkclone.be.dto.AtualizarTemaDTO;
 import com.lkclone.be.dto.CadastroUsuarioDTO;
 import com.lkclone.be.dto.ConfirmarEmailDTO;
@@ -10,6 +11,7 @@ import com.lkclone.be.dto.RedefinirSenhaDTO;
 import com.lkclone.be.dto.UsuarioResponseDTO;
 import com.lkclone.be.model.Usuario;
 import com.lkclone.be.service.ArquivoService;
+import com.lkclone.be.service.PerfilTagService;
 import com.lkclone.be.service.RateLimiter;
 import com.lkclone.be.service.UsuarioService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,11 +31,14 @@ public class UsuarioController {
     private final UsuarioService usuarioService;
     private final ArquivoService arquivoService;
     private final RateLimiter rateLimiter;
+    private final PerfilTagService perfilTagService;
 
-    public UsuarioController(UsuarioService usuarioService, ArquivoService arquivoService, RateLimiter rateLimiter) {
+    public UsuarioController(UsuarioService usuarioService, ArquivoService arquivoService, RateLimiter rateLimiter,
+                              PerfilTagService perfilTagService) {
         this.usuarioService = usuarioService;
         this.arquivoService = arquivoService;
         this.rateLimiter = rateLimiter;
+        this.perfilTagService = perfilTagService;
     }
 
     @PostMapping
@@ -110,6 +115,16 @@ public class UsuarioController {
         return paraDTO(atualizado);
     }
 
+    @PatchMapping("/{usuarioId}/tags-perfil")
+    public UsuarioResponseDTO atualizarTagsPerfil(@PathVariable Long usuarioId, @RequestBody AtualizarTagsPerfilDTO dados, Authentication authentication) {
+        Usuario usuario = usuarioService.buscarPorId(usuarioId);
+        verificarDono(usuario, authentication);
+
+        Usuario atualizado = perfilTagService.atualizarTags(usuario, dados.getTags());
+
+        return paraDTO(atualizado);
+    }
+
     @PostMapping("/{usuarioId}/pfp")
     public UsuarioResponseDTO atualizarFoto(@PathVariable Long usuarioId, @RequestParam("arquivo") MultipartFile arquivo, Authentication authentication) {
         Usuario usuario = usuarioService.buscarPorId(usuarioId);
@@ -132,6 +147,6 @@ public class UsuarioController {
     private UsuarioResponseDTO paraDTO(Usuario usuario) {
         return new UsuarioResponseDTO(usuario.getId(), usuario.getUserName(), usuario.getUserEmail(),
                 usuario.getUserPfp(), usuario.getBio(), usuario.getTema(), usuario.getPerfilVisualizacoes(),
-                usuario.isEmailVerificado(), usuario.getUserBadges());
+                usuario.isEmailVerificado(), usuario.getUserBadges(), usuario.getPerfilTags());
     }
 }

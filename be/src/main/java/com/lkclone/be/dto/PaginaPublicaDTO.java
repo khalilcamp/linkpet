@@ -11,9 +11,10 @@ public class PaginaPublicaDTO {
     private List<LinkResponseDTO> links;
     private PetResponseDTO pet;
     private List<String> badges;
+    private List<String> tags;
 
     public PaginaPublicaDTO(String userName, String userPfp, String bio, String tema, List<LinkResponseDTO> links,
-                             PetResponseDTO pet, List<String> badges) {
+                             PetResponseDTO pet, List<String> badges, List<String> tags) {
         this.userName = userName;
         this.userPfp = userPfp;
         this.bio = bio;
@@ -21,6 +22,7 @@ public class PaginaPublicaDTO {
         this.links = links;
         this.pet = pet;
         this.badges = badges;
+        this.tags = tags;
     }
 
     public String getUserName() {
@@ -49,5 +51,9 @@ public class PaginaPublicaDTO {
 
     public List<String> getBadges() {
         return badges;
+    }
+
+    public List<String> getTags() {
+        return tags;
     }
 }

@@ -13,6 +13,7 @@ export interface UsuarioResponseDTO {
   perfilVisualizacoes: number;
   emailVerificado: boolean;
   badges: string[];
+  tags: string[];
 }
 
 export interface LinkResponseDTO {
@@ -63,6 +64,7 @@ export interface PaginaPublicaDTO {
   links: LinkResponseDTO[];
   pet: PetResponseDTO;
   badges: string[];
+  tags: string[];
 }
 
 // ---- Armazenamento do token ----
@@ -272,6 +274,13 @@ export function atualizarTema(usuarioId: number, tema: string) {
   return request<UsuarioResponseDTO>(`/usuarios/${usuarioId}/tema`, {
     method: "PATCH",
     body: JSON.stringify({ tema }),
+  });
+}
+
+export function atualizarTagsPerfil(usuarioId: number, tags: string[]) {
+  return request<UsuarioResponseDTO>(`/usuarios/${usuarioId}/tags-perfil`, {
+    method: "PATCH",
+    body: JSON.stringify({ tags }),
   });
 }
 

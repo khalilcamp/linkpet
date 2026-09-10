@@ -143,6 +143,29 @@
       "description": "Member of the Skyrim The History server"
     }
   },
+  "perfilTags": {
+    "developer": "Developer",
+    "designer": "Designer",
+    "artist": "Artist",
+    "illustrator": "Illustrator",
+    "photographer": "Photographer",
+    "video_editor": "Video editor",
+    "music_producer": "Music producer",
+    "writer": "Writer",
+    "game_dev": "Game dev",
+    "streamer": "Streamer",
+    "vtuber": "VTuber",
+    "cosplayer": "Cosplayer",
+    "roleplayer": "Roleplayer",
+    "commissions_open": "Commissions open",
+    "commissions_closed": "Commissions closed",
+    "freelancer_available": "Available for freelance",
+    "job_hunting": "Job hunting",
+    "open_to_collab": "Open to collabs",
+    "volunteer": "Volunteer",
+    "mentor": "Mentor",
+    "lgbtq_friendly": "LGBTQ+ friendly"
+  },
   "dashboard": {
     "loading": "Loading...",
     "authErrorHint": "Check the project README for instructions on creating this endpoint on the backend.",
@@ -215,6 +238,11 @@
       "genericBioError": "Error saving bio",
       "theme": "Public page theme",
       "genericThemeError": "Error saving theme",
+      "tagsTitle": "I am...",
+      "tagsHint": "Choose up to {max} tags that describe you — they show up on your public profile.",
+      "saveTags": "Save tags",
+      "savingTags": "Saving...",
+      "genericTagsError": "Error saving tags",
       "hats": {
         "nenhum": "None",
         "festa": "Party",

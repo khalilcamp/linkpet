@@ -6,6 +6,7 @@ import { classesDoTema } from "@/lib/temas";
 import PetCard from "@/components/PetCard";
 import IconeSocial from "@/components/IconeSocial";
 import Badges from "@/components/Badges";
+import PerfilTags from "@/components/PerfilTags";
 
 export default function PaginaPublicaClient({
   username,
@@ -50,6 +51,7 @@ export default function PaginaPublicaClient({
             @{dados.userName}
           </h1>
           {dados.badges && <Badges codigos={dados.badges} />}
+          {dados.tags && <PerfilTags codigos={dados.tags} />}
           {dados.bio && (
             <p className={`text-sm ${tema.subtexto}`}>{dados.bio}</p>
           )}
