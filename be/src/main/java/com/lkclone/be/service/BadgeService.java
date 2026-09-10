@@ -9,6 +9,7 @@ public class BadgeService {
 
     public static final String BADGE_FIRST100 = "first100";
     public static final String BADGE_DEVELOPER = "developer";
+    public static final String BADGE_SKYRIM_RP = "skyrim_rp";
 
     private static final int LIMITE_PRIMEIROS_USUARIOS = 100;
 

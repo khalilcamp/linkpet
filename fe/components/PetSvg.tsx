@@ -11,7 +11,7 @@ export const CORES: Record<string, string> = {
 
 export const CORES_DISPONIVEIS = Object.keys(CORES);
 
-export const CHAPEUS_DISPONIVEIS = ["nenhum", "festa", "coroa", "bone"];
+export const CHAPEUS_DISPONIVEIS = ["nenhum", "festa", "coroa", "bone", "capacete_skyrim"];
 export const ROSTOS_DISPONIVEIS = ["nenhum", "oculos", "oculos_sol", "bigode"];
 export const ACESSORIOS_CORPO_DISPONIVEIS = ["nenhum", "gravata", "cachecol", "colar"];
 
@@ -43,7 +43,7 @@ export default function PetSvg({
   const gradId = `pet-corpo-${useId().replace(/:/g, "")}`;
 
   return (
-    <svg viewBox="0 0 100 100" className={className} role="img" aria-label="Pet robô">
+    <svg viewBox="0 0 100 100" className={className} role="img" aria-label="Pet robô" style={{ overflow: "visible" }}>
       <defs>
         <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={CASCO} stopOpacity={1} />
@@ -56,6 +56,9 @@ export default function PetSvg({
       <ellipse cx="50" cy="93" rx="18" ry="3.5" fill={acento} opacity={0.25} />
 
       <g className="pet-flutuar">
+      {/* cabeça um pouco mais fina só com o capacete do Skyrim — ele é largo
+          e "engorda" a silhueta se o corpo continuar na largura normal */}
+      <g style={chapeu === "capacete_skyrim" ? { transform: "scaleX(0.92)", transformOrigin: "50px 50px" } : undefined}>
         {radiante && (
           <g className="animate-pulse" opacity={0.8}>
             <path d="M12 30 l1.6 4 4 1.6 -4 1.6 -1.6 4 -1.6 -4 -4 -1.6 4 -1.6 Z" fill={acento} />
@@ -213,6 +216,7 @@ export default function PetSvg({
           <circle cx="65" cy="61" r="2.4" />
         </g>
       )}
+      </g>
 
       {/* chapéu */}
       {chapeu === "festa" && (
@@ -236,6 +240,16 @@ export default function PetSvg({
           <path d="M29 15 A21 16 0 0 1 71 15 Z" fill={acento} />
           <ellipse cx="40" cy="15.5" rx="15" ry="3" fill={acento} opacity={0.85} />
         </g>
+      )}
+      {chapeu === "capacete_skyrim" && (
+        <image
+          href="/helmet.png"
+          x="-21"
+          y="-25"
+          width="142"
+          height="120"
+          preserveAspectRatio="none"
+        />
       )}
       </g>
     </svg>

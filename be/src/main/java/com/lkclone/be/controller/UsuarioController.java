@@ -132,6 +132,6 @@ public class UsuarioController {
     private UsuarioResponseDTO paraDTO(Usuario usuario) {
         return new UsuarioResponseDTO(usuario.getId(), usuario.getUserName(), usuario.getUserEmail(),
                 usuario.getUserPfp(), usuario.getBio(), usuario.getTema(), usuario.getPerfilVisualizacoes(),
-                usuario.isEmailVerificado());
+                usuario.isEmailVerificado(), usuario.getUserBadges());
     }
 }

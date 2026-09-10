@@ -10,6 +10,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -18,9 +19,16 @@ public class PetService {
     private static final int XP_POR_LIKE = 10;
 
     private static final Set<String> CORES_PERMITIDAS = Set.of("laranja", "azul", "verde", "rosa", "roxo", "cinza");
-    private static final Set<String> CHAPEUS_PERMITIDOS = Set.of("nenhum", "festa", "coroa", "bone");
+    private static final Set<String> CHAPEUS_PERMITIDOS = Set.of("nenhum", "festa", "coroa", "bone", "capacete_skyrim");
     private static final Set<String> ROSTOS_PERMITIDOS = Set.of("nenhum", "oculos", "oculos_sol", "bigode");
     private static final Set<String> ACESSORIOS_PERMITIDOS = Set.of("nenhum", "gravata", "cachecol", "colar");
+
+    // Itens de customização exclusivos: só quem tem a badge correspondente
+    // pode escolher. Pra liberar um novo item exclusivo, basta adicionar aqui
+    // e conceder a badge ao usuário (ver BadgeService).
+    private static final Map<String, String> CHAPEUS_EXCLUSIVOS = Map.of(
+            "capacete_skyrim", BadgeService.BADGE_SKYRIM_RP
+    );
 
     private PetRepository petRepository;
     private PetLikeLogRepository petLikeLogRepository;
@@ -62,6 +70,10 @@ public class PetService {
         }
         if (acessorioCorpo == null || !ACESSORIOS_PERMITIDOS.contains(acessorioCorpo)) {
             throw new IllegalArgumentException(mensagemService.get("erro.pet.acessorioInvalido", ACESSORIOS_PERMITIDOS));
+        }
+        String badgeNecessaria = CHAPEUS_EXCLUSIVOS.get(chapeu);
+        if (badgeNecessaria != null && !usuario.getUserBadges().contains(badgeNecessaria)) {
+            throw new IllegalArgumentException(mensagemService.get("erro.pet.itemExclusivo"));
         }
 
         Pet pet = buscarPetPorUsuario(usuario);

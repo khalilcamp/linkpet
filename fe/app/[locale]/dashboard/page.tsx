@@ -37,6 +37,13 @@ import QRCode from "qrcode";
 
 const ABAS = ["links", "personalizar", "compartilhar"] as const;
 
+// Itens de customização exclusivos de badge: só aparecem na lista pra quem
+// já tem a badge correspondente, pra não mostrar algo que o usuário não pode
+// escolher (evita FOMO por um item que ele nem sabe como conseguir).
+const CHAPEUS_EXCLUSIVOS: Record<string, string> = {
+  capacete_skyrim: "skyrim_rp",
+};
+
 type Aba = (typeof ABAS)[number];
 
 function Icone({ children }: { children: ReactNode }) {
@@ -102,6 +109,11 @@ export default function DashboardPage() {
   const t = useTranslations("dashboard");
   const router = useRouter();
   const { usuario, carregando, erro: erroAuth } = useAuth();
+
+  const chapeusVisiveis = CHAPEUS_DISPONIVEIS.filter((opcao) => {
+    const badgeNecessaria = CHAPEUS_EXCLUSIVOS[opcao];
+    return !badgeNecessaria || usuario?.badges?.includes(badgeNecessaria);
+  });
 
   const [aba, setAba] = useState<Aba>("links");
   const [confirmacaoEnviada, setConfirmacaoEnviada] = useState(false);
@@ -892,7 +904,7 @@ export default function DashboardPage() {
                     <div>
                       <p className="mb-1.5 text-xs text-neutral-500">{t("customize.hat")}</p>
                       <div className="flex flex-wrap gap-2">
-                        {CHAPEUS_DISPONIVEIS.map((opcao) => (
+                        {chapeusVisiveis.map((opcao) => (
                           <button
                             key={opcao}
                             type="button"

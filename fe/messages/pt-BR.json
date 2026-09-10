@@ -139,8 +139,8 @@
       "description": "Uma das 100 primeiras contas do LinkPet"
     },
     "skyrim_rp": {
-      "name": "Skyrim RP Equipe",
-      "description": "Membro da equipe do Skyrim RP"
+      "name": "Skyrim The History",
+      "description": "Membro da equipe do Skyrim: The history"
     }
   },
   "dashboard": {
@@ -219,7 +219,8 @@
         "nenhum": "Nenhum",
         "festa": "Festa",
         "coroa": "Coroa",
-        "bone": "Boné"
+        "bone": "Boné",
+        "capacete_skyrim": "Elmo Nórdico"
       },
       "faces": {
         "nenhum": "Nenhum",

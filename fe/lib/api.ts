@@ -12,6 +12,7 @@ export interface UsuarioResponseDTO {
   tema: string;
   perfilVisualizacoes: number;
   emailVerificado: boolean;
+  badges: string[];
 }
 
 export interface LinkResponseDTO {

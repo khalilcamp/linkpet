@@ -139,8 +139,8 @@
       "description": "One of LinkPet's first 100 accounts"
     },
     "skyrim_rp": {
-      "name": "Skyrim RP Team",
-      "description": "Member of the Skyrim RP team"
+      "name": "Skyrim The History",
+      "description": "Member of the Skyrim The History server"
     }
   },
   "dashboard": {
@@ -219,7 +219,8 @@
         "nenhum": "None",
         "festa": "Party",
         "coroa": "Crown",
-        "bone": "Cap"
+        "bone": "Cap",
+        "capacete_skyrim": "Nordic Helmet"
       },
       "faces": {
         "nenhum": "None",

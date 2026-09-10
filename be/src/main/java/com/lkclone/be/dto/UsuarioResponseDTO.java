@@ -1,5 +1,7 @@
 package com.lkclone.be.dto;
 
+import java.util.List;
+
 public class UsuarioResponseDTO {
 
     private Long id;
@@ -10,9 +12,10 @@ public class UsuarioResponseDTO {
     private String tema;
     private Long perfilVisualizacoes;
     private boolean emailVerificado;
+    private List<String> badges;
 
     public UsuarioResponseDTO(Long id, String userName, String userEmail, String userPfp, String bio,
-                              String tema, Long perfilVisualizacoes, boolean emailVerificado) {
+                              String tema, Long perfilVisualizacoes, boolean emailVerificado, List<String> badges) {
         this.id = id;
         this.userName = userName;
         this.userEmail = userEmail;
@@ -21,6 +24,7 @@ public class UsuarioResponseDTO {
         this.tema = tema;
         this.perfilVisualizacoes = perfilVisualizacoes;
         this.emailVerificado = emailVerificado;
+        this.badges = badges;
     }
 
     public Long getId() {
@@ -53,5 +57,9 @@ public class UsuarioResponseDTO {
 
     public boolean isEmailVerificado() {
         return emailVerificado;
+    }
+
+    public List<String> getBadges() {
+        return badges;
     }
 }
