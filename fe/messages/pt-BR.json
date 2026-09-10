@@ -137,6 +137,10 @@
     "first100": {
       "name": "Primeiros 100",
       "description": "Uma das 100 primeiras contas do LinkPet"
+    },
+    "skyrim_rp": {
+      "name": "Skyrim RP Equipe",
+      "description": "Membro da equipe do Skyrim RP"
     }
   },
   "dashboard": {

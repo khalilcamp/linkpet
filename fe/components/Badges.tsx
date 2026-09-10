@@ -7,6 +7,12 @@ import { useTranslations } from "next-intl";
 const CORES: Record<string, string> = {
   developer: "#f97316",
   first100: "#38bdf8",
+  skyrim_rp: "#b45309",
+};
+
+// Badges com ícone externo (em vez de SVG desenhado à mão) entram aqui.
+const ICONES: Record<string, string> = {
+  skyrim_rp: "https://img.icons8.com/?size=100&id=58622&format=png&color=000000",
 };
 
 function Glifo({ codigo, cor }: { codigo: string; cor: string }) {
@@ -47,6 +53,7 @@ export default function Badges({ codigos }: { codigos: string[] }) {
     <div className="flex flex-wrap items-center justify-center gap-1.5">
       {validos.map((codigo) => {
         const cor = CORES[codigo];
+        const icone = ICONES[codigo];
         return (
           <div
             key={codigo}
@@ -54,9 +61,13 @@ export default function Badges({ codigos }: { codigos: string[] }) {
             className="flex items-center gap-1 rounded-full border px-2 py-0.5"
             style={{ borderColor: `${cor}55`, background: `${cor}1a` }}
           >
-            <svg viewBox="0 0 24 24" className="h-3 w-3" aria-hidden="true">
-              <Glifo codigo={codigo} cor={cor} />
-            </svg>
+            {icone ? (
+              <img src={icone} alt="" className="h-3 w-3" aria-hidden="true" />
+            ) : (
+              <svg viewBox="0 0 24 24" className="h-3 w-3" aria-hidden="true">
+                <Glifo codigo={codigo} cor={cor} />
+              </svg>
+            )}
             <span className="text-[11px] font-medium" style={{ color: cor }}>
               {t(`${codigo}.name`)}
             </span>
