@@ -16,11 +16,14 @@ public class EmailService {
 
     private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
 
-    @Value("${resend.api-key}")
+    @Value("${brevo.api-key}")
     private String apiKey;
 
-    @Value("${resend.from-email:onboarding@resend.dev}")
+    @Value("${brevo.from-email}")
     private String fromEmail;
+
+    @Value("${brevo.from-name:LinkPet}")
+    private String fromName;
 
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
@@ -65,26 +68,27 @@ public class EmailService {
     private void enviar(String destinatario, String assunto, String html) {
         try {
             String corpo = """
-                    {"from":"%s","to":["%s"],"subject":"%s","html":"%s"}
-                    """.formatted(escaparJson(fromEmail), escaparJson(destinatario),
+                    {"sender":{"name":"%s","email":"%s"},"to":[{"email":"%s"}],"subject":"%s","htmlContent":"%s"}
+                    """.formatted(escaparJson(fromName), escaparJson(fromEmail), escaparJson(destinatario),
                     escaparJson(assunto), escaparJson(html));
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("https://api.resend.com/emails"))
-                    .header("Authorization", "Bearer " + apiKey)
+                    .uri(URI.create("https://api.brevo.com/v3/smtp/email"))
+                    .header("api-key", apiKey)
                     .header("Content-Type", "application/json")
+                    .header("Accept", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(corpo))
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() >= 300) {
-                logger.error("Erro ao enviar e-mail via Resend para {}: {}", destinatario, response.body());
+                logger.error("Erro ao enviar e-mail via Brevo para {}: {}", destinatario, response.body());
             }
         } catch (IOException e) {
-            logger.error("Erro de comunicação com o Resend", e);
+            logger.error("Erro de comunicação com o Brevo", e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            logger.error("Erro de comunicação com o Resend", e);
+            logger.error("Erro de comunicação com o Brevo", e);
         }
     }
 
