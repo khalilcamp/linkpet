@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { curtirPet, PetResponseDTO } from "@/lib/api";
 import PetSvg from "./PetSvg";
 
@@ -17,6 +18,7 @@ export default function PetCard({
   cardClassName = "border-neutral-800 bg-neutral-900",
   subtextoClassName = "text-neutral-400",
 }: PetCardProps) {
+  const t = useTranslations("paginaPublica.petCard");
   const [estado, setEstado] = useState(pet);
   const [curtindo, setCurtindo] = useState(false);
   const [jaCurtiuHoje, setJaCurtiuHoje] = useState(false);
@@ -53,14 +55,14 @@ export default function PetCard({
         className="mx-auto h-24 w-24 transition-transform"
       />
       <p className={`mt-2 text-sm ${subtextoClassName}`}>
-        Nível {estado.nivel} · {estado.xp} XP
+        {t("level", { level: estado.nivel, xp: estado.xp })}
       </p>
       <button
         onClick={handleCurtir}
         disabled={curtindo || jaCurtiuHoje}
         className="mt-3 rounded-lg bg-white px-4 py-2 text-sm font-medium text-black transition hover:bg-neutral-200 disabled:opacity-50"
       >
-        {jaCurtiuHoje ? "Amor o suficiente por hoje!" : curtindo ? "..." : "Amei"}
+        {jaCurtiuHoje ? t("alreadyLiked") : curtindo ? "..." : t("like")}
       </button>
     </div>
   );

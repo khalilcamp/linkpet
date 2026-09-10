@@ -34,18 +34,23 @@ public class ArquivoService {
     @Value("${supabase.storage-bucket:avatars}")
     private String bucket;
 
+    private final MensagemService mensagemService;
     private final HttpClient httpClient = HttpClient.newHttpClient();
+
+    public ArquivoService(MensagemService mensagemService) {
+        this.mensagemService = mensagemService;
+    }
 
     public String salvarImagem(MultipartFile arquivo) {
         if (arquivo == null || arquivo.isEmpty()) {
-            throw new IllegalArgumentException("Nenhum arquivo enviado");
+            throw new IllegalArgumentException(mensagemService.get("erro.arquivo.nenhumEnviado"));
         }
         String contentType = arquivo.getContentType();
         if (!TIPOS_PERMITIDOS.contains(contentType)) {
-            throw new IllegalArgumentException("Formato de imagem não suportado. Use PNG, JPEG ou WEBP");
+            throw new IllegalArgumentException(mensagemService.get("erro.arquivo.formatoNaoSuportado"));
         }
         if (arquivo.getSize() > TAMANHO_MAXIMO) {
-            throw new IllegalArgumentException("Imagem muito grande (máximo 3MB)");
+            throw new IllegalArgumentException(mensagemService.get("erro.arquivo.tamanhoMaximo"));
         }
 
         byte[] bytes;
@@ -59,7 +64,7 @@ public class ArquivoService {
         // checar a assinatura real dos bytes, dava pra subir qualquer
         // arquivo se mentindo como imagem.
         if (!assinaturaCondizComTipo(bytes, contentType)) {
-            throw new IllegalArgumentException("O arquivo enviado não é uma imagem válida");
+            throw new IllegalArgumentException(mensagemService.get("erro.arquivo.invalido"));
         }
 
         String extensao = switch (contentType) {

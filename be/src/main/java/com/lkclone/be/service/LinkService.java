@@ -27,6 +27,7 @@ public class LinkService {
 
     private LinkRepository linkRepository;
     private LinkCliqueLogRepository linkCliqueLogRepository;
+    private MensagemService mensagemService;
 
 
     public Link createLink(String url, String label, String pictureLink, LocalDate dataInicio, LocalDate dataFim, Usuario usuario) {
@@ -93,7 +94,7 @@ public class LinkService {
 
     public void registrarClique(Long linkId, Usuario dono) {
         Link link = linkRepository.findById(linkId)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Link não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException(mensagemService.get("erro.link.naoEncontrado")));
 
         if (!link.getUsuario().getId().equals(dono.getId())) {
             throw new RecursoNaoEncontradoException("Link não encontrado");
@@ -117,7 +118,7 @@ public class LinkService {
 
     public List<LinkCliqueDiaDTO> historicoCliques(Long linkId, Usuario dono, int dias) {
         if (dias < 1 || dias > HISTORICO_DIAS_MAXIMO) {
-            throw new IllegalArgumentException("O período do histórico deve ser entre 1 e " + HISTORICO_DIAS_MAXIMO + " dias");
+            throw new IllegalArgumentException(mensagemService.get("erro.link.historicoPeriodo", HISTORICO_DIAS_MAXIMO));
         }
 
         Link link = buscarLinkDoDono(linkId, dono);
@@ -149,7 +150,7 @@ public class LinkService {
         Set<Long> idsInformados = new HashSet<>(ordemLinkIds);
 
         if (!idsDoUsuario.equals(idsInformados) || ordemLinkIds.size() != links.size()) {
-            throw new IllegalArgumentException("A lista de reordenação deve conter exatamente os links do usuário, sem repetições");
+            throw new IllegalArgumentException(mensagemService.get("erro.link.reordenacaoInvalida"));
         }
 
         Map<Long, Link> porId = links.stream().collect(Collectors.toMap(Link::getLinkId, l -> l));
@@ -164,29 +165,31 @@ public class LinkService {
 
     private void validarUrl(String url) {
         if (url == null || ESQUEMAS_PERMITIDOS.stream().noneMatch(url::startsWith)) {
-            throw new IllegalArgumentException("A URL deve começar com http:// ou https://");
+            throw new IllegalArgumentException(mensagemService.get("erro.link.urlEsquema"));
         }
     }
 
     private void validarPeriodo(LocalDate dataInicio, LocalDate dataFim) {
         if (dataInicio != null && dataFim != null && dataFim.isBefore(dataInicio)) {
-            throw new IllegalArgumentException("A data de término não pode ser anterior à data de início");
+            throw new IllegalArgumentException(mensagemService.get("erro.link.dataFimAntesInicio"));
         }
     }
 
     private Link buscarLinkDoDono(Long linkId, Usuario dono) {
         Link link = linkRepository.findById(linkId)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Link não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException(mensagemService.get("erro.link.naoEncontrado")));
 
         if (!link.getUsuario().getId().equals(dono.getId())) {
-            throw new AccessDeniedException("Você não pode alterar links de outro usuário");
+            throw new AccessDeniedException(mensagemService.get("erro.link.acessoNegado"));
         }
 
         return link;
     }
 
-    public LinkService(LinkRepository linkRepository, LinkCliqueLogRepository linkCliqueLogRepository){
+    public LinkService(LinkRepository linkRepository, LinkCliqueLogRepository linkCliqueLogRepository,
+                        MensagemService mensagemService){
         this.linkRepository = linkRepository;
         this.linkCliqueLogRepository = linkCliqueLogRepository;
+        this.mensagemService = mensagemService;
     }
 }

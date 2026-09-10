@@ -14,6 +14,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RateLimiter {
 
     private final Map<String, Janela> janelas = new ConcurrentHashMap<>();
+    private final MensagemService mensagemService;
+
+    public RateLimiter(MensagemService mensagemService) {
+        this.mensagemService = mensagemService;
+    }
 
     public void verificar(String chave, int maxRequisicoes, Duration duracaoJanela) {
         Janela janela = janelas.computeIfAbsent(chave, k -> new Janela());
@@ -29,7 +34,7 @@ public class RateLimiter {
             janela.contagem++;
 
             if (janela.contagem > maxRequisicoes) {
-                throw new RateLimitExcedidoException("Muitas requisições. Tente novamente em instantes.");
+                throw new RateLimitExcedidoException(mensagemService.get("erro.rateLimit.excedido"));
             }
         }
     }

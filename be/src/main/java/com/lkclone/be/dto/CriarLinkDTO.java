@@ -7,15 +7,15 @@ import java.time.LocalDate;
 
 public class CriarLinkDTO {
 
-    @NotBlank(message = "Informe a URL do link")
-    @Size(max = 2048, message = "A URL deve ter no máximo 2048 caracteres")
+    @NotBlank(message = "{validation.link.url.blank}")
+    @Size(max = 2048, message = "{validation.link.url.size}")
     private String url;
 
-    @NotBlank(message = "Informe um título para o link")
-    @Size(max = 100, message = "O título deve ter no máximo 100 caracteres")
+    @NotBlank(message = "{validation.link.titulo.blank}")
+    @Size(max = 100, message = "{validation.link.titulo.size}")
     private String label;
 
-    @Size(max = 2048, message = "A URL do ícone deve ter no máximo 2048 caracteres")
+    @Size(max = 2048, message = "{validation.link.icone.size}")
     private String pictureLink;
 
     private LocalDate dataInicio;

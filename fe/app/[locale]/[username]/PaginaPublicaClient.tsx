@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { registrarClique, urlImagem, PaginaPublicaDTO } from "@/lib/api";
 import { classesDoTema } from "@/lib/temas";
 import PetCard from "@/components/PetCard";
@@ -13,13 +14,14 @@ export default function PaginaPublicaClient({
   username: string;
   dadosIniciais: PaginaPublicaDTO | null;
 }) {
+  const t = useTranslations("paginaPublica");
   const dados = dadosIniciais;
   const tema = classesDoTema(dados?.tema);
 
   if (!dados) {
     return (
       <main className={`flex min-h-screen items-center justify-center ${tema.fundo}`}>
-        <p className={tema.subtexto}>Página não encontrada.</p>
+        <p className={tema.subtexto}>{t("notFound")}</p>
       </main>
     );
   }
@@ -65,7 +67,7 @@ export default function PaginaPublicaClient({
         <div className="space-y-3">
           {linksAtivos.length === 0 && (
             <p className={`text-sm ${tema.subtexto}`}>
-              Nenhum link disponível ainda.
+              {t("noLinksYet")}
             </p>
           )}
 

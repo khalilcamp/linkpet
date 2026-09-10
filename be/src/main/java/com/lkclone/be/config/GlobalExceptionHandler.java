@@ -3,6 +3,7 @@ package com.lkclone.be.config;
 import com.lkclone.be.exception.CredenciaisInvalidasException;
 import com.lkclone.be.exception.RateLimitExcedidoException;
 import com.lkclone.be.exception.RecursoNaoEncontradoException;
+import com.lkclone.be.service.MensagemService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,12 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private final MensagemService mensagemService;
+
+    public GlobalExceptionHandler(MensagemService mensagemService) {
+        this.mensagemService = mensagemService;
+    }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> tratarIllegalArgument(IllegalArgumentException e) {
@@ -50,6 +57,6 @@ public class GlobalExceptionHandler {
         // Rede de segurança contra corridas: a checagem prévia de duplicidade
         // (ex: cadastrarUsuario) evita a maioria dos casos, mas duas
         // requisições simultâneas ainda podem colidir na constraint do banco.
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", "Esse dado já está em uso"));
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", mensagemService.get("erro.dadoJaEmUso")));
     }
 }

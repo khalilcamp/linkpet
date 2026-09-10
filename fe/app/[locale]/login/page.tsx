@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, FormEvent, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter, Link } from "@/i18n/navigation";
 import { login, salvarToken } from "@/lib/api";
 import PetSvg from "@/components/PetSvg";
 
 function LoginForm() {
+  const t = useTranslations("login");
   const router = useRouter();
   const searchParams = useSearchParams();
   const cadastrado = searchParams.get("cadastrado");
@@ -27,9 +29,7 @@ function LoginForm() {
       salvarToken(token);
       router.push("/dashboard");
     } catch (err) {
-      setErro(
-        err instanceof Error ? err.message : "Usuário ou senha inválidos"
-      );
+      setErro(err instanceof Error ? err.message : t("genericError"));
     } finally {
       setCarregando(false);
     }
@@ -48,29 +48,27 @@ function LoginForm() {
 
         <div className="mt-8 text-center">
           <h1 className="font-display text-3xl font-semibold tracking-tight">
-            Entrar
+            {t("title")}
           </h1>
-          <p className="mt-1 text-sm text-neutral-400">
-            Acesse seu painel de links.
-          </p>
+          <p className="mt-1 text-sm text-neutral-400">{t("subtitle")}</p>
         </div>
 
         {cadastrado && (
           <p className="mt-6 rounded-lg bg-green-950 px-3 py-2 text-center text-sm text-green-400">
-            Conta criada! Faça login para continuar.
+            {t("signupSuccess")}
           </p>
         )}
 
         {senhaRedefinida && (
           <p className="mt-6 rounded-lg bg-green-950 px-3 py-2 text-center text-sm text-green-400">
-            Senha redefinida! Faça login com sua nova senha.
+            {t("resetSuccess")}
           </p>
         )}
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-4">
           <div>
             <label className="mb-1 block text-sm text-neutral-300">
-              Nome de usuário
+              {t("usernameLabel")}
             </label>
             <input
               type="text"
@@ -83,12 +81,14 @@ function LoginForm() {
 
           <div>
             <div className="mb-1 flex items-center justify-between">
-              <label className="text-sm text-neutral-300">Senha</label>
+              <label className="text-sm text-neutral-300">
+                {t("passwordLabel")}
+              </label>
               <Link
                 href="/esqueci-senha"
                 className="text-xs text-neutral-500 underline hover:text-neutral-300"
               >
-                Esqueceu a senha?
+                {t("forgotPassword")}
               </Link>
             </div>
             <input
@@ -111,14 +111,14 @@ function LoginForm() {
             disabled={carregando}
             className="w-full rounded-lg bg-orange-500 py-2 font-medium text-black transition hover:bg-orange-400 disabled:opacity-50"
           >
-            {carregando ? "Entrando..." : "Entrar"}
+            {carregando ? t("submitLoading") : t("submit")}
           </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-neutral-500">
-          Não tem conta?{" "}
+          {t("noAccount")}{" "}
           <Link href="/cadastro" className="text-orange-400 hover:text-orange-300">
-            Criar conta
+            {t("signup")}
           </Link>
         </p>
       </div>

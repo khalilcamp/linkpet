@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { buscarPaginaPublica, PaginaPublicaDTO } from "@/lib/api";
 import PaginaPublicaClient from "./PaginaPublicaClient";
 
-type Params = { username: string };
+type Params = { locale: string; username: string };
 
 async function buscarDadosOuNulo(username: string): Promise<PaginaPublicaDTO | null> {
   try {
@@ -17,15 +18,16 @@ export async function generateMetadata({
 }: {
   params: Promise<Params>;
 }): Promise<Metadata> {
-  const { username } = await params;
+  const { locale, username } = await params;
   const dados = await buscarDadosOuNulo(username);
+  const t = await getTranslations({ locale, namespace: "paginaPublica" });
 
   if (!dados) {
-    return { title: "Perfil não encontrado | LinkPet" };
+    return { title: t("notFoundTitle") };
   }
 
   const titulo = `${dados.userName} | LinkPet`;
-  const descricao = `Confira os links de @${dados.userName}`;
+  const descricao = t("description", { username: dados.userName });
 
   return {
     title: titulo,

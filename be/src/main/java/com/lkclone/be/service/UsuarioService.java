@@ -36,16 +36,17 @@ public class UsuarioService {
     private PetService petService;
     private EmailService emailService;
     private BadgeService badgeService;
+    private MensagemService mensagemService;
 
     @Value("${app.frontend-url:http://localhost:3000}")
     private String frontendUrl;
 
     public Usuario cadastrarUsuario(String username, String email, String senhaCrua){
         if (usuarioRepository.existsByUserName(username)) {
-            throw new IllegalArgumentException("Esse nome de usuário já está em uso");
+            throw new IllegalArgumentException(mensagemService.get("erro.usuario.nomeEmUso"));
         }
         if (usuarioRepository.existsByUserEmail(email)) {
-            throw new IllegalArgumentException("Esse e-mail já está cadastrado");
+            throw new IllegalArgumentException(mensagemService.get("erro.usuario.emailCadastrado"));
         }
         validarSenha(senhaCrua);
 
@@ -64,13 +65,14 @@ public class UsuarioService {
 
     public Usuario buscarPorId(Long id) {
         return usuarioRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException(mensagemService.get("erro.usuario.naoEncontrado")));
     }
 
     public UsuarioService(PasswordEncoder passwordEncoder, UsuarioRepository usuarioRepository,
                            PasswordResetTokenRepository passwordResetTokenRepository,
                            EmailVerificationTokenRepository emailVerificationTokenRepository,
-                           JwtUtil jwtUtil, PetService petService, EmailService emailService, BadgeService badgeService) {
+                           JwtUtil jwtUtil, PetService petService, EmailService emailService, BadgeService badgeService,
+                           MensagemService mensagemService) {
         this.passwordEncoder = passwordEncoder;
         this.usuarioRepository = usuarioRepository;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
@@ -79,23 +81,24 @@ public class UsuarioService {
         this.petService = petService;
         this.emailService = emailService;
         this.badgeService = badgeService;
+        this.mensagemService = mensagemService;
     }
 
     private void validarSenha(String senha) {
         if (senha == null || senha.length() < SENHA_TAMANHO_MINIMO) {
-            throw new IllegalArgumentException("A senha deve ter no mínimo " + SENHA_TAMANHO_MINIMO + " caracteres");
+            throw new IllegalArgumentException(mensagemService.get("erro.senha.minima", SENHA_TAMANHO_MINIMO));
         }
         if (!SENHA_PADRAO.matcher(senha).matches()) {
-            throw new IllegalArgumentException("A senha deve conter letras e números");
+            throw new IllegalArgumentException(mensagemService.get("erro.senha.letrasNumeros"));
         }
     }
 
     public String autenticar(String userName, String senhaCrua) {
         Usuario usuario = usuarioRepository.getUsuarioByUserName(userName)
-                .orElseThrow(() -> new CredenciaisInvalidasException("Usuário ou senha inválidos"));
+                .orElseThrow(() -> new CredenciaisInvalidasException(mensagemService.get("erro.credenciais.invalidas")));
 
         if (!passwordEncoder.matches(senhaCrua, usuario.getUserSenha())) {
-            throw new CredenciaisInvalidasException("Usuário ou senha inválidos");
+            throw new CredenciaisInvalidasException(mensagemService.get("erro.credenciais.invalidas"));
         }
 
         return jwtUtil.gerarToken(usuario.getUserName());
@@ -103,12 +106,12 @@ public class UsuarioService {
 
     public Usuario buscarPorUsername(String userName) {
         return usuarioRepository.getUsuarioByUserName(userName)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException(mensagemService.get("erro.usuario.naoEncontrado")));
     }
 
     public Usuario atualizarTema(Usuario usuario, String tema) {
         if (tema == null || !TEMAS_PERMITIDOS.contains(tema)) {
-            throw new IllegalArgumentException("Tema inválido. Escolha um de: " + TEMAS_PERMITIDOS);
+            throw new IllegalArgumentException(mensagemService.get("erro.tema.invalido", TEMAS_PERMITIDOS));
         }
 
         usuario.setTema(tema);
@@ -122,7 +125,7 @@ public class UsuarioService {
 
     public Usuario atualizarBio(Usuario usuario, String bio) {
         if (bio != null && bio.length() > BIO_TAMANHO_MAXIMO) {
-            throw new IllegalArgumentException("A bio deve ter no máximo " + BIO_TAMANHO_MAXIMO + " caracteres");
+            throw new IllegalArgumentException(mensagemService.get("erro.bio.tamanho", BIO_TAMANHO_MAXIMO));
         }
 
         usuario.setBio(bio);
@@ -155,10 +158,10 @@ public class UsuarioService {
         validarSenha(novaSenha);
 
         PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(token)
-                .orElseThrow(() -> new IllegalArgumentException("Link inválido ou expirado"));
+                .orElseThrow(() -> new IllegalArgumentException(mensagemService.get("erro.link.invalidoExpirado")));
 
         if (resetToken.isUsado() || resetToken.getExpiraEm().isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Link inválido ou expirado");
+            throw new IllegalArgumentException(mensagemService.get("erro.link.invalidoExpirado"));
         }
 
         Usuario usuario = resetToken.getUsuario();
@@ -190,10 +193,10 @@ public class UsuarioService {
 
     public void confirmarEmail(String token) {
         EmailVerificationToken verificationToken = emailVerificationTokenRepository.findByToken(token)
-                .orElseThrow(() -> new IllegalArgumentException("Link inválido ou expirado"));
+                .orElseThrow(() -> new IllegalArgumentException(mensagemService.get("erro.link.invalidoExpirado")));
 
         if (verificationToken.isUsado() || verificationToken.getExpiraEm().isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Link inválido ou expirado");
+            throw new IllegalArgumentException(mensagemService.get("erro.link.invalidoExpirado"));
         }
 
         Usuario usuario = verificationToken.getUsuario();

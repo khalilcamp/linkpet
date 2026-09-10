@@ -1,0 +1,250 @@
+{
+  "metadata": {
+    "title": "LinkPet — sua página de links",
+    "description": "Crie sua página de links personalizada em minutos: temas, analytics de cliques e um pet virtual que evolui com você."
+  },
+  "landing": {
+    "nav": {
+      "login": "Entrar",
+      "signup": "Criar conta"
+    },
+    "hero": {
+      "titleLine1": "Seus links, sua página.",
+      "titleLine2": "Um pet que sobe de nível com você.",
+      "subtitle": "Cinco temas, analytics por link e um bichinho virtual que evolui a cada curtida que sua página recebe.",
+      "cta": "Criar minha página",
+      "hasAccount": "já tenho conta",
+      "levelBadge": "Nível 4 · 320 XP"
+    },
+    "themes": {
+      "title": "Escolha sua cor.",
+      "subtitle": "Cinco temas prontos — dá pra trocar quando quiser, direto no seu painel.",
+      "sampleLink": "Meu link",
+      "names": {
+        "escuro": "Escuro",
+        "claro": "Claro",
+        "roxo": "Roxo",
+        "verde": "Verde",
+        "sunset": "Sunset"
+      }
+    },
+    "claims": {
+      "title": "Tudo que sua bio precisa.",
+      "analytics": {
+        "title": "Analytics por link",
+        "description": "Cliques por link, por dia — sem enrolação."
+      },
+      "qrcode": {
+        "title": "QR Code instantâneo",
+        "description": "Gera na hora. Cola no bio, imprime, pronto."
+      },
+      "scheduled": {
+        "title": "Links agendados",
+        "description": "Programe início e fim — o link aparece e some sozinho."
+      },
+      "fast": {
+        "title": "Rápida pra doer",
+        "description": "Página pública leve, sem esperar carregar nada."
+      }
+    },
+    "finalCta": {
+      "title": "Bora criar a sua?",
+      "subtitle": "Grátis, leva menos de um minuto.",
+      "button": "Criar conta"
+    },
+    "footer": {
+      "madeWith": "Feito com Next.js e Spring Boot."
+    }
+  },
+  "cadastro": {
+    "title": "Criar conta",
+    "subtitle": "Monte sua página de links em segundos.",
+    "usernameLabel": "Nome de usuário",
+    "usernameHint": "Vira sua URL pública — dá pra ver ao lado.",
+    "emailLabel": "E-mail",
+    "passwordLabel": "Senha",
+    "passwordHint": "Mínimo 8 caracteres, com letras e números.",
+    "submitLoading": "Criando...",
+    "submit": "Criar conta",
+    "hasAccount": "Já tem conta?",
+    "login": "Entrar",
+    "genericError": "Erro ao cadastrar",
+    "previewLabel": "Assim vai ficar a sua página:",
+    "previewLevel": "Nível 0 · 0 XP",
+    "previewFooter": "Seu pet começa sonolento — ele acorda com a primeira curtida na sua página."
+  },
+  "login": {
+    "title": "Entrar",
+    "subtitle": "Acesse seu painel de links.",
+    "signupSuccess": "Conta criada! Faça login para continuar.",
+    "resetSuccess": "Senha redefinida! Faça login com sua nova senha.",
+    "usernameLabel": "Nome de usuário",
+    "passwordLabel": "Senha",
+    "forgotPassword": "Esqueceu a senha?",
+    "submitLoading": "Entrando...",
+    "submit": "Entrar",
+    "noAccount": "Não tem conta?",
+    "signup": "Criar conta",
+    "genericError": "Usuário ou senha inválidos"
+  },
+  "esqueciSenha": {
+    "title": "Esqueceu a senha?",
+    "subtitle": "Informe seu e-mail e enviaremos um link de redefinição",
+    "sentMessage": "Se esse e-mail estiver cadastrado, você vai receber um link de redefinição em instantes.",
+    "emailLabel": "E-mail",
+    "submitLoading": "Enviando...",
+    "submit": "Enviar link",
+    "backToLogin": "Voltar para o login",
+    "genericError": "Erro ao solicitar redefinição"
+  },
+  "redefinirSenha": {
+    "invalidLink": "Link inválido. Solicite uma nova redefinição.",
+    "forgotPasswordLink": "Esqueci minha senha",
+    "title": "Nova senha",
+    "subtitle": "Escolha uma nova senha para sua conta",
+    "newPasswordLabel": "Nova senha",
+    "passwordHint": "Mínimo 8 caracteres, com letras e números.",
+    "submitLoading": "Salvando...",
+    "submit": "Redefinir senha",
+    "genericError": "Erro ao redefinir senha"
+  },
+  "confirmarEmail": {
+    "loading": "Confirmando seu e-mail...",
+    "successTitle": "E-mail confirmado!",
+    "successSubtitle": "Sua conta já está verificada.",
+    "goToLogin": "Ir para o login",
+    "invalidLink": "Link inválido.",
+    "invalidOrExpired": "Link inválido ou expirado.",
+    "backToLogin": "Voltar para o login",
+    "genericError": "Erro ao confirmar e-mail"
+  },
+  "paginaPublica": {
+    "notFoundTitle": "Perfil não encontrado | LinkPet",
+    "description": "Confira os links de @{username}",
+    "notFound": "Página não encontrada.",
+    "noLinksYet": "Nenhum link disponível ainda.",
+    "petCard": {
+      "level": "Nível {level} · {xp} XP",
+      "alreadyLiked": "Amor o suficiente por hoje!",
+      "like": "Amei"
+    }
+  },
+  "badges": {
+    "developer": {
+      "name": "Desenvolvedor oficial",
+      "description": "Criador do LinkPet"
+    },
+    "first100": {
+      "name": "Primeiros 100",
+      "description": "Uma das 100 primeiras contas do LinkPet"
+    }
+  },
+  "dashboard": {
+    "loading": "Carregando...",
+    "authErrorHint": "Veja as instruções no README do projeto para criar esse endpoint no backend.",
+    "logout": "Sair",
+    "emailBanner": {
+      "message": "Confirme seu e-mail para garantir o acesso à sua conta.",
+      "sent": "E-mail reenviado — confira sua caixa de entrada.",
+      "resendLoading": "Enviando...",
+      "resend": "Reenviar e-mail"
+    },
+    "greeting": "Olá, {name}",
+    "viewPublicPage": "Ver minha página pública",
+    "profileViews": "{count, plural, one {# visualização do perfil} other {# visualizações do perfil}}",
+    "uploadingPhoto": "Enviando foto...",
+    "tabs": {
+      "links": "Links",
+      "personalizar": "Personalizar",
+      "compartilhar": "Compartilhar"
+    },
+    "links": {
+      "newLink": "+ Novo link",
+      "addLink": "Adicionar link",
+      "cancel": "Cancelar",
+      "titlePlaceholder": "Título (ex: Meu Instagram)",
+      "urlPlaceholder": "https://...",
+      "iconUrlPlaceholder": "URL do ícone (opcional)",
+      "startsAt": "Aparece a partir de",
+      "endsAt": "Some a partir de",
+      "addLoading": "Adicionando...",
+      "loadingLinks": "Carregando links...",
+      "noLinks": "Você ainda não tem nenhum link — adicione o primeiro e ele já aparece na sua página pública.",
+      "inactive": "inativo",
+      "scheduled": "agendado",
+      "expired": "expirado",
+      "clicks": "{count, plural, one {# clique} other {# cliques}}",
+      "moveUp": "Mover para cima",
+      "moveDown": "Mover para baixo",
+      "viewHistory": "Ver histórico de cliques",
+      "historyTitle": "Histórico de cliques",
+      "edit": "Editar",
+      "editLink": "Editar link",
+      "delete": "Excluir",
+      "deleteLink": "Excluir link",
+      "reactivate": "Reativar",
+      "confirmDelete": "Excluir este link? Ele deixará de aparecer na sua página pública.",
+      "editTitlePlaceholder": "Título",
+      "save": "Salvar",
+      "saving": "Salvando...",
+      "loadingHistory": "Carregando histórico...",
+      "genericLoadError": "Não foi possível carregar seus links.",
+      "genericCreateError": "Erro ao criar link",
+      "genericEditError": "Erro ao editar link",
+      "genericDeleteError": "Erro ao excluir link",
+      "genericReactivateError": "Erro ao reativar link",
+      "genericReorderError": "Erro ao reordenar links"
+    },
+    "customize": {
+      "petLevel": "Nível {level} · {xp} XP",
+      "color": "Cor",
+      "hat": "Chapéu",
+      "face": "Rosto",
+      "accessory": "Acessório",
+      "savePet": "Salvar pet",
+      "savingPet": "Salvando...",
+      "genericPetError": "Não foi possível carregar seu pet.",
+      "genericPetSaveError": "Erro ao salvar pet",
+      "bio": "Bio",
+      "bioPlaceholder": "Uma frase curta sobre você",
+      "saveBio": "Salvar bio",
+      "genericBioError": "Erro ao salvar bio",
+      "theme": "Tema da página pública",
+      "genericThemeError": "Erro ao salvar tema",
+      "hats": {
+        "nenhum": "Nenhum",
+        "festa": "Festa",
+        "coroa": "Coroa",
+        "bone": "Boné"
+      },
+      "faces": {
+        "nenhum": "Nenhum",
+        "oculos": "Óculos",
+        "oculos_sol": "Óculos escuros",
+        "bigode": "Bigode"
+      },
+      "accessories": {
+        "nenhum": "Nenhum",
+        "gravata": "Gravata",
+        "cachecol": "Cachecol",
+        "colar": "Colar"
+      },
+      "themes": {
+        "escuro": "Escuro",
+        "claro": "Claro",
+        "roxo": "Roxo",
+        "verde": "Verde",
+        "sunset": "Sunset"
+      }
+    },
+    "share": {
+      "title": "Sua página pública",
+      "qrAlt": "QR code da página pública",
+      "qrPlaceholder": "QR code",
+      "generating": "Gerando...",
+      "hideQr": "Ocultar QR code",
+      "generateQr": "Gerar QR code"
+    },
+    "genericPhotoError": "Erro ao enviar foto"
+  }
+}

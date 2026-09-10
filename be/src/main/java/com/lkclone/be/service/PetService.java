@@ -24,10 +24,12 @@ public class PetService {
 
     private PetRepository petRepository;
     private PetLikeLogRepository petLikeLogRepository;
+    private MensagemService mensagemService;
 
-    public PetService(PetRepository petRepository, PetLikeLogRepository petLikeLogRepository) {
+    public PetService(PetRepository petRepository, PetLikeLogRepository petLikeLogRepository, MensagemService mensagemService) {
         this.petRepository = petRepository;
         this.petLikeLogRepository = petLikeLogRepository;
+        this.mensagemService = mensagemService;
     }
 
     public Pet criarPetParaUsuario(Usuario usuario) {
@@ -45,21 +47,21 @@ public class PetService {
 
     public Pet buscarPetPorUsuario(Usuario usuario) {
         return petRepository.getPetByUsuario(usuario)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException(mensagemService.get("erro.pet.naoEncontrado")));
     }
 
     public Pet customizarPet(Usuario usuario, String cor, String chapeu, String rosto, String acessorioCorpo) {
         if (cor == null || !CORES_PERMITIDAS.contains(cor)) {
-            throw new IllegalArgumentException("Cor inválida. Escolha uma de: " + CORES_PERMITIDAS);
+            throw new IllegalArgumentException(mensagemService.get("erro.pet.corInvalida", CORES_PERMITIDAS));
         }
         if (chapeu == null || !CHAPEUS_PERMITIDOS.contains(chapeu)) {
-            throw new IllegalArgumentException("Chapéu inválido. Escolha um de: " + CHAPEUS_PERMITIDOS);
+            throw new IllegalArgumentException(mensagemService.get("erro.pet.chapeuInvalido", CHAPEUS_PERMITIDOS));
         }
         if (rosto == null || !ROSTOS_PERMITIDOS.contains(rosto)) {
-            throw new IllegalArgumentException("Rosto inválido. Escolha um de: " + ROSTOS_PERMITIDOS);
+            throw new IllegalArgumentException(mensagemService.get("erro.pet.rostoInvalido", ROSTOS_PERMITIDOS));
         }
         if (acessorioCorpo == null || !ACESSORIOS_PERMITIDOS.contains(acessorioCorpo)) {
-            throw new IllegalArgumentException("Acessório inválido. Escolha um de: " + ACESSORIOS_PERMITIDOS);
+            throw new IllegalArgumentException(mensagemService.get("erro.pet.acessorioInvalido", ACESSORIOS_PERMITIDOS));
         }
 
         Pet pet = buscarPetPorUsuario(usuario);

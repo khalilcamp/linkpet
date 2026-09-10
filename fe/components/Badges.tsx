@@ -1,23 +1,12 @@
 // Selo de conquistas do usuário — definido aqui (não no backend) porque é
 // puramente conteúdo/design; o backend só manda os códigos que o usuário tem.
+// Nome/descrição vêm das traduções (namespace "badges"), só a cor fica fixa aqui.
 
-interface BadgeInfo {
-  nome: string;
-  descricao: string;
-  cor: string;
-}
+import { useTranslations } from "next-intl";
 
-const BADGES: Record<string, BadgeInfo> = {
-  developer: {
-    nome: "Desenvolvedor oficial",
-    descricao: "Criador do LinkPet",
-    cor: "#f97316",
-  },
-  first100: {
-    nome: "Primeiros 100",
-    descricao: "Uma das 100 primeiras contas do LinkPet",
-    cor: "#38bdf8",
-  },
+const CORES: Record<string, string> = {
+  developer: "#f97316",
+  first100: "#38bdf8",
 };
 
 function Glifo({ codigo, cor }: { codigo: string; cor: string }) {
@@ -50,25 +39,26 @@ function Glifo({ codigo, cor }: { codigo: string; cor: string }) {
 }
 
 export default function Badges({ codigos }: { codigos: string[] }) {
-  const validos = codigos.filter((codigo) => BADGES[codigo]);
+  const t = useTranslations("badges");
+  const validos = codigos.filter((codigo) => CORES[codigo]);
   if (validos.length === 0) return null;
 
   return (
     <div className="flex flex-wrap items-center justify-center gap-1.5">
       {validos.map((codigo) => {
-        const info = BADGES[codigo];
+        const cor = CORES[codigo];
         return (
           <div
             key={codigo}
-            title={info.descricao}
+            title={t(`${codigo}.description`)}
             className="flex items-center gap-1 rounded-full border px-2 py-0.5"
-            style={{ borderColor: `${info.cor}55`, background: `${info.cor}1a` }}
+            style={{ borderColor: `${cor}55`, background: `${cor}1a` }}
           >
             <svg viewBox="0 0 24 24" className="h-3 w-3" aria-hidden="true">
-              <Glifo codigo={codigo} cor={info.cor} />
+              <Glifo codigo={codigo} cor={cor} />
             </svg>
-            <span className="text-[11px] font-medium" style={{ color: info.cor }}>
-              {info.nome}
+            <span className="text-[11px] font-medium" style={{ color: cor }}>
+              {t(`${codigo}.name`)}
             </span>
           </div>
         );

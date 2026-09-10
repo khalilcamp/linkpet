@@ -7,17 +7,17 @@ import jakarta.validation.constraints.Size;
 
 public class CadastroUsuarioDTO {
 
-    @NotBlank(message = "Informe um nome de usuário")
-    @Size(min = 3, max = 50, message = "O nome de usuário deve ter entre 3 e 50 caracteres")
+    @NotBlank(message = "{validation.username.blank}")
+    @Size(min = 3, max = 50, message = "{validation.username.size}")
     private String userName;
 
-    @NotBlank(message = "Informe um e-mail")
-    @Email(message = "Informe um e-mail válido")
+    @NotBlank(message = "{validation.email.blank}")
+    @Email(message = "{validation.email.invalid}")
     private String userEmail;
 
-    @NotBlank(message = "Informe uma senha")
+    @NotBlank(message = "{validation.senha.blank}")
     @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d).{8,}$",
-            message = "A senha deve ter no mínimo 8 caracteres e conter letras e números")
+            message = "{validation.senha.pattern}")
     private String senha;
 
     public String getUserName() {

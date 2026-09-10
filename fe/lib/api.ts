@@ -97,6 +97,15 @@ export function obterVisitorId(): string {
   return id;
 }
 
+// Lê o locale resolvido pelo next-intl (cookie setado pelo middleware/geo-IP)
+// para repassar ao backend via Accept-Language — garante que as mensagens de
+// erro da API saiam no mesmo idioma da página, e não no idioma do navegador.
+function obterLocaleAtual(): string {
+  if (typeof document === "undefined") return "pt-BR";
+  const match = document.cookie.match(/(?:^|; )NEXT_LOCALE=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : "pt-BR";
+}
+
 // ---- Helper central de requisições ----
 
 async function request<T>(
@@ -111,6 +120,7 @@ async function request<T>(
 
   const headers: HeadersInit = {
     ...(ehFormData ? {} : { "Content-Type": "application/json" }),
+    "Accept-Language": obterLocaleAtual(),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...options.headers,
   };

@@ -5,12 +5,12 @@ import jakarta.validation.constraints.Pattern;
 
 public class RedefinirSenhaDTO {
 
-    @NotBlank(message = "Token inválido")
+    @NotBlank(message = "{validation.token.blank}")
     private String token;
 
-    @NotBlank(message = "Informe uma senha")
+    @NotBlank(message = "{validation.senha.blank}")
     @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d).{8,}$",
-            message = "A senha deve ter no mínimo 8 caracteres e conter letras e números")
+            message = "{validation.senha.pattern}")
     private String novaSenha;
 
     public String getToken() {
