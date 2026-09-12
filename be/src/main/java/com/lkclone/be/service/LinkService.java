@@ -32,6 +32,7 @@ public class LinkService {
 
     public Link createLink(String url, String label, String pictureLink, LocalDate dataInicio, LocalDate dataFim, Usuario usuario) {
         validarUrl(url);
+        validarPictureLink(pictureLink);
         validarPeriodo(dataInicio, dataFim);
 
         List<Link> linksExistentes = linkRepository.getLinkByUsuario(usuario);
@@ -72,6 +73,7 @@ public class LinkService {
 
     public Link atualizarLink(Long linkId, Usuario dono, String url, String label, String pictureLink, LocalDate dataInicio, LocalDate dataFim) {
         validarUrl(url);
+        validarPictureLink(pictureLink);
         validarPeriodo(dataInicio, dataFim);
 
         Link link = buscarLinkDoDono(linkId, dono);
@@ -166,6 +168,17 @@ public class LinkService {
     private void validarUrl(String url) {
         if (url == null || ESQUEMAS_PERMITIDOS.stream().noneMatch(url::startsWith)) {
             throw new IllegalArgumentException(mensagemService.get("erro.link.urlEsquema"));
+        }
+    }
+
+    private void validarPictureLink(String pictureLink) {
+        // Campo opcional (ícone customizado do link) — só valida o esquema
+        // quando algo foi informado.
+        if (pictureLink == null || pictureLink.isBlank()) {
+            return;
+        }
+        if (ESQUEMAS_PERMITIDOS.stream().noneMatch(pictureLink::startsWith)) {
+            throw new IllegalArgumentException(mensagemService.get("erro.link.iconeEsquema"));
         }
     }
 
