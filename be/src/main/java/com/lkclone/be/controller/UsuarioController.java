@@ -42,7 +42,9 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public UsuarioResponseDTO cadastrar(@Valid @RequestBody CadastroUsuarioDTO dados) {
+    public UsuarioResponseDTO cadastrar(@Valid @RequestBody CadastroUsuarioDTO dados, HttpServletRequest request) {
+        rateLimiter.verificar("cadastro:" + request.getRemoteAddr(), 5, Duration.ofHours(1));
+
         Usuario usuario = usuarioService.cadastrarUsuario(
                 dados.getUserName(),
                 dados.getUserEmail(),
@@ -69,13 +71,17 @@ public class UsuarioController {
 
     @PostMapping("/redefinir-senha")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void redefinirSenha(@Valid @RequestBody RedefinirSenhaDTO dados) {
+    public void redefinirSenha(@Valid @RequestBody RedefinirSenhaDTO dados, HttpServletRequest request) {
+        rateLimiter.verificar("redefinir-senha:" + request.getRemoteAddr(), 10, Duration.ofMinutes(1));
+
         usuarioService.redefinirSenha(dados.getToken(), dados.getNovaSenha());
     }
 
     @PostMapping("/confirmar-email")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void confirmarEmail(@RequestBody ConfirmarEmailDTO dados) {
+    public void confirmarEmail(@RequestBody ConfirmarEmailDTO dados, HttpServletRequest request) {
+        rateLimiter.verificar("confirmar-email:" + request.getRemoteAddr(), 10, Duration.ofMinutes(1));
+
         usuarioService.confirmarEmail(dados.getToken());
     }
 
