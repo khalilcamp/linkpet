@@ -28,6 +28,13 @@ public class UsuarioService {
     private static final Pattern SENHA_PADRAO = Pattern.compile("^(?=.*[A-Za-z])(?=.*\\d).+$");
     private static final long TOKEN_VALIDADE_HORAS = 1;
 
+    // Hash BCrypt de uma senha que não existe de verdade — usado só pra
+    // gastar o mesmo tempo de comparação quando o usuário não é encontrado,
+    // e não dar pra descobrir usernames válidos medindo o tempo de resposta
+    // do login (usuário inexistente rejeitava na hora; existente esperava
+    // o BCrypt rodar).
+    private static final String HASH_FANTASMA = "$2a$10$xOBnS0/H7TUZPjJKQFFpVOkrWOtTM1VTSh7BVV3P2E61yD2LdyA5e";
+
     private PasswordEncoder passwordEncoder;
     private UsuarioRepository usuarioRepository;
     private PasswordResetTokenRepository passwordResetTokenRepository;
@@ -94,10 +101,14 @@ public class UsuarioService {
     }
 
     public String autenticar(String userName, String senhaCrua) {
-        Usuario usuario = usuarioRepository.getUsuarioByUserName(userName)
-                .orElseThrow(() -> new CredenciaisInvalidasException(mensagemService.get("erro.credenciais.invalidas")));
+        Usuario usuario = usuarioRepository.getUsuarioByUserName(userName).orElse(null);
 
-        if (!passwordEncoder.matches(senhaCrua, usuario.getUserSenha())) {
+        // Roda o BCrypt sempre, mesmo se o usuário não existir (contra um
+        // hash fantasma), pra não vazar por timing se o username é válido.
+        String hashParaComparar = usuario != null ? usuario.getUserSenha() : HASH_FANTASMA;
+        boolean senhaConfere = passwordEncoder.matches(senhaCrua, hashParaComparar);
+
+        if (usuario == null || !senhaConfere) {
             throw new CredenciaisInvalidasException(mensagemService.get("erro.credenciais.invalidas"));
         }
 
