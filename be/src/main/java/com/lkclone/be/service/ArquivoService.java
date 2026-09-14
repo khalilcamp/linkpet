@@ -16,7 +16,7 @@ import java.util.UUID;
 public class ArquivoService {
 
     private static final Set<String> TIPOS_PERMITIDOS = Set.of("image/png", "image/jpeg", "image/webp");
-    private static final long TAMANHO_MAXIMO = 3 * 1024 * 1024;
+    private static final long TAMANHO_MAXIMO = 10 * 1024 * 1024;
 
     @Value("${supabase.url}")
     private String supabaseUrl;

@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -50,6 +51,16 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.joining("; "));
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", mensagem));
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<Map<String, String>> tratarArquivoGrande(MaxUploadSizeExceededException e) {
+        // Sem isso, o limite do multipart estoura antes de chegar no
+        // controller: o Tomcat interrompe a conexão no meio do envio e o
+        // proxy da Render devolve um 502 sem header de CORS — o navegador
+        // reporta como erro de CORS em vez do 413 que era pra ser.
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+                .body(Map.of("message", mensagemService.get("erro.arquivo.tamanhoMaximo")));
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
