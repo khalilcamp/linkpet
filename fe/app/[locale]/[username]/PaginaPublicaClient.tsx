@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { registrarClique, urlImagem, PaginaPublicaDTO, LinkResponseDTO } from "@/lib/api";
 import { classesDoTema, TemaClasses } from "@/lib/temas";
+import { fontFamilyDaFonte, classeFormatoBotao, classeEstiloBotao } from "@/lib/aparencia";
 import PetCard from "@/components/PetCard";
 import IconeSocial from "@/components/IconeSocial";
 import Badges from "@/components/Badges";
@@ -13,10 +14,14 @@ function LinkCard({
   link,
   username,
   tema,
+  formatoBotao,
+  estiloBotao,
 }: {
   link: LinkResponseDTO;
   username: string;
   tema: TemaClasses;
+  formatoBotao: string;
+  estiloBotao: string;
 }) {
   return (
     <a
@@ -28,7 +33,7 @@ function LinkCard({
           // Falha ao registrar clique não deve impedir a navegação.
         });
       }}
-      className={`flex items-center gap-3 rounded-xl border px-4 py-3 transition ${tema.card} ${tema.cardHover}`}
+      className={`flex items-center gap-3 border px-4 py-3 transition ${tema.card} ${tema.cardHover} ${classeFormatoBotao(formatoBotao)} ${classeEstiloBotao(estiloBotao)}`}
       style={tema.estiloCard}
     >
       {link.pictureLink ? (
@@ -69,7 +74,10 @@ export default function PaginaPublicaClient({
   const semNenhumLink = linksSemGrupo.length === 0 && grupos.length === 0;
 
   return (
-    <main className={`min-h-screen px-4 py-16 ${tema.fundo}`} style={tema.estiloFundo}>
+    <main
+      className={`min-h-screen px-4 py-16 ${tema.fundo}`}
+      style={{ ...tema.estiloFundo, fontFamily: fontFamilyDaFonte(dados.fonte) }}
+    >
       <div className="mx-auto max-w-sm space-y-8 text-center">
         <div className="space-y-3">
           {dados.userPfp ? (
@@ -114,7 +122,14 @@ export default function PaginaPublicaClient({
           {linksSemGrupo.length > 0 && (
             <div className="space-y-3">
               {linksSemGrupo.map((link) => (
-                <LinkCard key={link.linkId} link={link} username={username} tema={tema} />
+                <LinkCard
+                  key={link.linkId}
+                  link={link}
+                  username={username}
+                  tema={tema}
+                  formatoBotao={dados.formatoBotao}
+                  estiloBotao={dados.estiloBotao}
+                />
               ))}
             </div>
           )}
@@ -125,13 +140,22 @@ export default function PaginaPublicaClient({
                 {grupo.nome}
               </h2>
               {grupo.links.map((link) => (
-                <LinkCard key={link.linkId} link={link} username={username} tema={tema} />
+                <LinkCard
+                  key={link.linkId}
+                  link={link}
+                  username={username}
+                  tema={tema}
+                  formatoBotao={dados.formatoBotao}
+                  estiloBotao={dados.estiloBotao}
+                />
               ))}
             </div>
           ))}
         </div>
 
-        {dados.captarContato && <CapturarContatoForm username={username} tema={tema} />}
+        {dados.captarContato && (
+          <CapturarContatoForm username={username} tema={tema} formatoBotao={dados.formatoBotao} />
+        )}
       </div>
     </main>
   );

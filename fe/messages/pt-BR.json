@@ -267,6 +267,26 @@
       "genericBioError": "Erro ao salvar bio",
       "theme": "Tema da página pública",
       "genericThemeError": "Erro ao salvar tema",
+      "genericAparenciaError": "Erro ao salvar aparência",
+      "font": "Fonte",
+      "fonts": {
+        "padrao": "Padrão",
+        "serif": "Serifada",
+        "mono": "Monoespaçada",
+        "arredondada": "Arredondada"
+      },
+      "buttonShape": "Formato dos botões",
+      "buttonShapes": {
+        "quadrado": "Quadrado",
+        "arredondado": "Arredondado",
+        "pill": "Pílula"
+      },
+      "buttonStyle": "Estilo dos botões",
+      "buttonStyles": {
+        "preenchido": "Preenchido",
+        "contorno": "Contorno",
+        "sombra": "Sombra"
+      },
       "tagsTitle": "Eu sou...",
       "tagsHint": "Escolha até {max} tags que te descrevem — aparecem no seu perfil público.",
       "saveTags": "Salvar tags",

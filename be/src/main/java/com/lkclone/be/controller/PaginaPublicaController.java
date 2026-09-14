@@ -81,7 +81,8 @@ public class PaginaPublicaController {
                 pet.getChapeu(), pet.getRosto(), pet.getAcessorioCorpo());
 
         return new PaginaPublicaDTO(usuario.getUserName(), usuario.getUserPfp(), usuario.getBio(), usuario.getTema(),
-                usuario.getCorPersonalizada(), linksSemGrupoDTO, gruposDTO, petDTO, usuario.getUserBadges(),
+                usuario.getCorPersonalizada(), usuario.getFonte(), usuario.getFormatoBotao(), usuario.getEstiloBotao(),
+                linksSemGrupoDTO, gruposDTO, petDTO, usuario.getUserBadges(),
                 usuario.getPerfilTags(), usuario.isCaptarContato());
     }
 

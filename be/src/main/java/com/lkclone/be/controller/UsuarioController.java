@@ -1,5 +1,6 @@
 package com.lkclone.be.controller;
 
+import com.lkclone.be.dto.AtualizarAparenciaDTO;
 import com.lkclone.be.dto.AtualizarBioDTO;
 import com.lkclone.be.dto.AtualizarCaptarContatoDTO;
 import com.lkclone.be.dto.AtualizarTagsPerfilDTO;
@@ -112,6 +113,16 @@ public class UsuarioController {
         return paraDTO(atualizado);
     }
 
+    @PatchMapping("/{usuarioId}/aparencia")
+    public UsuarioResponseDTO atualizarAparencia(@PathVariable Long usuarioId, @RequestBody AtualizarAparenciaDTO dados, Authentication authentication) {
+        Usuario usuario = usuarioService.buscarPorId(usuarioId);
+        verificarDono(usuario, authentication);
+
+        Usuario atualizado = usuarioService.atualizarAparencia(usuario, dados.getFonte(), dados.getFormatoBotao(), dados.getEstiloBotao());
+
+        return paraDTO(atualizado);
+    }
+
     @PatchMapping("/{usuarioId}/captar-contato")
     public UsuarioResponseDTO atualizarCaptarContato(@PathVariable Long usuarioId, @RequestBody AtualizarCaptarContatoDTO dados, Authentication authentication) {
         Usuario usuario = usuarioService.buscarPorId(usuarioId);
@@ -164,6 +175,7 @@ public class UsuarioController {
     private UsuarioResponseDTO paraDTO(Usuario usuario) {
         return new UsuarioResponseDTO(usuario.getId(), usuario.getUserName(), usuario.getUserEmail(),
                 usuario.getUserPfp(), usuario.getBio(), usuario.getTema(), usuario.getCorPersonalizada(),
+                usuario.getFonte(), usuario.getFormatoBotao(), usuario.getEstiloBotao(),
                 usuario.getPerfilVisualizacoes(), usuario.isEmailVerificado(), usuario.isCaptarContato(),
                 usuario.getUserBadges(), usuario.getPerfilTags());
     }

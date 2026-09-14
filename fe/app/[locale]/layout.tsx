@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Fredoka } from "next/font/google";
+import { Geist, Geist_Mono, Fredoka, Playfair_Display } from "next/font/google";
 import { hasLocale } from "next-intl";
 import { NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -20,6 +20,14 @@ const geistMono = Geist_Mono({
 const fredoka = Fredoka({
   variable: "--font-fredoka",
   weight: ["500", "600", "700"],
+  subsets: ["latin"],
+});
+
+// Carregada aqui (não sob demanda) porque next/font só permite fontes
+// declaradas em build-time — não dá pra escolher uma fonte do Google Fonts
+// dinamicamente a partir de um valor vindo do banco.
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
   subsets: ["latin"],
 });
 
@@ -58,7 +66,7 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      className={`h-full antialiased ${geistSans.variable} ${geistMono.variable} ${fredoka.variable}`}
+      className={`h-full antialiased ${geistSans.variable} ${geistMono.variable} ${fredoka.variable} ${playfair.variable}`}
     >
       <body className="min-h-full flex flex-col font-sans">
         <NextIntlClientProvider>{children}</NextIntlClientProvider>

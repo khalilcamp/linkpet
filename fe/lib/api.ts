@@ -11,6 +11,9 @@ export interface UsuarioResponseDTO {
   bio: string | null;
   tema: string;
   corPersonalizada: string | null;
+  fonte: string;
+  formatoBotao: string;
+  estiloBotao: string;
   perfilVisualizacoes: number;
   emailVerificado: boolean;
   captarContato: boolean;
@@ -84,6 +87,9 @@ export interface PaginaPublicaDTO {
   bio: string | null;
   tema: string;
   corPersonalizada: string | null;
+  fonte: string;
+  formatoBotao: string;
+  estiloBotao: string;
   linksSemGrupo: LinkResponseDTO[];
   grupos: GrupoPublicoDTO[];
   pet: PetResponseDTO;
@@ -352,6 +358,16 @@ export function atualizarTema(usuarioId: number, tema: string, corPersonalizada?
   return request<UsuarioResponseDTO>(`/usuarios/${usuarioId}/tema`, {
     method: "PATCH",
     body: JSON.stringify({ tema, corPersonalizada }),
+  });
+}
+
+export function atualizarAparencia(
+  usuarioId: number,
+  dados: { fonte: string; formatoBotao: string; estiloBotao: string }
+) {
+  return request<UsuarioResponseDTO>(`/usuarios/${usuarioId}/aparencia`, {
+    method: "PATCH",
+    body: JSON.stringify(dados),
   });
 }
 

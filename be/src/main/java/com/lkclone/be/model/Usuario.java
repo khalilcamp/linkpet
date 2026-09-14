@@ -42,6 +42,15 @@ public class Usuario {
     private boolean captarContato = false;
 
     @Column(nullable = false)
+    private String fonte = "padrao";
+
+    @Column(nullable = false)
+    private String formatoBotao = "arredondado";
+
+    @Column(nullable = false)
+    private String estiloBotao = "preenchido";
+
+    @Column(nullable = false)
     private Long perfilVisualizacoes = 0L;
 
     @Column(nullable = false)

@@ -11,6 +11,9 @@ public class UsuarioResponseDTO {
     private String bio;
     private String tema;
     private String corPersonalizada;
+    private String fonte;
+    private String formatoBotao;
+    private String estiloBotao;
     private Long perfilVisualizacoes;
     private boolean emailVerificado;
     private boolean captarContato;
@@ -18,8 +21,9 @@ public class UsuarioResponseDTO {
     private List<String> tags;
 
     public UsuarioResponseDTO(Long id, String userName, String userEmail, String userPfp, String bio,
-                              String tema, String corPersonalizada, Long perfilVisualizacoes, boolean emailVerificado,
-                              boolean captarContato, List<String> badges, List<String> tags) {
+                              String tema, String corPersonalizada, String fonte, String formatoBotao, String estiloBotao,
+                              Long perfilVisualizacoes, boolean emailVerificado, boolean captarContato,
+                              List<String> badges, List<String> tags) {
         this.id = id;
         this.userName = userName;
         this.userEmail = userEmail;
@@ -27,6 +31,9 @@ public class UsuarioResponseDTO {
         this.bio = bio;
         this.tema = tema;
         this.corPersonalizada = corPersonalizada;
+        this.fonte = fonte;
+        this.formatoBotao = formatoBotao;
+        this.estiloBotao = estiloBotao;
         this.perfilVisualizacoes = perfilVisualizacoes;
         this.emailVerificado = emailVerificado;
         this.captarContato = captarContato;
@@ -60,6 +67,18 @@ public class UsuarioResponseDTO {
 
     public String getCorPersonalizada() {
         return corPersonalizada;
+    }
+
+    public String getFonte() {
+        return fonte;
+    }
+
+    public String getFormatoBotao() {
+        return formatoBotao;
+    }
+
+    public String getEstiloBotao() {
+        return estiloBotao;
     }
 
     public Long getPerfilVisualizacoes() {

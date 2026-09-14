@@ -23,6 +23,7 @@ import {
   buscarPaginaPublica,
   customizarPet,
   atualizarTema,
+  atualizarAparencia,
   atualizarBio,
   atualizarTagsPerfil,
   uploadFoto,
@@ -48,6 +49,13 @@ import PetSvg, {
 import GraficoCliques from "@/components/GraficoCliques";
 import EstatisticasPerfil from "@/components/EstatisticasPerfil";
 import { TEMAS_DISPONIVEIS } from "@/lib/temas";
+import {
+  FONTES_DISPONIVEIS,
+  FORMATOS_BOTAO_DISPONIVEIS,
+  ESTILOS_BOTAO_DISPONIVEIS,
+  fontFamilyDaFonte,
+  classeFormatoBotao,
+} from "@/lib/aparencia";
 import { TAGS_DISPONIVEIS, TAGS_MAXIMO } from "@/lib/perfilTags";
 import QRCode from "qrcode";
 
@@ -338,6 +346,15 @@ export default function DashboardPage() {
   const tema = temaOverride ?? usuario?.tema ?? "escuro";
   const corPersonalizada = corPersonalizadaOverride ?? usuario?.corPersonalizada ?? "#f97316";
 
+  const [fonteOverride, setFonteOverride] = useState<string | null>(null);
+  const [formatoBotaoOverride, setFormatoBotaoOverride] = useState<string | null>(null);
+  const [estiloBotaoOverride, setEstiloBotaoOverride] = useState<string | null>(null);
+  const [salvandoAparencia, setSalvandoAparencia] = useState(false);
+  const [erroAparencia, setErroAparencia] = useState<string | null>(null);
+  const fonte = fonteOverride ?? usuario?.fonte ?? "padrao";
+  const formatoBotao = formatoBotaoOverride ?? usuario?.formatoBotao ?? "arredondado";
+  const estiloBotao = estiloBotaoOverride ?? usuario?.estiloBotao ?? "preenchido";
+
   const [bioOverride, setBioOverride] = useState<string | null>(null);
   const [salvandoBio, setSalvandoBio] = useState(false);
   const [erroBio, setErroBio] = useState<string | null>(null);
@@ -440,6 +457,28 @@ export default function DashboardPage() {
       setErroTema(err instanceof Error ? err.message : t("customize.genericThemeError"));
     } finally {
       setSalvandoTema(false);
+    }
+  }
+
+  async function handleSalvarAparencia(mudancas: { fonte?: string; formatoBotao?: string; estiloBotao?: string }) {
+    if (!usuario) return;
+
+    setErroAparencia(null);
+    setSalvandoAparencia(true);
+
+    try {
+      const atualizado = await atualizarAparencia(usuario.id, {
+        fonte: mudancas.fonte ?? fonte,
+        formatoBotao: mudancas.formatoBotao ?? formatoBotao,
+        estiloBotao: mudancas.estiloBotao ?? estiloBotao,
+      });
+      setFonteOverride(atualizado.fonte);
+      setFormatoBotaoOverride(atualizado.formatoBotao);
+      setEstiloBotaoOverride(atualizado.estiloBotao);
+    } catch (err) {
+      setErroAparencia(err instanceof Error ? err.message : t("customize.genericAparenciaError"));
+    } finally {
+      setSalvandoAparencia(false);
     }
   }
 
@@ -1532,6 +1571,75 @@ export default function DashboardPage() {
               {erroTema && (
                 <p className="mt-3 rounded-lg bg-red-950 px-3 py-2 text-sm text-red-400">
                   {erroTema}
+                </p>
+              )}
+            </section>
+
+            <section>
+              <h2 className="mb-3 text-sm font-medium text-neutral-300">{t("customize.font")}</h2>
+              <div className="flex flex-wrap gap-2">
+                {FONTES_DISPONIVEIS.map((opcao) => (
+                  <button
+                    key={opcao}
+                    type="button"
+                    onClick={() => handleSalvarAparencia({ fonte: opcao })}
+                    disabled={salvandoAparencia}
+                    style={{ fontFamily: fontFamilyDaFonte(opcao) }}
+                    className={`rounded-full border px-3 py-1.5 text-xs disabled:opacity-50 ${
+                      fonte === opcao
+                        ? "border-orange-500 text-orange-400"
+                        : "border-neutral-700 text-neutral-400"
+                    }`}
+                  >
+                    {t(`customize.fonts.${opcao}`)}
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            <section>
+              <h2 className="mb-3 text-sm font-medium text-neutral-300">{t("customize.buttonShape")}</h2>
+              <div className="flex flex-wrap gap-2">
+                {FORMATOS_BOTAO_DISPONIVEIS.map((opcao) => (
+                  <button
+                    key={opcao}
+                    type="button"
+                    onClick={() => handleSalvarAparencia({ formatoBotao: opcao })}
+                    disabled={salvandoAparencia}
+                    className={`border px-3 py-1.5 text-xs disabled:opacity-50 ${classeFormatoBotao(opcao)} ${
+                      formatoBotao === opcao
+                        ? "border-orange-500 text-orange-400"
+                        : "border-neutral-700 text-neutral-400"
+                    }`}
+                  >
+                    {t(`customize.buttonShapes.${opcao}`)}
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            <section>
+              <h2 className="mb-3 text-sm font-medium text-neutral-300">{t("customize.buttonStyle")}</h2>
+              <div className="flex flex-wrap gap-2">
+                {ESTILOS_BOTAO_DISPONIVEIS.map((opcao) => (
+                  <button
+                    key={opcao}
+                    type="button"
+                    onClick={() => handleSalvarAparencia({ estiloBotao: opcao })}
+                    disabled={salvandoAparencia}
+                    className={`rounded-full border px-3 py-1.5 text-xs disabled:opacity-50 ${
+                      estiloBotao === opcao
+                        ? "border-orange-500 text-orange-400"
+                        : "border-neutral-700 text-neutral-400"
+                    }`}
+                  >
+                    {t(`customize.buttonStyles.${opcao}`)}
+                  </button>
+                ))}
+              </div>
+              {erroAparencia && (
+                <p className="mt-3 rounded-lg bg-red-950 px-3 py-2 text-sm text-red-400">
+                  {erroAparencia}
                 </p>
               )}
             </section>

@@ -22,6 +22,9 @@ import java.util.regex.Pattern;
 public class UsuarioService {
 
     private static final Set<String> TEMAS_PERMITIDOS = Set.of("escuro", "claro", "roxo", "verde", "sunset", "custom");
+    private static final Set<String> FONTES_PERMITIDAS = Set.of("padrao", "serif", "mono", "arredondada");
+    private static final Set<String> FORMATOS_BOTAO_PERMITIDOS = Set.of("quadrado", "arredondado", "pill");
+    private static final Set<String> ESTILOS_BOTAO_PERMITIDOS = Set.of("preenchido", "contorno", "sombra");
     private static final int BIO_TAMANHO_MAXIMO = 280;
     private static final int SENHA_TAMANHO_MINIMO = 8;
     // Exige ao menos uma letra e um número, sem restringir caracteres especiais.
@@ -133,6 +136,23 @@ public class UsuarioService {
         }
 
         usuario.setTema(tema);
+        return usuarioRepository.save(usuario);
+    }
+
+    public Usuario atualizarAparencia(Usuario usuario, String fonte, String formatoBotao, String estiloBotao) {
+        if (fonte == null || !FONTES_PERMITIDAS.contains(fonte)) {
+            throw new IllegalArgumentException(mensagemService.get("erro.aparencia.fonteInvalida", FONTES_PERMITIDAS));
+        }
+        if (formatoBotao == null || !FORMATOS_BOTAO_PERMITIDOS.contains(formatoBotao)) {
+            throw new IllegalArgumentException(mensagemService.get("erro.aparencia.formatoBotaoInvalido", FORMATOS_BOTAO_PERMITIDOS));
+        }
+        if (estiloBotao == null || !ESTILOS_BOTAO_PERMITIDOS.contains(estiloBotao)) {
+            throw new IllegalArgumentException(mensagemService.get("erro.aparencia.estiloBotaoInvalido", ESTILOS_BOTAO_PERMITIDOS));
+        }
+
+        usuario.setFonte(fonte);
+        usuario.setFormatoBotao(formatoBotao);
+        usuario.setEstiloBotao(estiloBotao);
         return usuarioRepository.save(usuario);
     }
 

@@ -9,6 +9,9 @@ public class PaginaPublicaDTO {
     private String bio;
     private String tema;
     private String corPersonalizada;
+    private String fonte;
+    private String formatoBotao;
+    private String estiloBotao;
     private List<LinkResponseDTO> linksSemGrupo;
     private List<GrupoPublicoDTO> grupos;
     private PetResponseDTO pet;
@@ -17,6 +20,7 @@ public class PaginaPublicaDTO {
     private boolean captarContato;
 
     public PaginaPublicaDTO(String userName, String userPfp, String bio, String tema, String corPersonalizada,
+                             String fonte, String formatoBotao, String estiloBotao,
                              List<LinkResponseDTO> linksSemGrupo, List<GrupoPublicoDTO> grupos, PetResponseDTO pet,
                              List<String> badges, List<String> tags, boolean captarContato) {
         this.userName = userName;
@@ -24,6 +28,9 @@ public class PaginaPublicaDTO {
         this.bio = bio;
         this.tema = tema;
         this.corPersonalizada = corPersonalizada;
+        this.fonte = fonte;
+        this.formatoBotao = formatoBotao;
+        this.estiloBotao = estiloBotao;
         this.linksSemGrupo = linksSemGrupo;
         this.grupos = grupos;
         this.pet = pet;
@@ -50,6 +57,18 @@ public class PaginaPublicaDTO {
 
     public String getCorPersonalizada() {
         return corPersonalizada;
+    }
+
+    public String getFonte() {
+        return fonte;
+    }
+
+    public String getFormatoBotao() {
+        return formatoBotao;
+    }
+
+    public String getEstiloBotao() {
+        return estiloBotao;
     }
 
     public List<LinkResponseDTO> getLinksSemGrupo() {

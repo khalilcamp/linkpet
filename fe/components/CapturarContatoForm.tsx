@@ -4,13 +4,16 @@ import { useState, FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { capturarContato } from "@/lib/api";
 import type { TemaClasses } from "@/lib/temas";
+import { classeFormatoBotao } from "@/lib/aparencia";
 
 export default function CapturarContatoForm({
   username,
   tema,
+  formatoBotao,
 }: {
   username: string;
   tema: TemaClasses;
+  formatoBotao: string;
 }) {
   const t = useTranslations("paginaPublica.contato");
   const [email, setEmail] = useState("");
@@ -70,7 +73,7 @@ export default function CapturarContatoForm({
       <button
         type="submit"
         disabled={enviando}
-        className="w-full rounded-lg bg-orange-500 py-2 text-sm font-medium text-black transition hover:bg-orange-400 disabled:opacity-50"
+        className={`w-full bg-orange-500 py-2 text-sm font-medium text-black transition hover:bg-orange-400 disabled:opacity-50 ${classeFormatoBotao(formatoBotao)}`}
       >
         {enviando ? t("enviando") : t("enviar")}
       </button>

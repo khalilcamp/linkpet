@@ -267,6 +267,26 @@
       "genericBioError": "Error saving bio",
       "theme": "Public page theme",
       "genericThemeError": "Error saving theme",
+      "genericAparenciaError": "Error saving appearance",
+      "font": "Font",
+      "fonts": {
+        "padrao": "Default",
+        "serif": "Serif",
+        "mono": "Monospace",
+        "arredondada": "Rounded"
+      },
+      "buttonShape": "Button shape",
+      "buttonShapes": {
+        "quadrado": "Square",
+        "arredondado": "Rounded",
+        "pill": "Pill"
+      },
+      "buttonStyle": "Button style",
+      "buttonStyles": {
+        "preenchido": "Filled",
+        "contorno": "Outline",
+        "sombra": "Shadow"
+      },
       "tagsTitle": "I am...",
       "tagsHint": "Choose up to {max} tags that describe you — they show up on your public profile.",
       "saveTags": "Save tags",
