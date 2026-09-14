@@ -127,6 +127,15 @@
       "level": "Nível {level} · {xp} XP",
       "alreadyLiked": "Amor o suficiente por hoje!",
       "like": "Amei"
+    },
+    "contato": {
+      "titulo": "Quer ficar por dentro? Deixe seu contato",
+      "emailPlaceholder": "Seu e-mail",
+      "whatsappPlaceholder": "Seu WhatsApp",
+      "enviar": "Enviar",
+      "enviando": "Enviando...",
+      "obrigado": "Valeu! Seu contato foi enviado.",
+      "genericError": "Erro ao enviar contato"
     }
   },
   "badges": {
@@ -183,6 +192,7 @@
     "tabs": {
       "links": "Links",
       "personalizar": "Personalizar",
+      "contatos": "Contatos",
       "compartilhar": "Compartilhar"
     },
     "links": {
@@ -220,7 +230,26 @@
       "genericEditError": "Erro ao editar link",
       "genericDeleteError": "Erro ao excluir link",
       "genericReactivateError": "Erro ao reativar link",
-      "genericReorderError": "Erro ao reordenar links"
+      "genericReorderError": "Erro ao reordenar links",
+      "groups": {
+        "newGroup": "+ Novo grupo",
+        "create": "Criar grupo",
+        "namePlaceholder": "Nome do grupo (ex: Redes sociais)",
+        "rename": "Renomear grupo",
+        "delete": "Excluir grupo",
+        "hide": "Ocultar",
+        "show": "Mostrar",
+        "hidden": "oculto",
+        "empty": "Nenhum link neste grupo ainda — mova um link pra cá.",
+        "moveToGroup": "Mover para grupo",
+        "noGroup": "Sem grupo",
+        "confirmDelete": "Excluir este grupo? Os links dele voltam a ficar soltos, fora de qualquer grupo.",
+        "genericLoadError": "Não foi possível carregar seus grupos.",
+        "genericCreateError": "Erro ao criar grupo",
+        "genericEditError": "Erro ao editar grupo",
+        "genericDeleteError": "Erro ao excluir grupo",
+        "genericReorderError": "Erro ao reordenar grupos"
+      }
     },
     "customize": {
       "petLevel": "Nível {level} · {xp} XP",
@@ -267,8 +296,20 @@
         "claro": "Claro",
         "roxo": "Roxo",
         "verde": "Verde",
-        "sunset": "Sunset"
+        "sunset": "Sunset",
+        "custom": "Personalizado"
       }
+    },
+    "contatos": {
+      "enableLabel": "Mostrar bloco de contato na página pública",
+      "enableHint": "Deixa um formulário na sua página pública pra quem visitar deixar e-mail ou WhatsApp.",
+      "genericToggleError": "Erro ao atualizar",
+      "loading": "Carregando contatos...",
+      "empty": "Nenhum contato capturado ainda.",
+      "genericLoadError": "Não foi possível carregar os contatos.",
+      "delete": "Excluir",
+      "confirmDelete": "Excluir esse contato?",
+      "genericDeleteError": "Erro ao excluir contato"
     },
     "share": {
       "title": "Sua página pública",
@@ -277,6 +318,22 @@
       "generating": "Gerando...",
       "hideQr": "Ocultar QR code",
       "generateQr": "Gerar QR code"
+    },
+    "analytics": {
+      "title": "Estatísticas (últimos 30 dias)",
+      "total": "{total, plural, one {# visualização} other {# visualizações}}",
+      "origens": "De onde vêm as visitas",
+      "dispositivos": "Dispositivo",
+      "paises": "País",
+      "direto": "Direto",
+      "dispositivo": {
+        "mobile": "Celular",
+        "tablet": "Tablet",
+        "desktop": "Computador"
+      },
+      "loading": "Carregando estatísticas...",
+      "empty": "Ainda sem dados suficientes.",
+      "genericError": "Não foi possível carregar as estatísticas."
     },
     "genericPhotoError": "Erro ao enviar foto"
   }

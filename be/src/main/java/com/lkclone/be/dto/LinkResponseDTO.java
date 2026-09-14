@@ -13,9 +13,10 @@ public class LinkResponseDTO {
     private Long cliques;
     private LocalDate dataInicio;
     private LocalDate dataFim;
+    private Long grupoId;
 
     public LinkResponseDTO(Long linkId, String url, String label, String pictureLink, Long position, boolean ativo,
-                            Long cliques, LocalDate dataInicio, LocalDate dataFim) {
+                            Long cliques, LocalDate dataInicio, LocalDate dataFim, Long grupoId) {
         this.linkId = linkId;
         this.url = url;
         this.label = label;
@@ -25,6 +26,7 @@ public class LinkResponseDTO {
         this.cliques = cliques;
         this.dataInicio = dataInicio;
         this.dataFim = dataFim;
+        this.grupoId = grupoId;
     }
 
     public Long getLinkId() {
@@ -61,5 +63,9 @@ public class LinkResponseDTO {
 
     public LocalDate getDataFim() {
         return dataFim;
+    }
+
+    public Long getGrupoId() {
+        return grupoId;
     }
 }

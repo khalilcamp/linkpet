@@ -1,0 +1,9 @@
+CREATE TABLE grupo (
+    id BIGSERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    posicao BIGINT NOT NULL,
+    ativo BOOLEAN NOT NULL DEFAULT true,
+    usuario_id BIGINT NOT NULL REFERENCES usuario(id)
+);
+
+ALTER TABLE link_usuario ADD COLUMN grupo_id BIGINT REFERENCES grupo(id) ON DELETE SET NULL;

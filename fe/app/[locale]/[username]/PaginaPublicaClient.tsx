@@ -1,12 +1,46 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { registrarClique, urlImagem, PaginaPublicaDTO } from "@/lib/api";
-import { classesDoTema } from "@/lib/temas";
+import { registrarClique, urlImagem, PaginaPublicaDTO, LinkResponseDTO } from "@/lib/api";
+import { classesDoTema, TemaClasses } from "@/lib/temas";
 import PetCard from "@/components/PetCard";
 import IconeSocial from "@/components/IconeSocial";
 import Badges from "@/components/Badges";
 import PerfilTags from "@/components/PerfilTags";
+import CapturarContatoForm from "@/components/CapturarContatoForm";
+
+function LinkCard({
+  link,
+  username,
+  tema,
+}: {
+  link: LinkResponseDTO;
+  username: string;
+  tema: TemaClasses;
+}) {
+  return (
+    <a
+      href={link.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={() => {
+        registrarClique(username, link.linkId).catch(() => {
+          // Falha ao registrar clique não deve impedir a navegação.
+        });
+      }}
+      className={`flex items-center gap-3 rounded-xl border px-4 py-3 transition ${tema.card} ${tema.cardHover}`}
+      style={tema.estiloCard}
+    >
+      {link.pictureLink ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={link.pictureLink} alt="" className="h-6 w-6 rounded" />
+      ) : (
+        <IconeSocial url={link.url} />
+      )}
+      <span className={`flex-1 font-medium ${tema.texto}`}>{link.label}</span>
+    </a>
+  );
+}
 
 export default function PaginaPublicaClient({
   username,
@@ -17,7 +51,7 @@ export default function PaginaPublicaClient({
 }) {
   const t = useTranslations("paginaPublica");
   const dados = dadosIniciais;
-  const tema = classesDoTema(dados?.tema);
+  const tema = classesDoTema(dados?.tema, dados?.corPersonalizada);
 
   if (!dados) {
     return (
@@ -27,12 +61,15 @@ export default function PaginaPublicaClient({
     );
   }
 
-  const linksAtivos = dados.links
-    .filter((l) => l.ativo)
-    .sort((a, b) => a.position - b.position);
+  const linksSemGrupo = [...dados.linksSemGrupo].sort((a, b) => a.position - b.position);
+  const grupos = dados.grupos.map((grupo) => ({
+    ...grupo,
+    links: [...grupo.links].sort((a, b) => a.position - b.position),
+  }));
+  const semNenhumLink = linksSemGrupo.length === 0 && grupos.length === 0;
 
   return (
-    <main className={`min-h-screen px-4 py-16 ${tema.fundo}`}>
+    <main className={`min-h-screen px-4 py-16 ${tema.fundo}`} style={tema.estiloFundo}>
       <div className="mx-auto max-w-sm space-y-8 text-center">
         <div className="space-y-3">
           {dados.userPfp ? (
@@ -62,46 +99,39 @@ export default function PaginaPublicaClient({
             username={username}
             pet={dados.pet}
             cardClassName={tema.card}
+            cardStyle={tema.estiloCard}
             subtextoClassName={tema.subtexto}
           />
         )}
 
-        <div className="space-y-3">
-          {linksAtivos.length === 0 && (
+        <div className="space-y-6">
+          {semNenhumLink && (
             <p className={`text-sm ${tema.subtexto}`}>
               {t("noLinksYet")}
             </p>
           )}
 
-          {linksAtivos.map((link) => (
-            <a
-              key={link.linkId}
-              href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => {
-                registrarClique(username, link.linkId).catch(() => {
-                  // Falha ao registrar clique não deve impedir a navegação.
-                });
-              }}
-              className={`flex items-center gap-3 rounded-xl border px-4 py-3 transition ${tema.card} ${tema.cardHover}`}
-            >
-              {link.pictureLink ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={link.pictureLink}
-                  alt=""
-                  className="h-6 w-6 rounded"
-                />
-              ) : (
-                <IconeSocial url={link.url} />
-              )}
-              <span className={`flex-1 font-medium ${tema.texto}`}>
-                {link.label}
-              </span>
-            </a>
+          {linksSemGrupo.length > 0 && (
+            <div className="space-y-3">
+              {linksSemGrupo.map((link) => (
+                <LinkCard key={link.linkId} link={link} username={username} tema={tema} />
+              ))}
+            </div>
+          )}
+
+          {grupos.map((grupo, indice) => (
+            <div key={indice} className="space-y-3">
+              <h2 className={`text-left text-xs font-semibold uppercase tracking-wide ${tema.subtexto}`}>
+                {grupo.nome}
+              </h2>
+              {grupo.links.map((link) => (
+                <LinkCard key={link.linkId} link={link} username={username} tema={tema} />
+              ))}
+            </div>
           ))}
         </div>
+
+        {dados.captarContato && <CapturarContatoForm username={username} tema={tema} />}
       </div>
     </main>
   );

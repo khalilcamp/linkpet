@@ -61,6 +61,7 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/p/{username}").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/p/{username}/pet/like").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/p/{username}/links/{linkId}/click").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/p/{username}/contato").permitAll()
                         .requestMatchers("/usuarios", "/usuarios/login", "/usuarios/esqueci-senha", "/usuarios/redefinir-senha",
                                 "/usuarios/confirmar-email", "/usuarios/reenviar-confirmacao").permitAll()
                         .anyRequest().authenticated()

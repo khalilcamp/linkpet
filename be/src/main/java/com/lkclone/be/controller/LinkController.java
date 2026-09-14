@@ -4,6 +4,7 @@ import com.lkclone.be.dto.AtualizarLinkDTO;
 import com.lkclone.be.dto.CriarLinkDTO;
 import com.lkclone.be.dto.LinkCliqueDiaDTO;
 import com.lkclone.be.dto.LinkResponseDTO;
+import com.lkclone.be.dto.MoverLinkDTO;
 import com.lkclone.be.dto.ReordenarLinksDTO;
 import com.lkclone.be.model.Link;
 import com.lkclone.be.model.Usuario;
@@ -36,7 +37,7 @@ public class LinkController {
         verificarDono(dono, authentication);
 
         Link link = linkService.createLink(dados.getUrl(), dados.getLabel(), dados.getPictureLink(),
-                dados.getDataInicio(), dados.getDataFim(), dono);
+                dados.getDataInicio(), dados.getDataFim(), dados.getGrupoId(), dono);
 
         return paraDTO(link);
     }
@@ -84,6 +85,16 @@ public class LinkController {
         return paraDTO(link);
     }
 
+    @PatchMapping("/{linkId}/mover")
+    public LinkResponseDTO moverLink(@PathVariable Long usuarioId, @PathVariable Long linkId,
+                                      @RequestBody MoverLinkDTO dados, Authentication authentication) {
+        Usuario dono = usuarioService.buscarPorId(usuarioId);
+        verificarDono(dono, authentication);
+
+        Link link = linkService.moverLinkParaGrupo(linkId, dono, dados.getGrupoId());
+        return paraDTO(link);
+    }
+
     @PatchMapping("/reordenar")
     public List<LinkResponseDTO> reordenarLinks(@PathVariable Long usuarioId, @RequestBody ReordenarLinksDTO dados, Authentication authentication) {
         Usuario dono = usuarioService.buscarPorId(usuarioId);
@@ -113,6 +124,7 @@ public class LinkController {
 
     private LinkResponseDTO paraDTO(Link link) {
         return new LinkResponseDTO(link.getLinkId(), link.getUrl(), link.getLabel(), link.getPictureLink(),
-                link.getLink_position(), link.isAtivo(), link.getCliques(), link.getDataInicio(), link.getDataFim());
+                link.getLink_position(), link.isAtivo(), link.getCliques(), link.getDataInicio(), link.getDataFim(),
+                link.getGrupo() != null ? link.getGrupo().getId() : null);
     }
 }

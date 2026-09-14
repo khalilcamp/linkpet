@@ -2,6 +2,8 @@
 // no backend (UsuarioService.TEMAS_PERMITIDOS). Um valor fora dessa lista é
 // rejeitado pelo backend antes de chegar aqui.
 
+import type { CSSProperties } from "react";
+
 export const TEMAS_DISPONIVEIS = ["escuro", "claro", "roxo", "verde", "sunset"] as const;
 
 export type Tema = (typeof TEMAS_DISPONIVEIS)[number];
@@ -14,12 +16,17 @@ export const TEMA_LABEL: Record<Tema, string> = {
   sunset: "Sunset",
 };
 
-interface TemaClasses {
+export interface TemaClasses {
   fundo: string;
   texto: string;
   subtexto: string;
   card: string;
   cardHover: string;
+  // Só preenchidos pro tema "custom" — a cor vem do banco (runtime), então
+  // não dá pra virar classe Tailwind estática (o compilador não a vê em
+  // build-time). Aplicados como style inline, mesclados na classe acima.
+  estiloFundo?: CSSProperties;
+  estiloCard?: CSSProperties;
 }
 
 export const TEMA_CLASSES: Record<Tema, TemaClasses> = {
@@ -60,7 +67,26 @@ export const TEMA_CLASSES: Record<Tema, TemaClasses> = {
   },
 };
 
-export function classesDoTema(tema: string | undefined): TemaClasses {
+function classesDoTemaCustom(cor: string): TemaClasses {
+  return {
+    fundo: "bg-neutral-950",
+    texto: "text-white",
+    subtexto: "text-neutral-400",
+    card: "border-neutral-800 bg-neutral-900",
+    cardHover: "hover:border-neutral-600 hover:bg-neutral-800",
+    estiloFundo: {
+      backgroundImage: `radial-gradient(circle at 50% 0%, ${cor}33, transparent 70%)`,
+    },
+    estiloCard: {
+      borderColor: `${cor}55`,
+    },
+  };
+}
+
+export function classesDoTema(tema: string | undefined, corPersonalizada?: string | null): TemaClasses {
+  if (tema === "custom" && corPersonalizada) {
+    return classesDoTemaCustom(corPersonalizada);
+  }
   if (tema && (TEMAS_DISPONIVEIS as readonly string[]).includes(tema)) {
     return TEMA_CLASSES[tema as Tema];
   }

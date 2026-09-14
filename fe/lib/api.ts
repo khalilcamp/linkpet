@@ -10,10 +10,19 @@ export interface UsuarioResponseDTO {
   userPfp: string | null;
   bio: string | null;
   tema: string;
+  corPersonalizada: string | null;
   perfilVisualizacoes: number;
   emailVerificado: boolean;
+  captarContato: boolean;
   badges: string[];
   tags: string[];
+}
+
+export interface ContatoCapturadoResponseDTO {
+  id: number;
+  email: string | null;
+  whatsapp: string | null;
+  criadoEm: string;
 }
 
 export interface LinkResponseDTO {
@@ -27,6 +36,19 @@ export interface LinkResponseDTO {
   // Datas no formato ISO "yyyy-MM-dd", como o Jackson serializa um LocalDate.
   dataInicio: string | null;
   dataFim: string | null;
+  grupoId: number | null;
+}
+
+export interface GrupoResponseDTO {
+  id: number;
+  nome: string;
+  posicao: number;
+  ativo: boolean;
+}
+
+export interface GrupoPublicoDTO {
+  nome: string;
+  links: LinkResponseDTO[];
 }
 
 export interface LinkCliqueDiaDTO {
@@ -61,10 +83,13 @@ export interface PaginaPublicaDTO {
   userPfp: string | null;
   bio: string | null;
   tema: string;
-  links: LinkResponseDTO[];
+  corPersonalizada: string | null;
+  linksSemGrupo: LinkResponseDTO[];
+  grupos: GrupoPublicoDTO[];
   pet: PetResponseDTO;
   badges: string[];
   tags: string[];
+  captarContato: boolean;
 }
 
 // ---- Armazenamento do token ----
@@ -206,6 +231,7 @@ interface DadosLink {
   pictureLink?: string;
   dataInicio?: string;
   dataFim?: string;
+  grupoId?: number;
 }
 
 export function criarLink(usuarioId: number, dados: DadosLink) {
@@ -245,6 +271,58 @@ export function reordenarLinks(usuarioId: number, ordem: number[]) {
   });
 }
 
+export function moverLink(usuarioId: number, linkId: number, grupoId: number | null) {
+  return request<LinkResponseDTO>(`/usuarios/${usuarioId}/links/${linkId}/mover`, {
+    method: "PATCH",
+    body: JSON.stringify({ grupoId }),
+  });
+}
+
+export function listarGrupos(usuarioId: number) {
+  return request<GrupoResponseDTO[]>(`/usuarios/${usuarioId}/grupos`);
+}
+
+export function criarGrupo(usuarioId: number, nome: string) {
+  return request<GrupoResponseDTO>(`/usuarios/${usuarioId}/grupos`, {
+    method: "POST",
+    body: JSON.stringify({ nome }),
+  });
+}
+
+export function renomearGrupo(usuarioId: number, grupoId: number, nome: string) {
+  return request<GrupoResponseDTO>(`/usuarios/${usuarioId}/grupos/${grupoId}`, {
+    method: "PATCH",
+    body: JSON.stringify({ nome }),
+  });
+}
+
+export function alternarGrupoAtivo(usuarioId: number, grupoId: number, ativo: boolean) {
+  return request<GrupoResponseDTO>(`/usuarios/${usuarioId}/grupos/${grupoId}/ativo`, {
+    method: "PATCH",
+    body: JSON.stringify({ ativo }),
+  });
+}
+
+export function excluirGrupo(usuarioId: number, grupoId: number) {
+  return request<void>(`/usuarios/${usuarioId}/grupos/${grupoId}`, {
+    method: "DELETE",
+  });
+}
+
+export function reordenarGrupos(usuarioId: number, ordem: number[]) {
+  return request<GrupoResponseDTO[]>(`/usuarios/${usuarioId}/grupos/reordenar`, {
+    method: "PATCH",
+    body: JSON.stringify({ ordem }),
+  });
+}
+
+export function reordenarLinksDoGrupo(usuarioId: number, grupoId: number, ordem: number[]) {
+  return request<LinkResponseDTO[]>(`/usuarios/${usuarioId}/grupos/${grupoId}/links/reordenar`, {
+    method: "PATCH",
+    body: JSON.stringify({ ordem }),
+  });
+}
+
 export function buscarPaginaPublica(username: string) {
   return request<PaginaPublicaDTO>(`/p/${username}`);
 }
@@ -270,10 +348,10 @@ export function customizarPet(
   });
 }
 
-export function atualizarTema(usuarioId: number, tema: string) {
+export function atualizarTema(usuarioId: number, tema: string, corPersonalizada?: string) {
   return request<UsuarioResponseDTO>(`/usuarios/${usuarioId}/tema`, {
     method: "PATCH",
-    body: JSON.stringify({ tema }),
+    body: JSON.stringify({ tema, corPersonalizada }),
   });
 }
 
@@ -297,6 +375,30 @@ export function atualizarBio(usuarioId: number, bio: string) {
   });
 }
 
+export function atualizarCaptarContato(usuarioId: number, ativo: boolean) {
+  return request<UsuarioResponseDTO>(`/usuarios/${usuarioId}/captar-contato`, {
+    method: "PATCH",
+    body: JSON.stringify({ ativo }),
+  });
+}
+
+export function capturarContato(username: string, dados: { email?: string; whatsapp?: string }) {
+  return request<void>(`/p/${username}/contato`, {
+    method: "POST",
+    body: JSON.stringify(dados),
+  });
+}
+
+export function listarContatos(usuarioId: number) {
+  return request<ContatoCapturadoResponseDTO[]>(`/usuarios/${usuarioId}/contatos`);
+}
+
+export function excluirContato(usuarioId: number, contatoId: number) {
+  return request<void>(`/usuarios/${usuarioId}/contatos/${contatoId}`, {
+    method: "DELETE",
+  });
+}
+
 export function uploadFoto(usuarioId: number, arquivo: File) {
   const formData = new FormData();
   formData.append("arquivo", arquivo);
@@ -311,6 +413,22 @@ export function historicoCliques(usuarioId: number, linkId: number, dias = 7) {
   return request<LinkCliqueDiaDTO[]>(
     `/usuarios/${usuarioId}/links/${linkId}/cliques/historico?dias=${dias}`
   );
+}
+
+export interface EstatisticaItemDTO {
+  rotulo: string;
+  quantidade: number;
+}
+
+export interface EstatisticasPerfilDTO {
+  total: number;
+  origens: EstatisticaItemDTO[];
+  dispositivos: EstatisticaItemDTO[];
+  paises: EstatisticaItemDTO[];
+}
+
+export function obterEstatisticas(usuarioId: number, dias = 30) {
+  return request<EstatisticasPerfilDTO>(`/usuarios/${usuarioId}/analytics?dias=${dias}`);
 }
 
 // Imagens enviadas via upload são servidas pelo próprio backend em

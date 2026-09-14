@@ -21,11 +21,12 @@ import java.util.regex.Pattern;
 @Service
 public class UsuarioService {
 
-    private static final Set<String> TEMAS_PERMITIDOS = Set.of("escuro", "claro", "roxo", "verde", "sunset");
+    private static final Set<String> TEMAS_PERMITIDOS = Set.of("escuro", "claro", "roxo", "verde", "sunset", "custom");
     private static final int BIO_TAMANHO_MAXIMO = 280;
     private static final int SENHA_TAMANHO_MINIMO = 8;
     // Exige ao menos uma letra e um número, sem restringir caracteres especiais.
     private static final Pattern SENHA_PADRAO = Pattern.compile("^(?=.*[A-Za-z])(?=.*\\d).+$");
+    private static final Pattern COR_PADRAO = Pattern.compile("^#[0-9A-Fa-f]{6}$");
     private static final long TOKEN_VALIDADE_HORAS = 1;
 
     // Hash BCrypt de uma senha que não existe de verdade — usado só pra
@@ -120,12 +121,23 @@ public class UsuarioService {
                 .orElseThrow(() -> new RecursoNaoEncontradoException(mensagemService.get("erro.usuario.naoEncontrado")));
     }
 
-    public Usuario atualizarTema(Usuario usuario, String tema) {
+    public Usuario atualizarTema(Usuario usuario, String tema, String corPersonalizada) {
         if (tema == null || !TEMAS_PERMITIDOS.contains(tema)) {
             throw new IllegalArgumentException(mensagemService.get("erro.tema.invalido", TEMAS_PERMITIDOS));
         }
+        if ("custom".equals(tema)) {
+            if (corPersonalizada == null || !COR_PADRAO.matcher(corPersonalizada).matches()) {
+                throw new IllegalArgumentException(mensagemService.get("erro.tema.corInvalida"));
+            }
+            usuario.setCorPersonalizada(corPersonalizada);
+        }
 
         usuario.setTema(tema);
+        return usuarioRepository.save(usuario);
+    }
+
+    public Usuario atualizarCaptarContato(Usuario usuario, boolean ativo) {
+        usuario.setCaptarContato(ativo);
         return usuarioRepository.save(usuario);
     }
 

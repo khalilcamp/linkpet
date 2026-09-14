@@ -9,6 +9,7 @@ interface PetCardProps {
   username: string;
   pet: PetResponseDTO;
   cardClassName?: string;
+  cardStyle?: React.CSSProperties;
   subtextoClassName?: string;
 }
 
@@ -16,6 +17,7 @@ export default function PetCard({
   username,
   pet,
   cardClassName = "border-neutral-800 bg-neutral-900",
+  cardStyle,
   subtextoClassName = "text-neutral-400",
 }: PetCardProps) {
   const t = useTranslations("paginaPublica.petCard");
@@ -44,7 +46,7 @@ export default function PetCard({
   }
 
   return (
-    <div className={`rounded-xl border p-5 text-center ${cardClassName}`}>
+    <div className={`rounded-xl border p-5 text-center ${cardClassName}`} style={cardStyle}>
       <PetSvg
         cor={estado.cor}
         estagioVisual={estado.estagioVisual}

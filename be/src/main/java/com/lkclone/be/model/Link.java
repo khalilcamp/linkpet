@@ -30,6 +30,13 @@ public class Link {
     private Usuario usuario;
     private boolean ativo;
 
+    // Grupo opcional — link sem grupo continua aparecendo solto, como sempre
+    // funcionou. link_position é a posição relativa ao próprio grupo (ou
+    // entre os links soltos, se grupo for null), não um índice global.
+    @ManyToOne
+    @JoinColumn(name = "grupo_id")
+    private Grupo grupo;
+
     @Column(nullable = false)
     private Long cliques = 0L;
 

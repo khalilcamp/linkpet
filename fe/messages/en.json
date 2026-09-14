@@ -127,6 +127,15 @@
       "level": "Level {level} · {xp} XP",
       "alreadyLiked": "Enough love for today!",
       "like": "Like"
+    },
+    "contato": {
+      "titulo": "Want to stay in touch? Leave your contact",
+      "emailPlaceholder": "Your email",
+      "whatsappPlaceholder": "Your WhatsApp",
+      "enviar": "Send",
+      "enviando": "Sending...",
+      "obrigado": "Thanks! Your contact was sent.",
+      "genericError": "Error sending contact"
     }
   },
   "badges": {
@@ -183,6 +192,7 @@
     "tabs": {
       "links": "Links",
       "personalizar": "Customize",
+      "contatos": "Contacts",
       "compartilhar": "Share"
     },
     "links": {
@@ -220,7 +230,26 @@
       "genericEditError": "Error editing link",
       "genericDeleteError": "Error deleting link",
       "genericReactivateError": "Error reactivating link",
-      "genericReorderError": "Error reordering links"
+      "genericReorderError": "Error reordering links",
+      "groups": {
+        "newGroup": "+ New group",
+        "create": "Create group",
+        "namePlaceholder": "Group name (e.g. Social media)",
+        "rename": "Rename group",
+        "delete": "Delete group",
+        "hide": "Hide",
+        "show": "Show",
+        "hidden": "hidden",
+        "empty": "No links in this group yet — move one here.",
+        "moveToGroup": "Move to group",
+        "noGroup": "No group",
+        "confirmDelete": "Delete this group? Its links go back to being ungrouped.",
+        "genericLoadError": "Couldn't load your groups.",
+        "genericCreateError": "Error creating group",
+        "genericEditError": "Error editing group",
+        "genericDeleteError": "Error deleting group",
+        "genericReorderError": "Error reordering groups"
+      }
     },
     "customize": {
       "petLevel": "Level {level} · {xp} XP",
@@ -267,8 +296,20 @@
         "claro": "Light",
         "roxo": "Purple",
         "verde": "Green",
-        "sunset": "Sunset"
+        "sunset": "Sunset",
+        "custom": "Custom"
       }
+    },
+    "contatos": {
+      "enableLabel": "Show contact block on public page",
+      "enableHint": "Adds a form on your public page for visitors to leave their email or WhatsApp.",
+      "genericToggleError": "Error updating",
+      "loading": "Loading contacts...",
+      "empty": "No contacts captured yet.",
+      "genericLoadError": "Couldn't load contacts.",
+      "delete": "Delete",
+      "confirmDelete": "Delete this contact?",
+      "genericDeleteError": "Error deleting contact"
     },
     "share": {
       "title": "Your public page",
@@ -277,6 +318,22 @@
       "generating": "Generating...",
       "hideQr": "Hide QR code",
       "generateQr": "Generate QR code"
+    },
+    "analytics": {
+      "title": "Stats (last 30 days)",
+      "total": "{total, plural, one {# view} other {# views}}",
+      "origens": "Where visits come from",
+      "dispositivos": "Device",
+      "paises": "Country",
+      "direto": "Direct",
+      "dispositivo": {
+        "mobile": "Mobile",
+        "tablet": "Tablet",
+        "desktop": "Desktop"
+      },
+      "loading": "Loading stats...",
+      "empty": "Not enough data yet.",
+      "genericError": "Couldn't load stats."
     },
     "genericPhotoError": "Error uploading photo"
   }

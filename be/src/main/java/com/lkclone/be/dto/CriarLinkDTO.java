@@ -21,6 +21,9 @@ public class CriarLinkDTO {
     private LocalDate dataInicio;
     private LocalDate dataFim;
 
+    // Opcional: já cria o link dentro de um grupo existente.
+    private Long grupoId;
+
     public String getUrl() {
         return url;
     }
@@ -59,5 +62,13 @@ public class CriarLinkDTO {
 
     public void setDataFim(LocalDate dataFim) {
         this.dataFim = dataFim;
+    }
+
+    public Long getGrupoId() {
+        return grupoId;
+    }
+
+    public void setGrupoId(Long grupoId) {
+        this.grupoId = grupoId;
     }
 }

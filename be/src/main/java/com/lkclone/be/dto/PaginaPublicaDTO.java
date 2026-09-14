@@ -8,21 +8,28 @@ public class PaginaPublicaDTO {
     private String userPfp;
     private String bio;
     private String tema;
-    private List<LinkResponseDTO> links;
+    private String corPersonalizada;
+    private List<LinkResponseDTO> linksSemGrupo;
+    private List<GrupoPublicoDTO> grupos;
     private PetResponseDTO pet;
     private List<String> badges;
     private List<String> tags;
+    private boolean captarContato;
 
-    public PaginaPublicaDTO(String userName, String userPfp, String bio, String tema, List<LinkResponseDTO> links,
-                             PetResponseDTO pet, List<String> badges, List<String> tags) {
+    public PaginaPublicaDTO(String userName, String userPfp, String bio, String tema, String corPersonalizada,
+                             List<LinkResponseDTO> linksSemGrupo, List<GrupoPublicoDTO> grupos, PetResponseDTO pet,
+                             List<String> badges, List<String> tags, boolean captarContato) {
         this.userName = userName;
         this.userPfp = userPfp;
         this.bio = bio;
         this.tema = tema;
-        this.links = links;
+        this.corPersonalizada = corPersonalizada;
+        this.linksSemGrupo = linksSemGrupo;
+        this.grupos = grupos;
         this.pet = pet;
         this.badges = badges;
         this.tags = tags;
+        this.captarContato = captarContato;
     }
 
     public String getUserName() {
@@ -41,8 +48,16 @@ public class PaginaPublicaDTO {
         return tema;
     }
 
-    public List<LinkResponseDTO> getLinks() {
-        return links;
+    public String getCorPersonalizada() {
+        return corPersonalizada;
+    }
+
+    public List<LinkResponseDTO> getLinksSemGrupo() {
+        return linksSemGrupo;
+    }
+
+    public List<GrupoPublicoDTO> getGrupos() {
+        return grupos;
     }
 
     public PetResponseDTO getPet() {
@@ -55,5 +70,9 @@ public class PaginaPublicaDTO {
 
     public List<String> getTags() {
         return tags;
+    }
+
+    public boolean isCaptarContato() {
+        return captarContato;
     }
 }

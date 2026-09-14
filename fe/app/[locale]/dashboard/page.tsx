@@ -11,6 +11,14 @@ import {
   removerLink,
   reativarLink,
   reordenarLinks,
+  moverLink,
+  listarGrupos,
+  criarGrupo,
+  renomearGrupo,
+  alternarGrupoAtivo,
+  excluirGrupo,
+  reordenarGrupos,
+  reordenarLinksDoGrupo,
   removerToken,
   buscarPaginaPublica,
   customizarPet,
@@ -21,9 +29,14 @@ import {
   historicoCliques,
   urlImagem,
   reenviarConfirmacaoEmail,
+  atualizarCaptarContato,
+  listarContatos,
+  excluirContato,
   LinkResponseDTO,
   LinkCliqueDiaDTO,
   PetResponseDTO,
+  GrupoResponseDTO,
+  ContatoCapturadoResponseDTO,
 } from "@/lib/api";
 import PetSvg, {
   CORES,
@@ -33,11 +46,12 @@ import PetSvg, {
   ACESSORIOS_CORPO_DISPONIVEIS,
 } from "@/components/PetSvg";
 import GraficoCliques from "@/components/GraficoCliques";
+import EstatisticasPerfil from "@/components/EstatisticasPerfil";
 import { TEMAS_DISPONIVEIS } from "@/lib/temas";
 import { TAGS_DISPONIVEIS, TAGS_MAXIMO } from "@/lib/perfilTags";
 import QRCode from "qrcode";
 
-const ABAS = ["links", "personalizar", "compartilhar"] as const;
+const ABAS = ["links", "personalizar", "contatos", "compartilhar"] as const;
 
 // Itens de customização exclusivos de badge: só aparecem na lista pra quem
 // já tem a badge correspondente, pra não mostrar algo que o usuário não pode
@@ -107,6 +121,159 @@ function IconeChevronDown() {
   );
 }
 
+function LinkRow({
+  link,
+  index,
+  lista,
+  onMover,
+  onAlternarHistorico,
+  historicoAbertoId,
+  carregandoHistorico,
+  historicoDados,
+  onIniciarEdicao,
+  onExcluir,
+  excluindoId,
+  onReativar,
+  hojeISO,
+  grupos,
+  onMoverParaGrupo,
+  t,
+}: {
+  link: LinkResponseDTO;
+  index: number;
+  lista: LinkResponseDTO[];
+  onMover: (lista: LinkResponseDTO[], index: number, direcao: -1 | 1) => void;
+  onAlternarHistorico: (linkId: number) => void;
+  historicoAbertoId: number | null;
+  carregandoHistorico: boolean;
+  historicoDados: LinkCliqueDiaDTO[] | null;
+  onIniciarEdicao: (link: LinkResponseDTO) => void;
+  onExcluir: (linkId: number) => void;
+  excluindoId: number | null;
+  onReativar: (linkId: number) => void;
+  hojeISO: string;
+  grupos: GrupoResponseDTO[];
+  onMoverParaGrupo: (linkId: number, grupoId: number | null) => void;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  return (
+    <div>
+      <div className="flex items-center gap-3 py-4">
+        {link.pictureLink && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={link.pictureLink} alt="" className="h-8 w-8 shrink-0 rounded" />
+        )}
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="truncate font-medium text-white">{link.label}</p>
+            {!link.ativo && (
+              <span className="shrink-0 rounded-full bg-neutral-800 px-2 py-0.5 text-xs text-neutral-400">
+                {t("links.inactive")}
+              </span>
+            )}
+            {link.ativo && link.dataInicio && link.dataInicio > hojeISO && (
+              <span className="shrink-0 rounded-full bg-blue-950 px-2 py-0.5 text-xs text-blue-400">
+                {t("links.scheduled")}
+              </span>
+            )}
+            {link.ativo && link.dataFim && link.dataFim < hojeISO && (
+              <span className="shrink-0 rounded-full bg-neutral-800 px-2 py-0.5 text-xs text-neutral-400">
+                {t("links.expired")}
+              </span>
+            )}
+          </div>
+          <p className="truncate text-sm text-neutral-500">{link.url}</p>
+          <p className="text-xs text-neutral-600">{t("links.clicks", { count: link.cliques })}</p>
+        </div>
+
+        <div className="flex shrink-0 items-center gap-1 text-neutral-500">
+          <select
+            value={link.grupoId ?? ""}
+            onChange={(e) => onMoverParaGrupo(link.linkId, e.target.value ? Number(e.target.value) : null)}
+            aria-label={t("links.groups.moveToGroup")}
+            title={t("links.groups.moveToGroup")}
+            className="rounded-md border border-neutral-800 bg-neutral-950 px-1.5 py-1 text-xs text-neutral-400 outline-none focus:border-orange-500"
+          >
+            <option value="">{t("links.groups.noGroup")}</option>
+            {grupos.map((grupo) => (
+              <option key={grupo.id} value={grupo.id}>
+                {grupo.nome}
+              </option>
+            ))}
+          </select>
+          <div className="flex flex-col">
+            <button
+              type="button"
+              onClick={() => onMover(lista, index, -1)}
+              disabled={index === 0}
+              aria-label={t("links.moveUp")}
+              className="rounded p-0.5 hover:text-white disabled:opacity-30"
+            >
+              <IconeChevronUp />
+            </button>
+            <button
+              type="button"
+              onClick={() => onMover(lista, index, 1)}
+              disabled={index === lista.length - 1}
+              aria-label={t("links.moveDown")}
+              className="rounded p-0.5 hover:text-white disabled:opacity-30"
+            >
+              <IconeChevronDown />
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={() => onAlternarHistorico(link.linkId)}
+            aria-label={t("links.viewHistory")}
+            title={t("links.historyTitle")}
+            className={`rounded-md p-2 transition hover:bg-neutral-800 hover:text-white ${
+              historicoAbertoId === link.linkId ? "bg-orange-500/10 text-orange-400" : ""
+            }`}
+          >
+            <IconeGrafico />
+          </button>
+          <button
+            type="button"
+            onClick={() => onIniciarEdicao(link)}
+            aria-label={t("links.editLink")}
+            title={t("links.edit")}
+            className="rounded-md p-2 transition hover:bg-neutral-800 hover:text-white"
+          >
+            <IconeEditar />
+          </button>
+          {link.ativo ? (
+            <button
+              type="button"
+              onClick={() => onExcluir(link.linkId)}
+              disabled={excluindoId === link.linkId}
+              aria-label={t("links.deleteLink")}
+              title={t("links.delete")}
+              className="rounded-md p-2 transition hover:bg-red-950 hover:text-red-400 disabled:opacity-50"
+            >
+              <IconeExcluir />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => onReativar(link.linkId)}
+              className="rounded-md px-2.5 py-1.5 text-xs text-neutral-300 transition hover:bg-neutral-800"
+            >
+              {t("links.reactivate")}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {historicoAbertoId === link.linkId && (
+        <div className="pb-4">
+          {carregandoHistorico && <p className="text-xs text-neutral-500">{t("links.loadingHistory")}</p>}
+          {!carregandoHistorico && historicoDados && <GraficoCliques dados={historicoDados} />}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const t = useTranslations("dashboard");
   const tTags = useTranslations("perfilTags");
@@ -125,6 +292,14 @@ export default function DashboardPage() {
   const [links, setLinks] = useState<LinkResponseDTO[]>([]);
   const [carregandoLinks, setCarregandoLinks] = useState(true);
   const [mostrarNovoLink, setMostrarNovoLink] = useState(false);
+
+  const [grupos, setGrupos] = useState<GrupoResponseDTO[]>([]);
+  const [criandoGrupo, setCriandoGrupo] = useState(false);
+  const [novoGrupoNome, setNovoGrupoNome] = useState("");
+  const [salvandoGrupo, setSalvandoGrupo] = useState(false);
+  const [erroGrupo, setErroGrupo] = useState<string | null>(null);
+  const [editandoGrupoId, setEditandoGrupoId] = useState<number | null>(null);
+  const [editGrupoNome, setEditGrupoNome] = useState("");
 
   const [url, setUrl] = useState("");
   const [label, setLabel] = useState("");
@@ -157,9 +332,11 @@ export default function DashboardPage() {
   const [erroPet, setErroPet] = useState<string | null>(null);
 
   const [temaOverride, setTemaOverride] = useState<string | null>(null);
+  const [corPersonalizadaOverride, setCorPersonalizadaOverride] = useState<string | null>(null);
   const [salvandoTema, setSalvandoTema] = useState(false);
   const [erroTema, setErroTema] = useState<string | null>(null);
   const tema = temaOverride ?? usuario?.tema ?? "escuro";
+  const corPersonalizada = corPersonalizadaOverride ?? usuario?.corPersonalizada ?? "#f97316";
 
   const [bioOverride, setBioOverride] = useState<string | null>(null);
   const [salvandoBio, setSalvandoBio] = useState(false);
@@ -178,6 +355,14 @@ export default function DashboardPage() {
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const [gerandoQr, setGerandoQr] = useState(false);
 
+  const [captarContatoOverride, setCaptarContatoOverride] = useState<boolean | null>(null);
+  const captarContatoAtivo = captarContatoOverride ?? usuario?.captarContato ?? false;
+  const [salvandoCaptarContato, setSalvandoCaptarContato] = useState(false);
+  const [erroCaptarContato, setErroCaptarContato] = useState<string | null>(null);
+  const [contatos, setContatos] = useState<ContatoCapturadoResponseDTO[]>([]);
+  const [carregandoContatos, setCarregandoContatos] = useState(true);
+  const [excluindoContatoId, setExcluindoContatoId] = useState<number | null>(null);
+
   useEffect(() => {
     if (!usuario) return;
 
@@ -192,6 +377,15 @@ export default function DashboardPage() {
       })
       .catch(() => setErroForm(t("links.genericLoadError")))
       .finally(() => setCarregandoLinks(false));
+
+    listarGrupos(usuario.id)
+      .then(setGrupos)
+      .catch(() => setErroGrupo(t("links.groups.genericLoadError")));
+
+    listarContatos(usuario.id)
+      .then(setContatos)
+      .catch(() => setErroCaptarContato(t("contatos.genericLoadError")))
+      .finally(() => setCarregandoContatos(false));
 
     buscarPaginaPublica(usuario.userName)
       .then((dados) => {
@@ -232,15 +426,16 @@ export default function DashboardPage() {
     }
   }
 
-  async function handleSalvarTema(novoTema: string) {
+  async function handleSalvarTema(novoTema: string, cor?: string) {
     if (!usuario) return;
 
     setErroTema(null);
     setSalvandoTema(true);
 
     try {
-      const atualizado = await atualizarTema(usuario.id, novoTema);
+      const atualizado = await atualizarTema(usuario.id, novoTema, cor);
       setTemaOverride(atualizado.tema);
+      setCorPersonalizadaOverride(atualizado.corPersonalizada);
     } catch (err) {
       setErroTema(err instanceof Error ? err.message : t("customize.genericThemeError"));
     } finally {
@@ -469,6 +664,160 @@ export default function DashboardPage() {
     }
   }
 
+  async function handleMoverLinkDentroGrupo(
+    linksDoGrupoOrdenados: LinkResponseDTO[],
+    index: number,
+    direcao: -1 | 1,
+    grupoId: number
+  ) {
+    if (!usuario) return;
+    const alvo = index + direcao;
+    if (alvo < 0 || alvo >= linksDoGrupoOrdenados.length) return;
+
+    const novaOrdem = [...linksDoGrupoOrdenados];
+    [novaOrdem[index], novaOrdem[alvo]] = [novaOrdem[alvo], novaOrdem[index]];
+
+    try {
+      const atualizados = await reordenarLinksDoGrupo(usuario.id, grupoId, novaOrdem.map((l) => l.linkId));
+      setLinks(atualizados);
+    } catch (err) {
+      setErroForm(err instanceof Error ? err.message : t("links.genericReorderError"));
+    }
+  }
+
+  async function handleMoverLinkParaGrupo(linkId: number, grupoId: number | null) {
+    if (!usuario) return;
+
+    try {
+      const atualizado = await moverLink(usuario.id, linkId, grupoId);
+      setLinks((atual) => atual.map((l) => (l.linkId === linkId ? atualizado : l)));
+    } catch (err) {
+      setErroForm(err instanceof Error ? err.message : t("links.genericReorderError"));
+    }
+  }
+
+  async function handleCriarGrupo(e: FormEvent) {
+    e.preventDefault();
+    if (!usuario) return;
+
+    setErroGrupo(null);
+    setSalvandoGrupo(true);
+
+    try {
+      const novoGrupo = await criarGrupo(usuario.id, novoGrupoNome);
+      setGrupos((atual) => [...atual, novoGrupo]);
+      setNovoGrupoNome("");
+      setCriandoGrupo(false);
+    } catch (err) {
+      setErroGrupo(err instanceof Error ? err.message : t("links.groups.genericCreateError"));
+    } finally {
+      setSalvandoGrupo(false);
+    }
+  }
+
+  function iniciarEdicaoGrupo(grupo: GrupoResponseDTO) {
+    setEditandoGrupoId(grupo.id);
+    setEditGrupoNome(grupo.nome);
+    setErroGrupo(null);
+  }
+
+  function cancelarEdicaoGrupo() {
+    setEditandoGrupoId(null);
+    setErroGrupo(null);
+  }
+
+  async function handleSalvarEdicaoGrupo(e: FormEvent, grupoId: number) {
+    e.preventDefault();
+    if (!usuario) return;
+
+    setErroGrupo(null);
+    setSalvandoGrupo(true);
+
+    try {
+      const atualizado = await renomearGrupo(usuario.id, grupoId, editGrupoNome);
+      setGrupos((atual) => atual.map((g) => (g.id === grupoId ? atualizado : g)));
+      setEditandoGrupoId(null);
+    } catch (err) {
+      setErroGrupo(err instanceof Error ? err.message : t("links.groups.genericEditError"));
+    } finally {
+      setSalvandoGrupo(false);
+    }
+  }
+
+  async function handleAlternarGrupoAtivo(grupoId: number, ativoAtual: boolean) {
+    if (!usuario) return;
+
+    try {
+      const atualizado = await alternarGrupoAtivo(usuario.id, grupoId, !ativoAtual);
+      setGrupos((atual) => atual.map((g) => (g.id === grupoId ? atualizado : g)));
+    } catch (err) {
+      setErroGrupo(err instanceof Error ? err.message : t("links.groups.genericEditError"));
+    }
+  }
+
+  async function handleExcluirGrupo(grupoId: number) {
+    if (!usuario) return;
+    if (!window.confirm(t("links.groups.confirmDelete"))) return;
+
+    try {
+      await excluirGrupo(usuario.id, grupoId);
+      setGrupos((atual) => atual.filter((g) => g.id !== grupoId));
+      // Os links do grupo voltam a ficar soltos, com posições novas —
+      // mais simples buscar de novo do que recalcular isso no cliente.
+      const atualizados = await listarLinks(usuario.id);
+      setLinks(atualizados);
+    } catch (err) {
+      setErroGrupo(err instanceof Error ? err.message : t("links.groups.genericDeleteError"));
+    }
+  }
+
+  async function handleMoverGrupo(gruposOrdenados: GrupoResponseDTO[], index: number, direcao: -1 | 1) {
+    if (!usuario) return;
+    const alvo = index + direcao;
+    if (alvo < 0 || alvo >= gruposOrdenados.length) return;
+
+    const novaOrdem = [...gruposOrdenados];
+    [novaOrdem[index], novaOrdem[alvo]] = [novaOrdem[alvo], novaOrdem[index]];
+
+    try {
+      const atualizados = await reordenarGrupos(usuario.id, novaOrdem.map((g) => g.id));
+      setGrupos(atualizados);
+    } catch (err) {
+      setErroGrupo(err instanceof Error ? err.message : t("links.groups.genericReorderError"));
+    }
+  }
+
+  async function handleAlternarCaptarContato() {
+    if (!usuario) return;
+
+    setErroCaptarContato(null);
+    setSalvandoCaptarContato(true);
+
+    try {
+      const atualizado = await atualizarCaptarContato(usuario.id, !captarContatoAtivo);
+      setCaptarContatoOverride(atualizado.captarContato);
+    } catch (err) {
+      setErroCaptarContato(err instanceof Error ? err.message : t("contatos.genericToggleError"));
+    } finally {
+      setSalvandoCaptarContato(false);
+    }
+  }
+
+  async function handleExcluirContato(contatoId: number) {
+    if (!usuario) return;
+    if (!window.confirm(t("contatos.confirmDelete"))) return;
+
+    setExcluindoContatoId(contatoId);
+    try {
+      await excluirContato(usuario.id, contatoId);
+      setContatos((atual) => atual.filter((c) => c.id !== contatoId));
+    } catch (err) {
+      setErroCaptarContato(err instanceof Error ? err.message : t("contatos.genericDeleteError"));
+    } finally {
+      setExcluindoContatoId(null);
+    }
+  }
+
   function handleLogout() {
     removerToken();
     router.push("/login");
@@ -509,7 +858,113 @@ export default function DashboardPage() {
   if (!usuario) return null;
 
   const hojeISO = new Date().toISOString().slice(0, 10);
-  const linksOrdenados = [...links].sort((a, b) => a.position - b.position);
+  const linksSoltos = links.filter((l) => l.grupoId == null).sort((a, b) => a.position - b.position);
+  const gruposOrdenados = [...grupos].sort((a, b) => a.posicao - b.posicao);
+  const linksDoGrupo = (grupoId: number) =>
+    links.filter((l) => l.grupoId === grupoId).sort((a, b) => a.position - b.position);
+
+  function renderLinkOuEdicao(lista: LinkResponseDTO[], grupoId?: number) {
+    const onMover = grupoId
+      ? (l: LinkResponseDTO[], i: number, d: -1 | 1) => handleMoverLinkDentroGrupo(l, i, d, grupoId)
+      : handleMoverLink;
+
+    return lista.map((link, index) =>
+      editandoId === link.linkId ? (
+        <form
+          key={link.linkId}
+          onSubmit={(e) => handleSalvarEdicao(e, link.linkId)}
+          className="space-y-2 rounded-xl border border-neutral-700 bg-neutral-900 p-4"
+        >
+          <input
+            type="text"
+            required
+            placeholder={t("links.editTitlePlaceholder")}
+            value={editLabel}
+            onChange={(e) => setEditLabel(e.target.value)}
+            className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-white placeholder-neutral-600 outline-none focus:border-orange-500"
+          />
+          <input
+            type="url"
+            required
+            placeholder={t("links.urlPlaceholder")}
+            value={editUrl}
+            onChange={(e) => setEditUrl(e.target.value)}
+            className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-white placeholder-neutral-600 outline-none focus:border-orange-500"
+          />
+          <input
+            type="url"
+            placeholder={t("links.iconUrlPlaceholder")}
+            value={editPictureLink}
+            onChange={(e) => setEditPictureLink(e.target.value)}
+            className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-white placeholder-neutral-600 outline-none focus:border-orange-500"
+          />
+          <div className="flex gap-3">
+            <label className="flex-1 text-xs text-neutral-500">
+              {t("links.startsAt")}
+              <input
+                type="date"
+                value={editDataInicio}
+                onChange={(e) => setEditDataInicio(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-white outline-none focus:border-orange-500"
+              />
+            </label>
+            <label className="flex-1 text-xs text-neutral-500">
+              {t("links.endsAt")}
+              <input
+                type="date"
+                value={editDataFim}
+                onChange={(e) => setEditDataFim(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-white outline-none focus:border-orange-500"
+              />
+            </label>
+          </div>
+
+          {erroEdicao && (
+            <p className="rounded-lg bg-red-950 px-3 py-2 text-sm text-red-400">
+              {erroEdicao}
+            </p>
+          )}
+
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              disabled={salvandoEdicao}
+              className="flex-1 rounded-lg bg-orange-500 py-2 text-sm font-medium text-black transition hover:bg-orange-400 disabled:opacity-50"
+            >
+              {salvandoEdicao ? t("links.saving") : t("links.save")}
+            </button>
+            <button
+              type="button"
+              onClick={cancelarEdicao}
+              className="rounded-lg border border-neutral-700 px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
+            >
+              {t("links.cancel")}
+            </button>
+          </div>
+        </form>
+      ) : (
+        <LinkRow
+          key={link.linkId}
+          link={link}
+          index={index}
+          lista={lista}
+          onMover={onMover}
+          onAlternarHistorico={handleAlternarHistorico}
+          historicoAbertoId={historicoAbertoId}
+          carregandoHistorico={carregandoHistorico}
+          historicoDados={historicoDados}
+          onIniciarEdicao={iniciarEdicao}
+          onExcluir={handleExcluirLink}
+          excluindoId={excluindoId}
+          onReativar={handleReativarLink}
+          hojeISO={hojeISO}
+          grupos={gruposOrdenados}
+          onMoverParaGrupo={handleMoverLinkParaGrupo}
+          t={t}
+        />
+      )
+    );
+  }
 
   return (
     <main className="min-h-screen bg-neutral-950 pb-16 text-white">
@@ -692,207 +1147,162 @@ export default function DashboardPage() {
               </section>
             )}
 
+            {carregandoLinks && (
+              <p className="text-sm text-neutral-500">{t("links.loadingLinks")}</p>
+            )}
+
+            {!carregandoLinks && links.length === 0 && !mostrarNovoLink && (
+              <p className="text-sm text-neutral-500">
+                {t("links.noLinks")}
+              </p>
+            )}
+
             <section className="divide-y divide-neutral-900">
-              {carregandoLinks && (
-                <p className="text-sm text-neutral-500">{t("links.loadingLinks")}</p>
-              )}
+              {renderLinkOuEdicao(linksSoltos)}
+            </section>
 
-              {!carregandoLinks && links.length === 0 && !mostrarNovoLink && (
-                <p className="text-sm text-neutral-500">
-                  {t("links.noLinks")}
-                </p>
-              )}
-
-              {linksOrdenados.map((link, index) =>
-                editandoId === link.linkId ? (
-                  <form
-                    key={link.linkId}
-                    onSubmit={(e) => handleSalvarEdicao(e, link.linkId)}
-                    className="space-y-2 rounded-xl border border-neutral-700 bg-neutral-900 p-4"
-                  >
-                    <input
-                      type="text"
-                      required
-                      placeholder={t("links.editTitlePlaceholder")}
-                      value={editLabel}
-                      onChange={(e) => setEditLabel(e.target.value)}
-                      className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-white placeholder-neutral-600 outline-none focus:border-orange-500"
-                    />
-                    <input
-                      type="url"
-                      required
-                      placeholder={t("links.urlPlaceholder")}
-                      value={editUrl}
-                      onChange={(e) => setEditUrl(e.target.value)}
-                      className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-white placeholder-neutral-600 outline-none focus:border-orange-500"
-                    />
-                    <input
-                      type="url"
-                      placeholder={t("links.iconUrlPlaceholder")}
-                      value={editPictureLink}
-                      onChange={(e) => setEditPictureLink(e.target.value)}
-                      className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-white placeholder-neutral-600 outline-none focus:border-orange-500"
-                    />
-                    <div className="flex gap-3">
-                      <label className="flex-1 text-xs text-neutral-500">
-                        {t("links.startsAt")}
-                        <input
-                          type="date"
-                          value={editDataInicio}
-                          onChange={(e) => setEditDataInicio(e.target.value)}
-                          className="mt-1 w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-white outline-none focus:border-orange-500"
-                        />
-                      </label>
-                      <label className="flex-1 text-xs text-neutral-500">
-                        {t("links.endsAt")}
-                        <input
-                          type="date"
-                          value={editDataFim}
-                          onChange={(e) => setEditDataFim(e.target.value)}
-                          className="mt-1 w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-white outline-none focus:border-orange-500"
-                        />
-                      </label>
-                    </div>
-
-                    {erroEdicao && (
-                      <p className="rounded-lg bg-red-950 px-3 py-2 text-sm text-red-400">
-                        {erroEdicao}
-                      </p>
-                    )}
-
-                    <div className="flex gap-2">
+            <section className="space-y-3">
+              {gruposOrdenados.map((grupo, indiceGrupo) => (
+                <div key={grupo.id} className="rounded-xl border border-neutral-800 bg-neutral-950/40">
+                  {editandoGrupoId === grupo.id ? (
+                    <form
+                      onSubmit={(e) => handleSalvarEdicaoGrupo(e, grupo.id)}
+                      className="flex items-center gap-2 p-3"
+                    >
+                      <input
+                        type="text"
+                        required
+                        maxLength={100}
+                        value={editGrupoNome}
+                        onChange={(e) => setEditGrupoNome(e.target.value)}
+                        className="flex-1 rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-1.5 text-sm text-white outline-none focus:border-orange-500"
+                      />
                       <button
                         type="submit"
-                        disabled={salvandoEdicao}
-                        className="flex-1 rounded-lg bg-orange-500 py-2 text-sm font-medium text-black transition hover:bg-orange-400 disabled:opacity-50"
+                        disabled={salvandoGrupo}
+                        className="rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-medium text-black transition hover:bg-orange-400 disabled:opacity-50"
                       >
-                        {salvandoEdicao ? t("links.saving") : t("links.save")}
+                        {t("links.save")}
                       </button>
                       <button
                         type="button"
-                        onClick={cancelarEdicao}
-                        className="rounded-lg border border-neutral-700 px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
+                        onClick={cancelarEdicaoGrupo}
+                        className="rounded-lg border border-neutral-700 px-3 py-1.5 text-xs text-neutral-300 hover:bg-neutral-800"
                       >
                         {t("links.cancel")}
                       </button>
-                    </div>
-                  </form>
-                ) : (
-                  <div key={link.linkId}>
-                    <div className="flex items-center gap-3 py-4">
-                      {link.pictureLink && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={link.pictureLink}
-                          alt=""
-                          className="h-8 w-8 shrink-0 rounded"
-                        />
-                      )}
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="truncate font-medium text-white">
-                            {link.label}
-                          </p>
-                          {!link.ativo && (
-                            <span className="shrink-0 rounded-full bg-neutral-800 px-2 py-0.5 text-xs text-neutral-400">
-                              {t("links.inactive")}
-                            </span>
-                          )}
-                          {link.ativo && link.dataInicio && link.dataInicio > hojeISO && (
-                            <span className="shrink-0 rounded-full bg-blue-950 px-2 py-0.5 text-xs text-blue-400">
-                              {t("links.scheduled")}
-                            </span>
-                          )}
-                          {link.ativo && link.dataFim && link.dataFim < hojeISO && (
-                            <span className="shrink-0 rounded-full bg-neutral-800 px-2 py-0.5 text-xs text-neutral-400">
-                              {t("links.expired")}
-                            </span>
-                          )}
-                        </div>
-                        <p className="truncate text-sm text-neutral-500">
-                          {link.url}
-                        </p>
-                        <p className="text-xs text-neutral-600">
-                          {t("links.clicks", { count: link.cliques })}
-                        </p>
-                      </div>
-
-                      <div className="flex shrink-0 items-center gap-1 text-neutral-500">
-                        <div className="flex flex-col">
-                          <button
-                            type="button"
-                            onClick={() => handleMoverLink(linksOrdenados, index, -1)}
-                            disabled={index === 0}
-                            aria-label={t("links.moveUp")}
-                            className="rounded p-0.5 hover:text-white disabled:opacity-30"
-                          >
-                            <IconeChevronUp />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleMoverLink(linksOrdenados, index, 1)}
-                            disabled={index === linksOrdenados.length - 1}
-                            aria-label={t("links.moveDown")}
-                            className="rounded p-0.5 hover:text-white disabled:opacity-30"
-                          >
-                            <IconeChevronDown />
-                          </button>
-                        </div>
+                    </form>
+                  ) : (
+                    <div className="flex items-center gap-2 p-3">
+                      <div className="flex flex-col text-neutral-500">
                         <button
                           type="button"
-                          onClick={() => handleAlternarHistorico(link.linkId)}
-                          aria-label={t("links.viewHistory")}
-                          title={t("links.historyTitle")}
-                          className={`rounded-md p-2 transition hover:bg-neutral-800 hover:text-white ${
-                            historicoAbertoId === link.linkId ? "bg-orange-500/10 text-orange-400" : ""
-                          }`}
+                          onClick={() => handleMoverGrupo(gruposOrdenados, indiceGrupo, -1)}
+                          disabled={indiceGrupo === 0}
+                          aria-label={t("links.moveUp")}
+                          className="rounded p-0.5 hover:text-white disabled:opacity-30"
                         >
-                          <IconeGrafico />
+                          <IconeChevronUp />
                         </button>
                         <button
                           type="button"
-                          onClick={() => iniciarEdicao(link)}
-                          aria-label={t("links.editLink")}
-                          title={t("links.edit")}
-                          className="rounded-md p-2 transition hover:bg-neutral-800 hover:text-white"
+                          onClick={() => handleMoverGrupo(gruposOrdenados, indiceGrupo, 1)}
+                          disabled={indiceGrupo === gruposOrdenados.length - 1}
+                          aria-label={t("links.moveDown")}
+                          className="rounded p-0.5 hover:text-white disabled:opacity-30"
                         >
-                          <IconeEditar />
+                          <IconeChevronDown />
                         </button>
-                        {link.ativo ? (
-                          <button
-                            type="button"
-                            onClick={() => handleExcluirLink(link.linkId)}
-                            disabled={excluindoId === link.linkId}
-                            aria-label={t("links.deleteLink")}
-                            title={t("links.delete")}
-                            className="rounded-md p-2 transition hover:bg-red-950 hover:text-red-400 disabled:opacity-50"
-                          >
-                            <IconeExcluir />
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => handleReativarLink(link.linkId)}
-                            className="rounded-md px-2.5 py-1.5 text-xs text-neutral-300 transition hover:bg-neutral-800"
-                          >
-                            {t("links.reactivate")}
-                          </button>
-                        )}
                       </div>
+                      <h3 className="flex-1 truncate font-medium text-white">
+                        {grupo.nome}
+                        {!grupo.ativo && (
+                          <span className="ml-2 rounded-full bg-neutral-800 px-2 py-0.5 text-xs font-normal text-neutral-400">
+                            {t("links.groups.hidden")}
+                          </span>
+                        )}
+                      </h3>
+                      <button
+                        type="button"
+                        onClick={() => handleAlternarGrupoAtivo(grupo.id, grupo.ativo)}
+                        className="rounded-md px-2.5 py-1.5 text-xs text-neutral-300 transition hover:bg-neutral-800"
+                      >
+                        {grupo.ativo ? t("links.groups.hide") : t("links.groups.show")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => iniciarEdicaoGrupo(grupo)}
+                        aria-label={t("links.groups.rename")}
+                        title={t("links.groups.rename")}
+                        className="rounded-md p-2 transition hover:bg-neutral-800 hover:text-white"
+                      >
+                        <IconeEditar />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleExcluirGrupo(grupo.id)}
+                        aria-label={t("links.groups.delete")}
+                        title={t("links.groups.delete")}
+                        className="rounded-md p-2 text-neutral-500 transition hover:bg-red-950 hover:text-red-400"
+                      >
+                        <IconeExcluir />
+                      </button>
                     </div>
+                  )}
 
-                    {historicoAbertoId === link.linkId && (
-                      <div className="pb-4">
-                        {carregandoHistorico && (
-                          <p className="text-xs text-neutral-500">{t("links.loadingHistory")}</p>
-                        )}
-                        {!carregandoHistorico && historicoDados && (
-                          <GraficoCliques dados={historicoDados} />
-                        )}
-                      </div>
+                  <div className="divide-y divide-neutral-900 px-3">
+                    {linksDoGrupo(grupo.id).length === 0 && (
+                      <p className="py-3 text-xs text-neutral-600">{t("links.groups.empty")}</p>
                     )}
+                    {renderLinkOuEdicao(linksDoGrupo(grupo.id), grupo.id)}
                   </div>
-                )
+                </div>
+              ))}
+
+              {erroGrupo && (
+                <p className="rounded-lg bg-red-950 px-3 py-2 text-sm text-red-400">
+                  {erroGrupo}
+                </p>
+              )}
+
+              {criandoGrupo ? (
+                <form onSubmit={handleCriarGrupo} className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    required
+                    maxLength={100}
+                    autoFocus
+                    placeholder={t("links.groups.namePlaceholder")}
+                    value={novoGrupoNome}
+                    onChange={(e) => setNovoGrupoNome(e.target.value)}
+                    className="flex-1 rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-white placeholder-neutral-600 outline-none focus:border-orange-500"
+                  />
+                  <button
+                    type="submit"
+                    disabled={salvandoGrupo}
+                    className="rounded-lg bg-orange-500 px-3 py-2 text-sm font-medium text-black transition hover:bg-orange-400 disabled:opacity-50"
+                  >
+                    {t("links.groups.create")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCriandoGrupo(false);
+                      setNovoGrupoNome("");
+                    }}
+                    className="rounded-lg border border-neutral-700 px-3 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
+                  >
+                    {t("links.cancel")}
+                  </button>
+                </form>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setCriandoGrupo(true)}
+                  className="w-full rounded-xl border border-dashed border-neutral-800 py-2.5 text-sm font-medium text-neutral-400 transition hover:border-neutral-700 hover:text-white"
+                >
+                  {t("links.groups.newGroup")}
+                </button>
               )}
             </section>
           </div>
@@ -1086,7 +1496,7 @@ export default function DashboardPage() {
 
             <section>
               <h2 className="mb-3 text-sm font-medium text-neutral-300">{t("customize.theme")}</h2>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 {TEMAS_DISPONIVEIS.map((opcao) => (
                   <button
                     key={opcao}
@@ -1102,12 +1512,81 @@ export default function DashboardPage() {
                     {t(`customize.themes.${opcao}`)}
                   </button>
                 ))}
+                <label
+                  className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs ${
+                    tema === "custom"
+                      ? "border-orange-500 text-orange-400"
+                      : "border-neutral-700 text-neutral-400"
+                  }`}
+                >
+                  <input
+                    type="color"
+                    value={corPersonalizada}
+                    onChange={(e) => handleSalvarTema("custom", e.target.value)}
+                    disabled={salvandoTema}
+                    className="h-4 w-4 cursor-pointer rounded border-none bg-transparent p-0"
+                  />
+                  {t("customize.themes.custom")}
+                </label>
               </div>
               {erroTema && (
                 <p className="mt-3 rounded-lg bg-red-950 px-3 py-2 text-sm text-red-400">
                   {erroTema}
                 </p>
               )}
+            </section>
+          </div>
+        )}
+
+        {aba === "contatos" && (
+          <div className="mt-6 space-y-6">
+            <section>
+              <label className="flex items-start gap-3 rounded-xl border border-neutral-800 bg-neutral-900 p-4">
+                <input
+                  type="checkbox"
+                  checked={captarContatoAtivo}
+                  onChange={handleAlternarCaptarContato}
+                  disabled={salvandoCaptarContato}
+                  className="mt-0.5 h-4 w-4 accent-orange-500"
+                />
+                <span>
+                  <span className="block text-sm font-medium text-white">{t("contatos.enableLabel")}</span>
+                  <span className="mt-0.5 block text-xs text-neutral-500">{t("contatos.enableHint")}</span>
+                </span>
+              </label>
+              {erroCaptarContato && (
+                <p className="mt-3 rounded-lg bg-red-950 px-3 py-2 text-sm text-red-400">
+                  {erroCaptarContato}
+                </p>
+              )}
+            </section>
+
+            <section className="divide-y divide-neutral-900">
+              {carregandoContatos && (
+                <p className="text-sm text-neutral-500">{t("contatos.loading")}</p>
+              )}
+              {!carregandoContatos && contatos.length === 0 && (
+                <p className="text-sm text-neutral-500">{t("contatos.empty")}</p>
+              )}
+              {contatos.map((contato) => (
+                <div key={contato.id} className="flex items-center justify-between gap-3 py-3">
+                  <div className="min-w-0">
+                    {contato.email && <p className="truncate text-sm text-white">{contato.email}</p>}
+                    {contato.whatsapp && <p className="truncate text-sm text-white">{contato.whatsapp}</p>}
+                    <p className="text-xs text-neutral-600">
+                      {new Date(contato.criadoEm).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleExcluirContato(contato.id)}
+                    disabled={excluindoContatoId === contato.id}
+                    className="shrink-0 rounded-md px-2.5 py-1.5 text-xs text-neutral-400 transition hover:bg-red-950 hover:text-red-400 disabled:opacity-50"
+                  >
+                    {t("contatos.delete")}
+                  </button>
+                </div>
+              ))}
             </section>
           </div>
         )}
@@ -1140,6 +1619,11 @@ export default function DashboardPage() {
               >
                 {gerandoQr ? t("share.generating") : qrCodeUrl ? t("share.hideQr") : t("share.generateQr")}
               </button>
+            </div>
+
+            <div className="mt-10">
+              <h2 className="mb-3 text-sm font-medium text-neutral-300">{t("analytics.title")}</h2>
+              <EstatisticasPerfil usuarioId={usuario.id} />
             </div>
           </div>
         )}

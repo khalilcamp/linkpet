@@ -10,22 +10,26 @@ public class UsuarioResponseDTO {
     private String userPfp;
     private String bio;
     private String tema;
+    private String corPersonalizada;
     private Long perfilVisualizacoes;
     private boolean emailVerificado;
+    private boolean captarContato;
     private List<String> badges;
     private List<String> tags;
 
     public UsuarioResponseDTO(Long id, String userName, String userEmail, String userPfp, String bio,
-                              String tema, Long perfilVisualizacoes, boolean emailVerificado, List<String> badges,
-                              List<String> tags) {
+                              String tema, String corPersonalizada, Long perfilVisualizacoes, boolean emailVerificado,
+                              boolean captarContato, List<String> badges, List<String> tags) {
         this.id = id;
         this.userName = userName;
         this.userEmail = userEmail;
         this.userPfp = userPfp;
         this.bio = bio;
         this.tema = tema;
+        this.corPersonalizada = corPersonalizada;
         this.perfilVisualizacoes = perfilVisualizacoes;
         this.emailVerificado = emailVerificado;
+        this.captarContato = captarContato;
         this.badges = badges;
         this.tags = tags;
     }
@@ -54,12 +58,20 @@ public class UsuarioResponseDTO {
         return tema;
     }
 
+    public String getCorPersonalizada() {
+        return corPersonalizada;
+    }
+
     public Long getPerfilVisualizacoes() {
         return perfilVisualizacoes;
     }
 
     public boolean isEmailVerificado() {
         return emailVerificado;
+    }
+
+    public boolean isCaptarContato() {
+        return captarContato;
     }
 
     public List<String> getBadges() {

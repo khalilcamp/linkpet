@@ -2,6 +2,7 @@ package com.lkclone.be.service;
 
 import com.lkclone.be.dto.LinkCliqueDiaDTO;
 import com.lkclone.be.exception.RecursoNaoEncontradoException;
+import com.lkclone.be.model.Grupo;
 import com.lkclone.be.model.Link;
 import com.lkclone.be.model.LinkCliqueLog;
 import com.lkclone.be.model.Usuario;
@@ -28,15 +29,19 @@ public class LinkService {
     private LinkRepository linkRepository;
     private LinkCliqueLogRepository linkCliqueLogRepository;
     private MensagemService mensagemService;
+    private GrupoService grupoService;
 
 
-    public Link createLink(String url, String label, String pictureLink, LocalDate dataInicio, LocalDate dataFim, Usuario usuario) {
+    public Link createLink(String url, String label, String pictureLink, LocalDate dataInicio, LocalDate dataFim,
+                            Long grupoId, Usuario usuario) {
         validarUrl(url);
         validarPictureLink(pictureLink);
         validarPeriodo(dataInicio, dataFim);
 
-        List<Link> linksExistentes = linkRepository.getLinkByUsuario(usuario);
-        long novaPosicao = linksExistentes.size() + 1;
+        Grupo grupo = grupoId != null ? grupoService.buscarGrupoDoDono(grupoId, usuario) : null;
+        long novaPosicao = grupo != null
+                ? grupoService.proximaPosicaoNoGrupo(usuario, grupo)
+                : grupoService.proximaPosicaoEntreSoltos(usuario);
 
         Link linkCriado = new Link();
         linkCriado.setUrl(url);
@@ -47,6 +52,7 @@ public class LinkService {
         linkCriado.setAtivo(true);
         linkCriado.setDataInicio(dataInicio);
         linkCriado.setDataFim(dataFim);
+        linkCriado.setGrupo(grupo);
 
         return linkRepository.save(linkCriado);
     }
@@ -146,13 +152,29 @@ public class LinkService {
     }
 
     public void reordenarLinks(Usuario dono, List<Long> ordemLinkIds) {
-        List<Link> links = linkRepository.getLinkByUsuario(dono);
+        List<Link> linksSoltos = linkRepository.getLinkByUsuario(dono).stream()
+                .filter(link -> link.getGrupo() == null)
+                .collect(Collectors.toList());
 
-        Set<Long> idsDoUsuario = links.stream().map(Link::getLinkId).collect(Collectors.toSet());
-        Set<Long> idsInformados = new HashSet<>(ordemLinkIds);
+        reordenarConjunto(linksSoltos, ordemLinkIds, "erro.link.reordenacaoInvalida");
+    }
 
-        if (!idsDoUsuario.equals(idsInformados) || ordemLinkIds.size() != links.size()) {
-            throw new IllegalArgumentException(mensagemService.get("erro.link.reordenacaoInvalida"));
+    public void reordenarLinksDoGrupo(Long grupoId, Usuario dono, List<Long> ordemLinkIds) {
+        Grupo grupo = grupoService.buscarGrupoDoDono(grupoId, dono);
+
+        List<Link> linksDoGrupo = linkRepository.getLinkByUsuario(dono).stream()
+                .filter(link -> grupo.equals(link.getGrupo()))
+                .collect(Collectors.toList());
+
+        reordenarConjunto(linksDoGrupo, ordemLinkIds, "erro.link.reordenacaoInvalida");
+    }
+
+    private void reordenarConjunto(List<Link> links, List<Long> ordemLinkIds, String chaveErro) {
+        Set<Long> idsDoConjunto = links.stream().map(Link::getLinkId).collect(Collectors.toSet());
+        Set<Long> idsInformados = new HashSet<>(ordemLinkIds == null ? List.of() : ordemLinkIds);
+
+        if (!idsDoConjunto.equals(idsInformados) || ordemLinkIds.size() != links.size()) {
+            throw new IllegalArgumentException(mensagemService.get(chaveErro));
         }
 
         Map<Long, Link> porId = links.stream().collect(Collectors.toMap(Link::getLinkId, l -> l));
@@ -163,6 +185,20 @@ public class LinkService {
             link.setLink_position(posicao++);
             linkRepository.save(link);
         }
+    }
+
+    public Link moverLinkParaGrupo(Long linkId, Usuario dono, Long grupoId) {
+        Link link = buscarLinkDoDono(linkId, dono);
+        Grupo grupo = grupoId != null ? grupoService.buscarGrupoDoDono(grupoId, dono) : null;
+
+        long novaPosicao = grupo != null
+                ? grupoService.proximaPosicaoNoGrupo(dono, grupo)
+                : grupoService.proximaPosicaoEntreSoltos(dono);
+
+        link.setGrupo(grupo);
+        link.setLink_position(novaPosicao);
+
+        return linkRepository.save(link);
     }
 
     private void validarUrl(String url) {
@@ -200,9 +236,10 @@ public class LinkService {
     }
 
     public LinkService(LinkRepository linkRepository, LinkCliqueLogRepository linkCliqueLogRepository,
-                        MensagemService mensagemService){
+                        MensagemService mensagemService, GrupoService grupoService){
         this.linkRepository = linkRepository;
         this.linkCliqueLogRepository = linkCliqueLogRepository;
         this.mensagemService = mensagemService;
+        this.grupoService = grupoService;
     }
 }

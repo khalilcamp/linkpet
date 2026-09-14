@@ -34,6 +34,13 @@ public class Usuario {
     @Column(nullable = false)
     private String tema = "escuro";
 
+    // Só usada quando tema = "custom" — formato hex "#rrggbb".
+    private String corPersonalizada;
+
+    // Mostra (ou não) o bloco "deixe seu contato" na página pública.
+    @Column(nullable = false)
+    private boolean captarContato = false;
+
     @Column(nullable = false)
     private Long perfilVisualizacoes = 0L;
 
