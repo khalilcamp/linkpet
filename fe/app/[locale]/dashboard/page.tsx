@@ -70,6 +70,17 @@ const ABAS = ["links", "personalizar", "contatos", "compartilhar"] as const;
 // (o erro do servidor já explica isso quando a pessoa tenta salvar).
 const TIPOS_CONTEUDO_DISPONIVEIS = ["link", "texto", "imagem"] as const;
 
+// Embeds (YouTube, Spotify, Instagram) usam o widget/iframe de terceiros —
+// sozinho como destaque ele renderiza em tamanho normal (sem virar
+// quadrado), mas dividindo a linha com outro destaque o layout quebra. Por
+// isso um embed só pode ser destaque se não houver nenhum outro, e um link
+// normal só pode ser destaque se não houver um embed já destacado (mesma
+// regra do backend) — desabilita o checkbox em vez de deixar a pessoa
+// descobrir isso só depois de tentar salvar.
+function naoPodeDestacar(exibirComoEmbed: boolean, existemOutrosDestaques: boolean, existeOutroEmbedDestacado: boolean): boolean {
+  return exibirComoEmbed ? existemOutrosDestaques : existeOutroEmbedDestacado;
+}
+
 // Itens de customização exclusivos de badge: só aparecem na lista pra quem
 // já tem a badge correspondente, pra não mostrar algo que o usuário não pode
 // escolher (evita FOMO por um item que ele nem sabe como conseguir).
@@ -1177,11 +1188,24 @@ export default function DashboardPage() {
               type="checkbox"
               checked={editDestaque}
               onChange={(e) => setEditDestaque(e.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded border-neutral-700 bg-neutral-950 accent-orange-500"
+              disabled={!editDestaque && naoPodeDestacar(
+                editExibirComoEmbed,
+                links.some((l) => l.destaque && l.linkId !== link.linkId),
+                links.some((l) => l.destaque && l.exibirComoEmbed && l.linkId !== link.linkId)
+              )}
+              className="mt-0.5 h-4 w-4 rounded border-neutral-700 bg-neutral-950 accent-orange-500 disabled:opacity-40"
             />
             <span>
               {t("links.destaqueToggle")}
-              <span className="block text-xs text-neutral-600">{t("links.destaqueHint")}</span>
+              <span className="block text-xs text-neutral-600">
+                {!editDestaque && naoPodeDestacar(
+                  editExibirComoEmbed,
+                  links.some((l) => l.destaque && l.linkId !== link.linkId),
+                  links.some((l) => l.destaque && l.exibirComoEmbed && l.linkId !== link.linkId)
+                )
+                  ? t("links.destaqueEmbedIndisponivel")
+                  : t("links.destaqueHint")}
+              </span>
             </span>
           </label>
 
@@ -1529,11 +1553,24 @@ export default function DashboardPage() {
                       type="checkbox"
                       checked={destaque}
                       onChange={(e) => setDestaque(e.target.checked)}
-                      className="mt-0.5 h-4 w-4 rounded border-neutral-700 bg-neutral-950 accent-orange-500"
+                      disabled={!destaque && naoPodeDestacar(
+                        exibirComoEmbed,
+                        links.some((l) => l.destaque),
+                        links.some((l) => l.destaque && l.exibirComoEmbed)
+                      )}
+                      className="mt-0.5 h-4 w-4 rounded border-neutral-700 bg-neutral-950 accent-orange-500 disabled:opacity-40"
                     />
                     <span>
                       {t("links.destaqueToggle")}
-                      <span className="block text-xs text-neutral-600">{t("links.destaqueHint")}</span>
+                      <span className="block text-xs text-neutral-600">
+                        {!destaque && naoPodeDestacar(
+                          exibirComoEmbed,
+                          links.some((l) => l.destaque),
+                          links.some((l) => l.destaque && l.exibirComoEmbed)
+                        )
+                          ? t("links.destaqueEmbedIndisponivel")
+                          : t("links.destaqueHint")}
+                      </span>
                     </span>
                   </label>
 

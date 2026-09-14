@@ -223,6 +223,7 @@
       "destaqueHint": "Shows this link in a highlighted section right below your profile info, instead of its usual spot in the list. Up to 1 on Free, 3 on Premium+ — side by side when there's more than one.",
       "destaqueOrdemTitulo": "Featured order",
       "destaqueOrdemHint": "Left to right on your public page.",
+      "destaqueEmbedIndisponivel": "An embedded link can only be featured on its own — remove the other featured items first.",
       "destaqueBadge": "featured",
       "startsAt": "Shows starting on",
       "endsAt": "Disappears starting on",

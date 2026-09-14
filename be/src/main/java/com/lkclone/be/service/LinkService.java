@@ -45,6 +45,7 @@ public class LinkService {
         validarPeriodo(dataInicio, dataFim);
 
         if (destaque) {
+            validarDestaqueEmbedSozinho(usuario, exibirComoEmbed, null);
             validarLimiteDestaque(usuario, null);
         }
 
@@ -104,6 +105,9 @@ public class LinkService {
         boolean eraDestaque = link.isDestaque();
 
         Integer destaquePosicao = link.getDestaquePosicao();
+        if (destaque) {
+            validarDestaqueEmbedSozinho(dono, exibirComoEmbed, linkId);
+        }
         if (destaque && !eraDestaque) {
             validarLimiteDestaque(dono, linkId);
             destaquePosicao = proximaPosicaoDestaque(dono);
@@ -151,6 +155,28 @@ public class LinkService {
             Link link = porId.get(linkId);
             link.setDestaquePosicao(posicao++);
             linkRepository.save(link);
+        }
+    }
+
+    // Embeds (YouTube, Spotify, Instagram) usam o widget/iframe de terceiros,
+    // cada um com o próprio layout responsivo interno — nenhum deles se dá
+    // bem espremido no quadrado fixo da linha de destaques quando tem mais
+    // de um (o do Instagram simplesmente não cabe, o do Spotify quebra o
+    // layout visualmente). Sozinho, o destaque renderiza em tamanho normal
+    // (sem virar quadrado), então nesse caso um embed pode ser destaque —
+    // só não pode dividir a linha com outro destaque.
+    private void validarDestaqueEmbedSozinho(Usuario usuario, boolean exibirComoEmbed, Long linkIdExcluir) {
+        List<Link> outrosDestaques = linkRepository.getLinkByUsuario(usuario).stream()
+                .filter(Link::isDestaque)
+                .filter(l -> linkIdExcluir == null || !l.getLinkId().equals(linkIdExcluir))
+                .collect(Collectors.toList());
+
+        boolean violaRegra = exibirComoEmbed
+                ? !outrosDestaques.isEmpty()
+                : outrosDestaques.stream().anyMatch(Link::isExibirComoEmbed);
+
+        if (violaRegra) {
+            throw new IllegalArgumentException(mensagemService.get("erro.link.destaqueEmbedSozinho"));
         }
     }
 

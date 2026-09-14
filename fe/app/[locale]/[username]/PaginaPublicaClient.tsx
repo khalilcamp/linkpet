@@ -66,21 +66,29 @@ function LinkCard({
   tema,
   formatoBotao,
   estiloBotao,
+  layout = "linha",
 }: {
   link: LinkResponseDTO;
   username: string;
   tema: TemaClasses;
   formatoBotao: string;
   estiloBotao: string;
+  layout?: "linha" | "quadrado";
 }) {
+  const quadrado = layout === "quadrado";
+
   if (link.tipoConteudo === "texto") {
     const conteudo = (
       <div
-        className={`space-y-1 border px-4 py-3 text-left transition ${tema.card} ${classeFormatoBotao(formatoBotao)}`}
+        className={`${quadrado ? "flex h-full flex-col justify-center overflow-hidden px-3 py-2" : "space-y-1 px-4 py-3"} border text-left transition ${tema.card} ${classeFormatoBotao(formatoBotao)}`}
         style={tema.estiloCard}
       >
-        <p className={`font-medium ${tema.texto}`}>{link.label}</p>
-        {link.conteudo && <p className={`whitespace-pre-wrap text-sm ${tema.subtexto}`}>{link.conteudo}</p>}
+        <p className={`font-medium ${tema.texto} ${quadrado ? "text-sm" : ""}`}>{link.label}</p>
+        {link.conteudo && (
+          <p className={`whitespace-pre-wrap text-sm ${tema.subtexto} ${quadrado ? "line-clamp-4 text-xs" : ""}`}>
+            {link.conteudo}
+          </p>
+        )}
       </div>
     );
 
@@ -94,7 +102,7 @@ function LinkCard({
         onClick={() => {
           registrarClique(username, link.linkId).catch(() => {});
         }}
-        className={`block text-inherit no-underline ${tema.cardHover}`}
+        className={`block text-inherit no-underline ${tema.cardHover} ${quadrado ? "h-full" : ""}`}
       >
         {conteudo}
       </a>
@@ -104,15 +112,21 @@ function LinkCard({
   if (link.tipoConteudo === "imagem") {
     const conteudo = (
       <div
-        className={`overflow-hidden border transition ${tema.card} ${classeFormatoBotao(formatoBotao)}`}
+        className={`${quadrado ? "flex h-full flex-col" : ""} overflow-hidden border transition ${tema.card} ${classeFormatoBotao(formatoBotao)}`}
         style={tema.estiloCard}
       >
         {link.pictureLink && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={link.pictureLink} alt={link.label} className="w-full object-cover" />
+          <img
+            src={link.pictureLink}
+            alt={link.label}
+            className={quadrado ? "min-h-0 flex-1 w-full object-cover" : "w-full object-cover"}
+          />
         )}
         {link.conteudo && (
-          <p className={`px-4 py-2 text-left text-sm ${tema.subtexto}`}>{link.conteudo}</p>
+          <p className={`shrink-0 px-3 py-1.5 text-left text-sm ${tema.subtexto} ${quadrado ? "truncate text-xs" : "px-4 py-2"}`}>
+            {link.conteudo}
+          </p>
         )}
       </div>
     );
@@ -127,7 +141,7 @@ function LinkCard({
         onClick={() => {
           registrarClique(username, link.linkId).catch(() => {});
         }}
-        className={`block ${tema.cardHover}`}
+        className={`block ${tema.cardHover} ${quadrado ? "h-full" : ""}`}
       >
         {conteudo}
       </a>
@@ -137,10 +151,16 @@ function LinkCard({
   const embed = link.exibirComoEmbed ? detectarEmbed(link.url ?? "", link.embedCompacto) : null;
 
   if (embed?.tipo === "instagram") {
-    // O card do Instagram já vem com moldura própria do widget deles —
-    // não aplicamos o border/fundo do tema por cima, só centralizamos.
+    // O widget do Instagram impõe uma largura mínima própria (~326px) que
+    // nenhum CSS nosso derruba — dentro de uma célula quadrada estreita
+    // (linha de destaques com mais de um item) ele fica com scroll interno
+    // mesmo, sem solução de layout de verdade além de não colocar posts do
+    // Instagram lado a lado com outros destaques.
     return (
-      <div className="flex justify-center overflow-y-auto rounded-xl" style={{ maxHeight: 380 }}>
+      <div
+        className={`flex justify-center overflow-y-auto rounded-xl ${quadrado ? "h-full" : ""}`}
+        style={quadrado ? undefined : { maxHeight: 380 }}
+      >
         <InstagramEmbedBlock permalink={embed.permalink} />
       </div>
     );
@@ -149,13 +169,13 @@ function LinkCard({
   if (embed?.tipo === "iframe") {
     return (
       <div
-        className={`overflow-hidden border ${tema.card} ${classeFormatoBotao(formatoBotao)}`}
+        className={`overflow-hidden border ${quadrado ? "h-full" : ""} ${tema.card} ${classeFormatoBotao(formatoBotao)}`}
         style={tema.estiloCard}
       >
         <iframe
           src={embed.embedUrl}
           width="100%"
-          height={embed.altura}
+          height={quadrado ? "100%" : embed.altura}
           loading="lazy"
           allow="autoplay; encrypted-media; picture-in-picture; clipboard-write; fullscreen"
           style={{ display: "block", border: "none" }}
@@ -165,6 +185,29 @@ function LinkCard({
   }
 
   const urlDoLink = link.url ?? "";
+
+  if (quadrado) {
+    return (
+      <a
+        href={urlDoLink}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={() => {
+          registrarClique(username, link.linkId).catch(() => {});
+        }}
+        className={`flex h-full flex-col items-center justify-center gap-2 border p-3 text-center transition ${tema.card} ${tema.cardHover} ${classeFormatoBotao(formatoBotao)} ${classeEstiloBotao(estiloBotao)}`}
+        style={tema.estiloCard}
+      >
+        {link.pictureLink ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={link.pictureLink} alt="" className="h-8 w-8 shrink-0 rounded" />
+        ) : (
+          <IconeSocial url={urlDoLink} className="h-8 w-8 shrink-0" />
+        )}
+        <span className={`line-clamp-2 text-xs font-medium ${tema.texto}`}>{link.label}</span>
+      </a>
+    );
+  }
 
   return (
     <a
@@ -289,19 +332,40 @@ export default function PaginaPublicaClient({
         </div>
 
         {linksDestaque.length > 0 && (
-          <div className={linksDestaque.length > 1 ? "flex items-start gap-3" : "space-y-3"}>
-            {linksDestaque.map((link) => (
-              <div key={link.linkId} className={linksDestaque.length > 1 ? "min-w-0 flex-1" : undefined}>
-                <LinkCard
-                  link={link}
-                  username={username}
-                  tema={tema}
-                  formatoBotao={dados.formatoBotao}
-                  estiloBotao={dados.estiloBotao}
-                />
+          linksDestaque.length === 1 ? (
+            <div className="space-y-3">
+              <LinkCard
+                link={linksDestaque[0]}
+                username={username}
+                tema={tema}
+                formatoBotao={dados.formatoBotao}
+                estiloBotao={dados.estiloBotao}
+              />
+            </div>
+          ) : (
+            // Os cards têm tamanho fixo (não encolhem pra caber) — numa tela
+            // larga o suficiente eles cabem lado a lado sem rolar; numa tela
+            // de celular estreita, a fileira rola horizontalmente em vez de
+            // espremer cada card. O -translate-x-1/2 + left-1/2 + w-screen é
+            // o truque de "sair" da largura estreita (max-w-sm) do resto da
+            // página só nessa seção.
+            <div className="relative left-1/2 w-screen -translate-x-1/2">
+              <div className="mx-auto flex max-w-xl justify-center gap-3 overflow-x-auto px-4 pb-1">
+                {linksDestaque.map((link) => (
+                  <div key={link.linkId} className="h-40 w-40 shrink-0 overflow-hidden">
+                    <LinkCard
+                      link={link}
+                      username={username}
+                      tema={tema}
+                      formatoBotao={dados.formatoBotao}
+                      estiloBotao={dados.estiloBotao}
+                      layout="quadrado"
+                    />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          )
         )}
 
         {dados.pet && (

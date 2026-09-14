@@ -223,6 +223,7 @@
       "destaqueHint": "Mostra este link numa seção em destaque logo abaixo das informações do seu perfil, em vez da posição normal dele na lista. Até 1 no Free, 3 no Premium+ — lado a lado quando tiver mais de um.",
       "destaqueOrdemTitulo": "Ordem dos destaques",
       "destaqueOrdemHint": "Da esquerda pra direita na sua página pública.",
+      "destaqueEmbedIndisponivel": "Um link incorporado só pode ser destaque sozinho — remova os outros destaques primeiro.",
       "destaqueBadge": "destaque",
       "startsAt": "Aparece a partir de",
       "endsAt": "Some a partir de",
