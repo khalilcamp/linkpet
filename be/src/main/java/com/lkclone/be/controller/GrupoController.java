@@ -119,6 +119,7 @@ public class GrupoController {
     private LinkResponseDTO paraLinkDTO(Link link) {
         return new LinkResponseDTO(link.getLinkId(), link.getUrl(), link.getLabel(), link.getPictureLink(),
                 link.getLink_position(), link.isAtivo(), link.getCliques(), link.getDataInicio(), link.getDataFim(),
-                link.getGrupo() != null ? link.getGrupo().getId() : null);
+                link.getGrupo() != null ? link.getGrupo().getId() : null, link.isExibirComoEmbed(),
+                link.isEmbedCompacto(), link.isDestaque());
     }
 }

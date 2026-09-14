@@ -14,6 +14,7 @@ public class PaginaPublicaDTO {
     private String estiloBotao;
     private List<LinkResponseDTO> linksSemGrupo;
     private List<GrupoPublicoDTO> grupos;
+    private List<LinkResponseDTO> linksDestaque;
     private PetResponseDTO pet;
     private List<String> badges;
     private List<String> tags;
@@ -21,7 +22,8 @@ public class PaginaPublicaDTO {
 
     public PaginaPublicaDTO(String userName, String userPfp, String bio, String tema, String corPersonalizada,
                              String fonte, String formatoBotao, String estiloBotao,
-                             List<LinkResponseDTO> linksSemGrupo, List<GrupoPublicoDTO> grupos, PetResponseDTO pet,
+                             List<LinkResponseDTO> linksSemGrupo, List<GrupoPublicoDTO> grupos,
+                             List<LinkResponseDTO> linksDestaque, PetResponseDTO pet,
                              List<String> badges, List<String> tags, boolean captarContato) {
         this.userName = userName;
         this.userPfp = userPfp;
@@ -33,6 +35,7 @@ public class PaginaPublicaDTO {
         this.estiloBotao = estiloBotao;
         this.linksSemGrupo = linksSemGrupo;
         this.grupos = grupos;
+        this.linksDestaque = linksDestaque;
         this.pet = pet;
         this.badges = badges;
         this.tags = tags;
@@ -77,6 +80,10 @@ public class PaginaPublicaDTO {
 
     public List<GrupoPublicoDTO> getGrupos() {
         return grupos;
+    }
+
+    public List<LinkResponseDTO> getLinksDestaque() {
+        return linksDestaque;
     }
 
     public PetResponseDTO getPet() {

@@ -37,7 +37,8 @@ public class LinkController {
         verificarDono(dono, authentication);
 
         Link link = linkService.createLink(dados.getUrl(), dados.getLabel(), dados.getPictureLink(),
-                dados.getDataInicio(), dados.getDataFim(), dados.getGrupoId(), dono);
+                dados.getDataInicio(), dados.getDataFim(), dados.getGrupoId(), dados.isExibirComoEmbed(),
+                dados.isEmbedCompacto(), dados.isDestaque(), dono);
 
         return paraDTO(link);
     }
@@ -61,7 +62,7 @@ public class LinkController {
         verificarDono(dono, authentication);
 
         Link link = linkService.atualizarLink(linkId, dono, dados.getUrl(), dados.getLabel(), dados.getPictureLink(),
-                dados.getDataInicio(), dados.getDataFim());
+                dados.getDataInicio(), dados.getDataFim(), dados.isExibirComoEmbed(), dados.isEmbedCompacto(), dados.isDestaque());
 
         return paraDTO(link);
     }
@@ -125,6 +126,7 @@ public class LinkController {
     private LinkResponseDTO paraDTO(Link link) {
         return new LinkResponseDTO(link.getLinkId(), link.getUrl(), link.getLabel(), link.getPictureLink(),
                 link.getLink_position(), link.isAtivo(), link.getCliques(), link.getDataInicio(), link.getDataFim(),
-                link.getGrupo() != null ? link.getGrupo().getId() : null);
+                link.getGrupo() != null ? link.getGrupo().getId() : null, link.isExibirComoEmbed(),
+                link.isEmbedCompacto(), link.isDestaque());
     }
 }

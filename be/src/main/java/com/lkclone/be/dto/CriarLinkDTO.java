@@ -24,6 +24,10 @@ public class CriarLinkDTO {
     // Opcional: já cria o link dentro de um grupo existente.
     private Long grupoId;
 
+    private boolean exibirComoEmbed;
+    private boolean embedCompacto;
+    private boolean destaque;
+
     public String getUrl() {
         return url;
     }
@@ -70,5 +74,29 @@ public class CriarLinkDTO {
 
     public void setGrupoId(Long grupoId) {
         this.grupoId = grupoId;
+    }
+
+    public boolean isExibirComoEmbed() {
+        return exibirComoEmbed;
+    }
+
+    public void setExibirComoEmbed(boolean exibirComoEmbed) {
+        this.exibirComoEmbed = exibirComoEmbed;
+    }
+
+    public boolean isEmbedCompacto() {
+        return embedCompacto;
+    }
+
+    public void setEmbedCompacto(boolean embedCompacto) {
+        this.embedCompacto = embedCompacto;
+    }
+
+    public boolean isDestaque() {
+        return destaque;
+    }
+
+    public void setDestaque(boolean destaque) {
+        this.destaque = destaque;
     }
 }

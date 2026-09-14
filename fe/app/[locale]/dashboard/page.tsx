@@ -57,6 +57,7 @@ import {
   classeFormatoBotao,
 } from "@/lib/aparencia";
 import { TAGS_DISPONIVEIS, TAGS_MAXIMO } from "@/lib/perfilTags";
+import { detectarEmbed } from "@/lib/embeds";
 import QRCode from "qrcode";
 
 const ABAS = ["links", "personalizar", "contatos", "compartilhar"] as const;
@@ -174,6 +175,16 @@ function LinkRow({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <p className="truncate font-medium text-white">{link.label}</p>
+            {link.exibirComoEmbed && (
+              <span className="shrink-0 rounded-full bg-purple-950 px-2 py-0.5 text-xs text-purple-400">
+                {link.embedCompacto ? t("links.embedCompactBadge") : t("links.embedBadge")}
+              </span>
+            )}
+            {link.destaque && (
+              <span className="shrink-0 rounded-full bg-amber-950 px-2 py-0.5 text-xs text-amber-400">
+                {t("links.destaqueBadge")}
+              </span>
+            )}
             {!link.ativo && (
               <span className="shrink-0 rounded-full bg-neutral-800 px-2 py-0.5 text-xs text-neutral-400">
                 {t("links.inactive")}
@@ -314,6 +325,9 @@ export default function DashboardPage() {
   const [pictureLink, setPictureLink] = useState("");
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");
+  const [exibirComoEmbed, setExibirComoEmbed] = useState(false);
+  const [embedCompacto, setEmbedCompacto] = useState(false);
+  const [destaque, setDestaque] = useState(false);
   const [erroForm, setErroForm] = useState<string | null>(null);
   const [salvando, setSalvando] = useState(false);
 
@@ -323,6 +337,9 @@ export default function DashboardPage() {
   const [editPictureLink, setEditPictureLink] = useState("");
   const [editDataInicio, setEditDataInicio] = useState("");
   const [editDataFim, setEditDataFim] = useState("");
+  const [editExibirComoEmbed, setEditExibirComoEmbed] = useState(false);
+  const [editEmbedCompacto, setEditEmbedCompacto] = useState(false);
+  const [editDestaque, setEditDestaque] = useState(false);
   const [salvandoEdicao, setSalvandoEdicao] = useState(false);
   const [erroEdicao, setErroEdicao] = useState<string | null>(null);
   const [excluindoId, setExcluindoId] = useState<number | null>(null);
@@ -598,6 +615,9 @@ export default function DashboardPage() {
         pictureLink: pictureLink || undefined,
         dataInicio: dataInicio || undefined,
         dataFim: dataFim || undefined,
+        exibirComoEmbed,
+        embedCompacto,
+        destaque,
       });
       setLinks((atual) => [...atual, novoLink]);
       setUrl("");
@@ -605,6 +625,9 @@ export default function DashboardPage() {
       setPictureLink("");
       setDataInicio("");
       setDataFim("");
+      setExibirComoEmbed(false);
+      setEmbedCompacto(false);
+      setDestaque(false);
       setMostrarNovoLink(false);
     } catch (err) {
       setErroForm(err instanceof Error ? err.message : t("links.genericCreateError"));
@@ -620,6 +643,9 @@ export default function DashboardPage() {
     setEditPictureLink(link.pictureLink || "");
     setEditDataInicio(link.dataInicio || "");
     setEditDataFim(link.dataFim || "");
+    setEditExibirComoEmbed(link.exibirComoEmbed);
+    setEditEmbedCompacto(link.embedCompacto);
+    setEditDestaque(link.destaque);
     setErroEdicao(null);
   }
 
@@ -642,6 +668,9 @@ export default function DashboardPage() {
         pictureLink: editPictureLink || undefined,
         dataInicio: editDataInicio || undefined,
         dataFim: editDataFim || undefined,
+        exibirComoEmbed: editExibirComoEmbed,
+        embedCompacto: editEmbedCompacto,
+        destaque: editDestaque,
       });
       setLinks((atual) =>
         atual.map((l) => (l.linkId === linkId ? linkAtualizado : l))
@@ -958,6 +987,47 @@ export default function DashboardPage() {
             </label>
           </div>
 
+          <label className="flex items-start gap-2 text-sm text-neutral-400">
+            <input
+              type="checkbox"
+              checked={editExibirComoEmbed}
+              onChange={(e) => setEditExibirComoEmbed(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-neutral-700 bg-neutral-950 accent-orange-500"
+            />
+            <span>
+              {t("links.embedToggle")}
+              <span className="block text-xs text-neutral-600">{t("links.embedHint")}</span>
+            </span>
+          </label>
+
+          {editExibirComoEmbed && detectarEmbed(editUrl)?.tipo === "iframe" && (
+            <label className="ml-6 flex items-start gap-2 text-sm text-neutral-400">
+              <input
+                type="checkbox"
+                checked={editEmbedCompacto}
+                onChange={(e) => setEditEmbedCompacto(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-neutral-700 bg-neutral-950 accent-orange-500"
+              />
+              <span>
+                {t("links.embedCompactToggle")}
+                <span className="block text-xs text-neutral-600">{t("links.embedCompactHint")}</span>
+              </span>
+            </label>
+          )}
+
+          <label className="flex items-start gap-2 text-sm text-neutral-400">
+            <input
+              type="checkbox"
+              checked={editDestaque}
+              onChange={(e) => setEditDestaque(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-neutral-700 bg-neutral-950 accent-orange-500"
+            />
+            <span>
+              {t("links.destaqueToggle")}
+              <span className="block text-xs text-neutral-600">{t("links.destaqueHint")}</span>
+            </span>
+          </label>
+
           {erroEdicao && (
             <p className="rounded-lg bg-red-950 px-3 py-2 text-sm text-red-400">
               {erroEdicao}
@@ -1168,6 +1238,47 @@ export default function DashboardPage() {
                       />
                     </label>
                   </div>
+
+                  <label className="flex items-start gap-2 text-sm text-neutral-400">
+                    <input
+                      type="checkbox"
+                      checked={exibirComoEmbed}
+                      onChange={(e) => setExibirComoEmbed(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 rounded border-neutral-700 bg-neutral-950 accent-orange-500"
+                    />
+                    <span>
+                      {t("links.embedToggle")}
+                      <span className="block text-xs text-neutral-600">{t("links.embedHint")}</span>
+                    </span>
+                  </label>
+
+                  {exibirComoEmbed && detectarEmbed(url)?.tipo === "iframe" && (
+                    <label className="ml-6 flex items-start gap-2 text-sm text-neutral-400">
+                      <input
+                        type="checkbox"
+                        checked={embedCompacto}
+                        onChange={(e) => setEmbedCompacto(e.target.checked)}
+                        className="mt-0.5 h-4 w-4 rounded border-neutral-700 bg-neutral-950 accent-orange-500"
+                      />
+                      <span>
+                        {t("links.embedCompactToggle")}
+                        <span className="block text-xs text-neutral-600">{t("links.embedCompactHint")}</span>
+                      </span>
+                    </label>
+                  )}
+
+                  <label className="flex items-start gap-2 text-sm text-neutral-400">
+                    <input
+                      type="checkbox"
+                      checked={destaque}
+                      onChange={(e) => setDestaque(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 rounded border-neutral-700 bg-neutral-950 accent-orange-500"
+                    />
+                    <span>
+                      {t("links.destaqueToggle")}
+                      <span className="block text-xs text-neutral-600">{t("links.destaqueHint")}</span>
+                    </span>
+                  </label>
 
                   {erroForm && (
                     <p className="rounded-lg bg-red-950 px-3 py-2 text-sm text-red-400">

@@ -21,6 +21,10 @@ public class AtualizarLinkDTO {
     private LocalDate dataInicio;
     private LocalDate dataFim;
 
+    private boolean exibirComoEmbed;
+    private boolean embedCompacto;
+    private boolean destaque;
+
     public String getUrl() {
         return url;
     }
@@ -59,5 +63,29 @@ public class AtualizarLinkDTO {
 
     public void setDataFim(LocalDate dataFim) {
         this.dataFim = dataFim;
+    }
+
+    public boolean isExibirComoEmbed() {
+        return exibirComoEmbed;
+    }
+
+    public void setExibirComoEmbed(boolean exibirComoEmbed) {
+        this.exibirComoEmbed = exibirComoEmbed;
+    }
+
+    public boolean isEmbedCompacto() {
+        return embedCompacto;
+    }
+
+    public void setEmbedCompacto(boolean embedCompacto) {
+        this.embedCompacto = embedCompacto;
+    }
+
+    public boolean isDestaque() {
+        return destaque;
+    }
+
+    public void setDestaque(boolean destaque) {
+        this.destaque = destaque;
     }
 }

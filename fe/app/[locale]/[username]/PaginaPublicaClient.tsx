@@ -1,14 +1,64 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { registrarClique, urlImagem, PaginaPublicaDTO, LinkResponseDTO } from "@/lib/api";
 import { classesDoTema, TemaClasses } from "@/lib/temas";
 import { fontFamilyDaFonte, classeFormatoBotao, classeEstiloBotao } from "@/lib/aparencia";
+import { detectarEmbed } from "@/lib/embeds";
 import PetCard from "@/components/PetCard";
 import IconeSocial from "@/components/IconeSocial";
 import Badges from "@/components/Badges";
 import PerfilTags from "@/components/PerfilTags";
 import CapturarContatoForm from "@/components/CapturarContatoForm";
+
+declare global {
+  interface Window {
+    instgrm?: { Embeds: { process: () => void } };
+  }
+}
+
+const INSTAGRAM_SCRIPT_SRC = "https://www.instagram.com/embed.js";
+
+// O widget oficial do Instagram transforma o <blockquote> abaixo num
+// iframe. O script só precisa ser carregado uma vez por página — se já
+// estiver presente, só reprocessa os blockquotes novos.
+function InstagramEmbedBlock({ permalink }: { permalink: string }) {
+  const ref = useRef<HTMLQuoteElement>(null);
+
+  useEffect(() => {
+    function processar() {
+      window.instgrm?.Embeds.process();
+    }
+
+    if (window.instgrm) {
+      processar();
+      return;
+    }
+
+    const existente = document.querySelector<HTMLScriptElement>(`script[src="${INSTAGRAM_SCRIPT_SRC}"]`);
+    if (existente) {
+      existente.addEventListener("load", processar);
+      return () => existente.removeEventListener("load", processar);
+    }
+
+    const script = document.createElement("script");
+    script.src = INSTAGRAM_SCRIPT_SRC;
+    script.async = true;
+    script.onload = processar;
+    document.body.appendChild(script);
+  }, [permalink]);
+
+  return (
+    <blockquote
+      ref={ref}
+      className="instagram-media"
+      data-instgrm-permalink={permalink}
+      data-instgrm-version="14"
+      style={{ margin: "0 auto", width: "100%" }}
+    />
+  );
+}
 
 function LinkCard({
   link,
@@ -23,6 +73,36 @@ function LinkCard({
   formatoBotao: string;
   estiloBotao: string;
 }) {
+  const embed = link.exibirComoEmbed ? detectarEmbed(link.url, link.embedCompacto) : null;
+
+  if (embed?.tipo === "instagram") {
+    // O card do Instagram já vem com moldura própria do widget deles —
+    // não aplicamos o border/fundo do tema por cima, só centralizamos.
+    return (
+      <div className="flex justify-center overflow-y-auto rounded-xl" style={{ maxHeight: 380 }}>
+        <InstagramEmbedBlock permalink={embed.permalink} />
+      </div>
+    );
+  }
+
+  if (embed?.tipo === "iframe") {
+    return (
+      <div
+        className={`overflow-hidden border ${tema.card} ${classeFormatoBotao(formatoBotao)}`}
+        style={tema.estiloCard}
+      >
+        <iframe
+          src={embed.embedUrl}
+          width="100%"
+          height={embed.altura}
+          loading="lazy"
+          allow="autoplay; encrypted-media; picture-in-picture; clipboard-write; fullscreen"
+          style={{ display: "block", border: "none" }}
+        />
+      </div>
+    );
+  }
+
   return (
     <a
       href={link.url}
@@ -71,7 +151,8 @@ export default function PaginaPublicaClient({
     ...grupo,
     links: [...grupo.links].sort((a, b) => a.position - b.position),
   }));
-  const semNenhumLink = linksSemGrupo.length === 0 && grupos.length === 0;
+  const linksDestaque = [...(dados.linksDestaque ?? [])].sort((a, b) => a.position - b.position);
+  const semNenhumLink = linksSemGrupo.length === 0 && grupos.length === 0 && linksDestaque.length === 0;
 
   return (
     <main
@@ -101,6 +182,21 @@ export default function PaginaPublicaClient({
             <p className={`text-sm ${tema.subtexto}`}>{dados.bio}</p>
           )}
         </div>
+
+        {linksDestaque.length > 0 && (
+          <div className="space-y-3">
+            {linksDestaque.map((link) => (
+              <LinkCard
+                key={link.linkId}
+                link={link}
+                username={username}
+                tema={tema}
+                formatoBotao={dados.formatoBotao}
+                estiloBotao={dados.estiloBotao}
+              />
+            ))}
+          </div>
+        )}
 
         {dados.pet && (
           <PetCard

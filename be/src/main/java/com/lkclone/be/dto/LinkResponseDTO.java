@@ -14,9 +14,13 @@ public class LinkResponseDTO {
     private LocalDate dataInicio;
     private LocalDate dataFim;
     private Long grupoId;
+    private boolean exibirComoEmbed;
+    private boolean embedCompacto;
+    private boolean destaque;
 
     public LinkResponseDTO(Long linkId, String url, String label, String pictureLink, Long position, boolean ativo,
-                            Long cliques, LocalDate dataInicio, LocalDate dataFim, Long grupoId) {
+                            Long cliques, LocalDate dataInicio, LocalDate dataFim, Long grupoId, boolean exibirComoEmbed,
+                            boolean embedCompacto, boolean destaque) {
         this.linkId = linkId;
         this.url = url;
         this.label = label;
@@ -27,6 +31,9 @@ public class LinkResponseDTO {
         this.dataInicio = dataInicio;
         this.dataFim = dataFim;
         this.grupoId = grupoId;
+        this.exibirComoEmbed = exibirComoEmbed;
+        this.embedCompacto = embedCompacto;
+        this.destaque = destaque;
     }
 
     public Long getLinkId() {
@@ -67,5 +74,17 @@ public class LinkResponseDTO {
 
     public Long getGrupoId() {
         return grupoId;
+    }
+
+    public boolean isExibirComoEmbed() {
+        return exibirComoEmbed;
+    }
+
+    public boolean isEmbedCompacto() {
+        return embedCompacto;
+    }
+
+    public boolean isDestaque() {
+        return destaque;
     }
 }

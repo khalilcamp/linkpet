@@ -33,7 +33,7 @@ public class LinkService {
 
 
     public Link createLink(String url, String label, String pictureLink, LocalDate dataInicio, LocalDate dataFim,
-                            Long grupoId, Usuario usuario) {
+                            Long grupoId, boolean exibirComoEmbed, boolean embedCompacto, boolean destaque, Usuario usuario) {
         validarUrl(url);
         validarPictureLink(pictureLink);
         validarPeriodo(dataInicio, dataFim);
@@ -53,6 +53,9 @@ public class LinkService {
         linkCriado.setDataInicio(dataInicio);
         linkCriado.setDataFim(dataFim);
         linkCriado.setGrupo(grupo);
+        linkCriado.setExibirComoEmbed(exibirComoEmbed);
+        linkCriado.setEmbedCompacto(embedCompacto);
+        linkCriado.setDestaque(destaque);
 
         return linkRepository.save(linkCriado);
     }
@@ -77,7 +80,7 @@ public class LinkService {
                 .collect(Collectors.toList());
     }
 
-    public Link atualizarLink(Long linkId, Usuario dono, String url, String label, String pictureLink, LocalDate dataInicio, LocalDate dataFim) {
+    public Link atualizarLink(Long linkId, Usuario dono, String url, String label, String pictureLink, LocalDate dataInicio, LocalDate dataFim, boolean exibirComoEmbed, boolean embedCompacto, boolean destaque) {
         validarUrl(url);
         validarPictureLink(pictureLink);
         validarPeriodo(dataInicio, dataFim);
@@ -89,6 +92,9 @@ public class LinkService {
         link.setPictureLink(pictureLink);
         link.setDataInicio(dataInicio);
         link.setDataFim(dataFim);
+        link.setExibirComoEmbed(exibirComoEmbed);
+        link.setEmbedCompacto(embedCompacto);
+        link.setDestaque(destaque);
 
         return linkRepository.save(link);
     }

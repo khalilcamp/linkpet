@@ -40,6 +40,9 @@ export interface LinkResponseDTO {
   dataInicio: string | null;
   dataFim: string | null;
   grupoId: number | null;
+  exibirComoEmbed: boolean;
+  embedCompacto: boolean;
+  destaque: boolean;
 }
 
 export interface GrupoResponseDTO {
@@ -92,6 +95,7 @@ export interface PaginaPublicaDTO {
   estiloBotao: string;
   linksSemGrupo: LinkResponseDTO[];
   grupos: GrupoPublicoDTO[];
+  linksDestaque: LinkResponseDTO[];
   pet: PetResponseDTO;
   badges: string[];
   tags: string[];
@@ -238,6 +242,9 @@ interface DadosLink {
   dataInicio?: string;
   dataFim?: string;
   grupoId?: number;
+  exibirComoEmbed?: boolean;
+  embedCompacto?: boolean;
+  destaque?: boolean;
 }
 
 export function criarLink(usuarioId: number, dados: DadosLink) {

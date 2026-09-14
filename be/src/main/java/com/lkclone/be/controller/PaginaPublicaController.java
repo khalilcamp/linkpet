@@ -59,6 +59,12 @@ public class PaginaPublicaController {
 
         List<LinkResponseDTO> linksSemGrupoDTO = links.stream()
                 .filter(link -> link.getGrupo() == null)
+                .filter(link -> !link.isDestaque())
+                .map(this::paraDTO)
+                .collect(Collectors.toList());
+
+        List<LinkResponseDTO> linksDestaqueDTO = links.stream()
+                .filter(Link::isDestaque)
                 .map(this::paraDTO)
                 .collect(Collectors.toList());
 
@@ -67,6 +73,7 @@ public class PaginaPublicaController {
                 .map(grupo -> {
                     List<LinkResponseDTO> linksDoGrupo = links.stream()
                             .filter(link -> grupo.equals(link.getGrupo()))
+                            .filter(link -> !link.isDestaque())
                             .map(this::paraDTO)
                             .collect(Collectors.toList());
                     return new GrupoPublicoDTO(grupo.getNome(), linksDoGrupo);
@@ -82,14 +89,15 @@ public class PaginaPublicaController {
 
         return new PaginaPublicaDTO(usuario.getUserName(), usuario.getUserPfp(), usuario.getBio(), usuario.getTema(),
                 usuario.getCorPersonalizada(), usuario.getFonte(), usuario.getFormatoBotao(), usuario.getEstiloBotao(),
-                linksSemGrupoDTO, gruposDTO, petDTO, usuario.getUserBadges(),
+                linksSemGrupoDTO, gruposDTO, linksDestaqueDTO, petDTO, usuario.getUserBadges(),
                 usuario.getPerfilTags(), usuario.isCaptarContato());
     }
 
     private LinkResponseDTO paraDTO(Link link) {
         return new LinkResponseDTO(link.getLinkId(), link.getUrl(), link.getLabel(), link.getPictureLink(),
                 link.getLink_position(), link.isAtivo(), link.getCliques(), link.getDataInicio(), link.getDataFim(),
-                link.getGrupo() != null ? link.getGrupo().getId() : null);
+                link.getGrupo() != null ? link.getGrupo().getId() : null, link.isExibirComoEmbed(),
+                link.isEmbedCompacto(), link.isDestaque());
     }
 
     @PostMapping("/p/{username}/pet/like")
