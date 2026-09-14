@@ -17,6 +17,7 @@ export interface UsuarioResponseDTO {
   perfilVisualizacoes: number;
   emailVerificado: boolean;
   captarContato: boolean;
+  tipoUsuario: string;
   badges: string[];
   tags: string[];
 }
@@ -30,7 +31,7 @@ export interface ContatoCapturadoResponseDTO {
 
 export interface LinkResponseDTO {
   linkId: number;
-  url: string;
+  url: string | null;
   label: string;
   pictureLink: string | null;
   position: number;
@@ -43,6 +44,9 @@ export interface LinkResponseDTO {
   exibirComoEmbed: boolean;
   embedCompacto: boolean;
   destaque: boolean;
+  destaquePosicao: number | null;
+  tipoConteudo: string;
+  conteudo: string | null;
 }
 
 export interface GrupoResponseDTO {
@@ -50,11 +54,13 @@ export interface GrupoResponseDTO {
   nome: string;
   posicao: number;
   ativo: boolean;
+  layout: string;
 }
 
 export interface GrupoPublicoDTO {
   nome: string;
   links: LinkResponseDTO[];
+  layout: string;
 }
 
 export interface LinkCliqueDiaDTO {
@@ -236,7 +242,7 @@ export function reenviarConfirmacaoEmail(userEmail: string) {
 }
 
 interface DadosLink {
-  url: string;
+  url?: string;
   label: string;
   pictureLink?: string;
   dataInicio?: string;
@@ -245,6 +251,8 @@ interface DadosLink {
   exibirComoEmbed?: boolean;
   embedCompacto?: boolean;
   destaque?: boolean;
+  tipoConteudo?: string;
+  conteudo?: string;
 }
 
 export function criarLink(usuarioId: number, dados: DadosLink) {
@@ -284,6 +292,13 @@ export function reordenarLinks(usuarioId: number, ordem: number[]) {
   });
 }
 
+export function reordenarDestaque(usuarioId: number, ordem: number[]) {
+  return request<LinkResponseDTO[]>(`/usuarios/${usuarioId}/links/destaque/reordenar`, {
+    method: "PATCH",
+    body: JSON.stringify({ ordem }),
+  });
+}
+
 export function moverLink(usuarioId: number, linkId: number, grupoId: number | null) {
   return request<LinkResponseDTO>(`/usuarios/${usuarioId}/links/${linkId}/mover`, {
     method: "PATCH",
@@ -313,6 +328,13 @@ export function alternarGrupoAtivo(usuarioId: number, grupoId: number, ativo: bo
   return request<GrupoResponseDTO>(`/usuarios/${usuarioId}/grupos/${grupoId}/ativo`, {
     method: "PATCH",
     body: JSON.stringify({ ativo }),
+  });
+}
+
+export function atualizarLayoutGrupo(usuarioId: number, grupoId: number, layout: string) {
+  return request<GrupoResponseDTO>(`/usuarios/${usuarioId}/grupos/${grupoId}/layout`, {
+    method: "PATCH",
+    body: JSON.stringify({ layout }),
   });
 }
 
@@ -427,6 +449,18 @@ export function uploadFoto(usuarioId: number, arquivo: File) {
   formData.append("arquivo", arquivo);
 
   return request<UsuarioResponseDTO>(`/usuarios/${usuarioId}/pfp`, {
+    method: "POST",
+    body: formData,
+  });
+}
+
+// Upload genérico (usado pelo bloco de conteúdo "imagem" dos links) — sobe
+// o arquivo e devolve a URL pública, sem associar a nada no backend.
+export function uploadImagemLink(usuarioId: number, arquivo: File) {
+  const formData = new FormData();
+  formData.append("arquivo", arquivo);
+
+  return request<{ url: string }>(`/usuarios/${usuarioId}/imagens`, {
     method: "POST",
     body: formData,
   });

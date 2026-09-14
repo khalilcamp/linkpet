@@ -1,0 +1,1 @@
+ALTER TABLE usuario ADD COLUMN tipo_usuario VARCHAR(20) NOT NULL DEFAULT 'Free';

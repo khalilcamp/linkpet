@@ -24,19 +24,29 @@ import java.util.stream.Collectors;
 public class LinkService {
 
     private static final List<String> ESQUEMAS_PERMITIDOS = List.of("http://", "https://");
+    private static final Set<String> TIPOS_CONTEUDO_PERMITIDOS = Set.of("link", "texto", "imagem");
     private static final int HISTORICO_DIAS_MAXIMO = 90;
+    private static final int DESTAQUE_MAXIMO_FREE = 1;
+    private static final int DESTAQUE_MAXIMO_PREMIUM = 3;
 
     private LinkRepository linkRepository;
     private LinkCliqueLogRepository linkCliqueLogRepository;
     private MensagemService mensagemService;
     private GrupoService grupoService;
+    private UsuarioService usuarioService;
 
 
     public Link createLink(String url, String label, String pictureLink, LocalDate dataInicio, LocalDate dataFim,
-                            Long grupoId, boolean exibirComoEmbed, boolean embedCompacto, boolean destaque, Usuario usuario) {
-        validarUrl(url);
+                            Long grupoId, boolean exibirComoEmbed, boolean embedCompacto, boolean destaque,
+                            String tipoConteudo, String conteudo, Usuario usuario) {
+        validarTipoConteudo(tipoConteudo, usuario);
+        validarConteudoPorTipo(tipoConteudo, url, pictureLink, conteudo);
         validarPictureLink(pictureLink);
         validarPeriodo(dataInicio, dataFim);
+
+        if (destaque) {
+            validarLimiteDestaque(usuario, null);
+        }
 
         Grupo grupo = grupoId != null ? grupoService.buscarGrupoDoDono(grupoId, usuario) : null;
         long novaPosicao = grupo != null
@@ -56,6 +66,9 @@ public class LinkService {
         linkCriado.setExibirComoEmbed(exibirComoEmbed);
         linkCriado.setEmbedCompacto(embedCompacto);
         linkCriado.setDestaque(destaque);
+        linkCriado.setDestaquePosicao(destaque ? proximaPosicaoDestaque(usuario) : null);
+        linkCriado.setTipoConteudo(tipoConteudo);
+        linkCriado.setConteudo(conteudo);
 
         return linkRepository.save(linkCriado);
     }
@@ -80,12 +93,23 @@ public class LinkService {
                 .collect(Collectors.toList());
     }
 
-    public Link atualizarLink(Long linkId, Usuario dono, String url, String label, String pictureLink, LocalDate dataInicio, LocalDate dataFim, boolean exibirComoEmbed, boolean embedCompacto, boolean destaque) {
-        validarUrl(url);
+    public Link atualizarLink(Long linkId, Usuario dono, String url, String label, String pictureLink, LocalDate dataInicio, LocalDate dataFim,
+                               boolean exibirComoEmbed, boolean embedCompacto, boolean destaque, String tipoConteudo, String conteudo) {
+        validarTipoConteudo(tipoConteudo, dono);
+        validarConteudoPorTipo(tipoConteudo, url, pictureLink, conteudo);
         validarPictureLink(pictureLink);
         validarPeriodo(dataInicio, dataFim);
 
         Link link = buscarLinkDoDono(linkId, dono);
+        boolean eraDestaque = link.isDestaque();
+
+        Integer destaquePosicao = link.getDestaquePosicao();
+        if (destaque && !eraDestaque) {
+            validarLimiteDestaque(dono, linkId);
+            destaquePosicao = proximaPosicaoDestaque(dono);
+        } else if (!destaque) {
+            destaquePosicao = null;
+        }
 
         link.setUrl(url);
         link.setLabel(label);
@@ -95,8 +119,71 @@ public class LinkService {
         link.setExibirComoEmbed(exibirComoEmbed);
         link.setEmbedCompacto(embedCompacto);
         link.setDestaque(destaque);
+        link.setDestaquePosicao(destaquePosicao);
+        link.setTipoConteudo(tipoConteudo);
+        link.setConteudo(conteudo);
 
-        return linkRepository.save(link);
+        Link salvo = linkRepository.save(link);
+
+        if (!destaque && eraDestaque) {
+            compactarPosicoesDestaque(dono);
+        }
+
+        return salvo;
+    }
+
+    public void reordenarDestaque(Usuario dono, List<Long> ordemLinkIds) {
+        List<Link> destaques = linkRepository.getLinkByUsuario(dono).stream()
+                .filter(Link::isDestaque)
+                .collect(Collectors.toList());
+
+        Set<Long> idsDoConjunto = destaques.stream().map(Link::getLinkId).collect(Collectors.toSet());
+        Set<Long> idsInformados = new HashSet<>(ordemLinkIds == null ? List.of() : ordemLinkIds);
+
+        if (!idsDoConjunto.equals(idsInformados) || ordemLinkIds.size() != destaques.size()) {
+            throw new IllegalArgumentException(mensagemService.get("erro.link.reordenacaoInvalida"));
+        }
+
+        Map<Long, Link> porId = destaques.stream().collect(Collectors.toMap(Link::getLinkId, l -> l));
+
+        int posicao = 1;
+        for (Long linkId : ordemLinkIds) {
+            Link link = porId.get(linkId);
+            link.setDestaquePosicao(posicao++);
+            linkRepository.save(link);
+        }
+    }
+
+    private void validarLimiteDestaque(Usuario usuario, Long linkIdExcluir) {
+        int limite = usuarioService.ehPremium(usuario) ? DESTAQUE_MAXIMO_PREMIUM : DESTAQUE_MAXIMO_FREE;
+        long atuais = linkRepository.getLinkByUsuario(usuario).stream()
+                .filter(Link::isDestaque)
+                .filter(l -> linkIdExcluir == null || !l.getLinkId().equals(linkIdExcluir))
+                .count();
+        if (atuais >= limite) {
+            throw new IllegalArgumentException(mensagemService.get("erro.link.destaqueLimite", limite));
+        }
+    }
+
+    private int proximaPosicaoDestaque(Usuario usuario) {
+        return (int) linkRepository.getLinkByUsuario(usuario).stream()
+                .filter(Link::isDestaque)
+                .count() + 1;
+    }
+
+    // Fecha o "buraco" deixado na ordem quando um destaque é removido, pra
+    // não deixar posições tipo 1, 3 (sem o 2) depois de tirar o do meio.
+    private void compactarPosicoesDestaque(Usuario usuario) {
+        List<Link> destaques = linkRepository.getLinkByUsuario(usuario).stream()
+                .filter(Link::isDestaque)
+                .sorted(Comparator.comparing(l -> l.getDestaquePosicao() == null ? Integer.MAX_VALUE : l.getDestaquePosicao()))
+                .collect(Collectors.toList());
+
+        int posicao = 1;
+        for (Link link : destaques) {
+            link.setDestaquePosicao(posicao++);
+            linkRepository.save(link);
+        }
     }
 
     public void desativarLink(Long linkId, Usuario dono) {
@@ -213,6 +300,34 @@ public class LinkService {
         }
     }
 
+    private void validarTipoConteudo(String tipoConteudo, Usuario usuario) {
+        if (tipoConteudo == null || !TIPOS_CONTEUDO_PERMITIDOS.contains(tipoConteudo)) {
+            throw new IllegalArgumentException(mensagemService.get("erro.link.tipoConteudoInvalido", TIPOS_CONTEUDO_PERMITIDOS));
+        }
+        if (!tipoConteudo.equals("link") && !usuarioService.ehPremium(usuario)) {
+            throw new IllegalArgumentException(mensagemService.get("erro.link.tipoConteudoExigePremium"));
+        }
+    }
+
+    // Blocos de texto/imagem não exigem URL (diferente do link normal) —
+    // mas se uma URL for informada mesmo assim (pra virar clicável), ela
+    // ainda precisa ter esquema http/https válido.
+    private void validarConteudoPorTipo(String tipoConteudo, String url, String pictureLink, String conteudo) {
+        if (tipoConteudo.equals("link")) {
+            validarUrl(url);
+            return;
+        }
+        if (url != null && !url.isBlank()) {
+            validarUrl(url);
+        }
+        if (tipoConteudo.equals("texto") && (conteudo == null || conteudo.isBlank())) {
+            throw new IllegalArgumentException(mensagemService.get("erro.link.conteudoObrigatorio"));
+        }
+        if (tipoConteudo.equals("imagem") && (pictureLink == null || pictureLink.isBlank())) {
+            throw new IllegalArgumentException(mensagemService.get("erro.link.imagemObrigatoria"));
+        }
+    }
+
     private void validarPictureLink(String pictureLink) {
         // Campo opcional (ícone customizado do link) — só valida o esquema
         // quando algo foi informado.
@@ -242,10 +357,11 @@ public class LinkService {
     }
 
     public LinkService(LinkRepository linkRepository, LinkCliqueLogRepository linkCliqueLogRepository,
-                        MensagemService mensagemService, GrupoService grupoService){
+                        MensagemService mensagemService, GrupoService grupoService, UsuarioService usuarioService){
         this.linkRepository = linkRepository;
         this.linkCliqueLogRepository = linkCliqueLogRepository;
         this.mensagemService = mensagemService;
         this.grupoService = grupoService;
+        this.usuarioService = usuarioService;
     }
 }

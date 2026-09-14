@@ -16,6 +16,9 @@ import {
   criarGrupo,
   renomearGrupo,
   alternarGrupoAtivo,
+  atualizarLayoutGrupo,
+  uploadImagemLink,
+  reordenarDestaque,
   excluirGrupo,
   reordenarGrupos,
   reordenarLinksDoGrupo,
@@ -61,6 +64,11 @@ import { detectarEmbed } from "@/lib/embeds";
 import QRCode from "qrcode";
 
 const ABAS = ["links", "personalizar", "contatos", "compartilhar"] as const;
+
+// "texto" e "imagem" são exclusivos Premium+ — o backend recusa a criação
+// se o usuário não tiver o plano, então aqui não pré-filtramos as opções
+// (o erro do servidor já explica isso quando a pessoa tenta salvar).
+const TIPOS_CONTEUDO_DISPONIVEIS = ["link", "texto", "imagem"] as const;
 
 // Itens de customização exclusivos de badge: só aparecem na lista pra quem
 // já tem a badge correspondente, pra não mostrar algo que o usuário não pode
@@ -183,6 +191,11 @@ function LinkRow({
             {link.destaque && (
               <span className="shrink-0 rounded-full bg-amber-950 px-2 py-0.5 text-xs text-amber-400">
                 {t("links.destaqueBadge")}
+              </span>
+            )}
+            {(link.tipoConteudo === "texto" || link.tipoConteudo === "imagem") && (
+              <span className="shrink-0 rounded-full bg-sky-950 px-2 py-0.5 text-xs text-sky-400">
+                {t(`links.tipoConteudo.${link.tipoConteudo}`)}
               </span>
             )}
             {!link.ativo && (
@@ -328,6 +341,9 @@ export default function DashboardPage() {
   const [exibirComoEmbed, setExibirComoEmbed] = useState(false);
   const [embedCompacto, setEmbedCompacto] = useState(false);
   const [destaque, setDestaque] = useState(false);
+  const [tipoConteudo, setTipoConteudo] = useState("link");
+  const [conteudo, setConteudo] = useState("");
+  const [enviandoImagemBloco, setEnviandoImagemBloco] = useState(false);
   const [erroForm, setErroForm] = useState<string | null>(null);
   const [salvando, setSalvando] = useState(false);
 
@@ -340,6 +356,9 @@ export default function DashboardPage() {
   const [editExibirComoEmbed, setEditExibirComoEmbed] = useState(false);
   const [editEmbedCompacto, setEditEmbedCompacto] = useState(false);
   const [editDestaque, setEditDestaque] = useState(false);
+  const [editTipoConteudo, setEditTipoConteudo] = useState("link");
+  const [editConteudo, setEditConteudo] = useState("");
+  const [enviandoImagemBlocoEdicao, setEnviandoImagemBlocoEdicao] = useState(false);
   const [salvandoEdicao, setSalvandoEdicao] = useState(false);
   const [erroEdicao, setErroEdicao] = useState<string | null>(null);
   const [excluindoId, setExcluindoId] = useState<number | null>(null);
@@ -561,6 +580,42 @@ export default function DashboardPage() {
     }
   }
 
+  async function handleEnviarImagemBloco(e: ChangeEvent<HTMLInputElement>) {
+    const arquivo = e.target.files?.[0];
+    e.target.value = "";
+    if (!arquivo || !usuario) return;
+
+    setErroForm(null);
+    setEnviandoImagemBloco(true);
+
+    try {
+      const { url } = await uploadImagemLink(usuario.id, arquivo);
+      setPictureLink(url);
+    } catch (err) {
+      setErroForm(err instanceof Error ? err.message : t("genericPhotoError"));
+    } finally {
+      setEnviandoImagemBloco(false);
+    }
+  }
+
+  async function handleEnviarImagemBlocoEdicao(e: ChangeEvent<HTMLInputElement>) {
+    const arquivo = e.target.files?.[0];
+    e.target.value = "";
+    if (!arquivo || !usuario) return;
+
+    setErroEdicao(null);
+    setEnviandoImagemBlocoEdicao(true);
+
+    try {
+      const { url } = await uploadImagemLink(usuario.id, arquivo);
+      setEditPictureLink(url);
+    } catch (err) {
+      setErroEdicao(err instanceof Error ? err.message : t("genericPhotoError"));
+    } finally {
+      setEnviandoImagemBlocoEdicao(false);
+    }
+  }
+
   async function handleMostrarQrCode() {
     if (!usuario) return;
     if (qrCodeUrl) {
@@ -610,7 +665,7 @@ export default function DashboardPage() {
 
     try {
       const novoLink = await criarLink(usuario.id, {
-        url,
+        url: url || undefined,
         label,
         pictureLink: pictureLink || undefined,
         dataInicio: dataInicio || undefined,
@@ -618,6 +673,8 @@ export default function DashboardPage() {
         exibirComoEmbed,
         embedCompacto,
         destaque,
+        tipoConteudo,
+        conteudo: conteudo || undefined,
       });
       setLinks((atual) => [...atual, novoLink]);
       setUrl("");
@@ -628,6 +685,8 @@ export default function DashboardPage() {
       setExibirComoEmbed(false);
       setEmbedCompacto(false);
       setDestaque(false);
+      setTipoConteudo("link");
+      setConteudo("");
       setMostrarNovoLink(false);
     } catch (err) {
       setErroForm(err instanceof Error ? err.message : t("links.genericCreateError"));
@@ -638,7 +697,7 @@ export default function DashboardPage() {
 
   function iniciarEdicao(link: LinkResponseDTO) {
     setEditandoId(link.linkId);
-    setEditUrl(link.url);
+    setEditUrl(link.url || "");
     setEditLabel(link.label);
     setEditPictureLink(link.pictureLink || "");
     setEditDataInicio(link.dataInicio || "");
@@ -646,6 +705,8 @@ export default function DashboardPage() {
     setEditExibirComoEmbed(link.exibirComoEmbed);
     setEditEmbedCompacto(link.embedCompacto);
     setEditDestaque(link.destaque);
+    setEditTipoConteudo(link.tipoConteudo || "link");
+    setEditConteudo(link.conteudo || "");
     setErroEdicao(null);
   }
 
@@ -663,7 +724,7 @@ export default function DashboardPage() {
 
     try {
       const linkAtualizado = await atualizarLink(usuario.id, linkId, {
-        url: editUrl,
+        url: editUrl || undefined,
         label: editLabel,
         pictureLink: editPictureLink || undefined,
         dataInicio: editDataInicio || undefined,
@@ -671,6 +732,8 @@ export default function DashboardPage() {
         exibirComoEmbed: editExibirComoEmbed,
         embedCompacto: editEmbedCompacto,
         destaque: editDestaque,
+        tipoConteudo: editTipoConteudo,
+        conteudo: editConteudo || undefined,
       });
       setLinks((atual) =>
         atual.map((l) => (l.linkId === linkId ? linkAtualizado : l))
@@ -713,6 +776,22 @@ export default function DashboardPage() {
       );
     } catch (err) {
       setErroForm(err instanceof Error ? err.message : t("links.genericReactivateError"));
+    }
+  }
+
+  async function handleMoverDestaque(destaquesOrdenados: LinkResponseDTO[], index: number, direcao: -1 | 1) {
+    if (!usuario) return;
+    const alvo = index + direcao;
+    if (alvo < 0 || alvo >= destaquesOrdenados.length) return;
+
+    const novaOrdem = [...destaquesOrdenados];
+    [novaOrdem[index], novaOrdem[alvo]] = [novaOrdem[alvo], novaOrdem[index]];
+
+    try {
+      const atualizados = await reordenarDestaque(usuario.id, novaOrdem.map((l) => l.linkId));
+      setLinks(atualizados);
+    } catch (err) {
+      setErroForm(err instanceof Error ? err.message : t("links.genericReorderError"));
     }
   }
 
@@ -823,6 +902,19 @@ export default function DashboardPage() {
     }
   }
 
+  async function handleAlternarLayoutGrupo(grupoId: number, layoutAtual: string) {
+    if (!usuario) return;
+
+    const novoLayout = layoutAtual === "grid" ? "lista" : "grid";
+    try {
+      const atualizado = await atualizarLayoutGrupo(usuario.id, grupoId, novoLayout);
+      setGrupos((atual) => atual.map((g) => (g.id === grupoId ? atualizado : g)));
+      setErroGrupo(null);
+    } catch (err) {
+      setErroGrupo(err instanceof Error ? err.message : t("links.groups.genericEditError"));
+    }
+  }
+
   async function handleExcluirGrupo(grupoId: number) {
     if (!usuario) return;
     if (!window.confirm(t("links.groups.confirmDelete"))) return;
@@ -927,6 +1019,9 @@ export default function DashboardPage() {
 
   const hojeISO = new Date().toISOString().slice(0, 10);
   const linksSoltos = links.filter((l) => l.grupoId == null).sort((a, b) => a.position - b.position);
+  const linksDestaqueOrdenados = links
+    .filter((l) => l.destaque)
+    .sort((a, b) => (a.destaquePosicao ?? 0) - (b.destaquePosicao ?? 0));
   const gruposOrdenados = [...grupos].sort((a, b) => a.posicao - b.posicao);
   const linksDoGrupo = (grupoId: number) =>
     links.filter((l) => l.grupoId === grupoId).sort((a, b) => a.position - b.position);
@@ -943,6 +1038,23 @@ export default function DashboardPage() {
           onSubmit={(e) => handleSalvarEdicao(e, link.linkId)}
           className="space-y-2 rounded-xl border border-neutral-700 bg-neutral-900 p-4"
         >
+          <div className="flex gap-2">
+            {TIPOS_CONTEUDO_DISPONIVEIS.map((tipo) => (
+              <button
+                key={tipo}
+                type="button"
+                onClick={() => setEditTipoConteudo(tipo)}
+                className={`flex-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
+                  editTipoConteudo === tipo
+                    ? "border-orange-500 text-orange-400"
+                    : "border-neutral-800 text-neutral-400 hover:border-neutral-700"
+                }`}
+              >
+                {t(`links.tipoConteudo.${tipo}`)}
+              </button>
+            ))}
+          </div>
+
           <input
             type="text"
             required
@@ -951,21 +1063,64 @@ export default function DashboardPage() {
             onChange={(e) => setEditLabel(e.target.value)}
             className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-white placeholder-neutral-600 outline-none focus:border-orange-500"
           />
-          <input
-            type="url"
-            required
-            placeholder={t("links.urlPlaceholder")}
-            value={editUrl}
-            onChange={(e) => setEditUrl(e.target.value)}
-            className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-white placeholder-neutral-600 outline-none focus:border-orange-500"
-          />
-          <input
-            type="url"
-            placeholder={t("links.iconUrlPlaceholder")}
-            value={editPictureLink}
-            onChange={(e) => setEditPictureLink(e.target.value)}
-            className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-white placeholder-neutral-600 outline-none focus:border-orange-500"
-          />
+
+          {editTipoConteudo !== "texto" && (
+            <input
+              type="url"
+              required={editTipoConteudo === "link"}
+              placeholder={editTipoConteudo === "link" ? t("links.urlPlaceholder") : t("links.urlOpcionalPlaceholder")}
+              value={editUrl}
+              onChange={(e) => setEditUrl(e.target.value)}
+              className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-white placeholder-neutral-600 outline-none focus:border-orange-500"
+            />
+          )}
+
+          {editTipoConteudo === "imagem" ? (
+            <div className="space-y-1.5">
+              <input
+                type="url"
+                required
+                placeholder={t("links.imagemUrlPlaceholder")}
+                value={editPictureLink}
+                onChange={(e) => setEditPictureLink(e.target.value)}
+                className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-white placeholder-neutral-600 outline-none focus:border-orange-500"
+              />
+              <label className="flex cursor-pointer items-center gap-2 text-xs text-neutral-500 hover:text-neutral-300">
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  onChange={handleEnviarImagemBlocoEdicao}
+                  disabled={enviandoImagemBlocoEdicao}
+                  className="hidden"
+                />
+                <span className="underline">{t("links.uploadImagemBloco")}</span>
+                {enviandoImagemBlocoEdicao && <span>{t("uploadingPhoto")}</span>}
+              </label>
+            </div>
+          ) : editTipoConteudo === "link" ? (
+            <input
+              type="url"
+              placeholder={t("links.iconUrlPlaceholder")}
+              value={editPictureLink}
+              onChange={(e) => setEditPictureLink(e.target.value)}
+              className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-white placeholder-neutral-600 outline-none focus:border-orange-500"
+            />
+          ) : null}
+
+          {(editTipoConteudo === "texto" || editTipoConteudo === "imagem") && (
+            <textarea
+              required={editTipoConteudo === "texto"}
+              rows={3}
+              maxLength={1000}
+              placeholder={
+                editTipoConteudo === "texto" ? t("links.conteudoTextoPlaceholder") : t("links.conteudoLegendaPlaceholder")
+              }
+              value={editConteudo}
+              onChange={(e) => setEditConteudo(e.target.value)}
+              className="w-full resize-none rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-white placeholder-neutral-600 outline-none focus:border-orange-500"
+            />
+          )}
+
           <div className="flex gap-3">
             <label className="flex-1 text-xs text-neutral-500">
               {t("links.startsAt")}
@@ -987,20 +1142,22 @@ export default function DashboardPage() {
             </label>
           </div>
 
-          <label className="flex items-start gap-2 text-sm text-neutral-400">
-            <input
-              type="checkbox"
-              checked={editExibirComoEmbed}
-              onChange={(e) => setEditExibirComoEmbed(e.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded border-neutral-700 bg-neutral-950 accent-orange-500"
-            />
-            <span>
-              {t("links.embedToggle")}
-              <span className="block text-xs text-neutral-600">{t("links.embedHint")}</span>
-            </span>
-          </label>
+          {editTipoConteudo === "link" && (
+            <label className="flex items-start gap-2 text-sm text-neutral-400">
+              <input
+                type="checkbox"
+                checked={editExibirComoEmbed}
+                onChange={(e) => setEditExibirComoEmbed(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-neutral-700 bg-neutral-950 accent-orange-500"
+              />
+              <span>
+                {t("links.embedToggle")}
+                <span className="block text-xs text-neutral-600">{t("links.embedHint")}</span>
+              </span>
+            </label>
+          )}
 
-          {editExibirComoEmbed && detectarEmbed(editUrl)?.tipo === "iframe" && (
+          {editTipoConteudo === "link" && editExibirComoEmbed && detectarEmbed(editUrl)?.tipo === "iframe" && (
             <label className="ml-6 flex items-start gap-2 text-sm text-neutral-400">
               <input
                 type="checkbox"
@@ -1174,6 +1331,41 @@ export default function DashboardPage() {
 
         {aba === "links" && (
           <div className="mt-6 space-y-6">
+            {linksDestaqueOrdenados.length > 1 && (
+              <section className="rounded-xl border border-amber-900/40 bg-amber-950/10 p-4">
+                <h2 className="mb-1 text-sm font-medium text-amber-400">{t("links.destaqueOrdemTitulo")}</h2>
+                <p className="mb-3 text-xs text-neutral-500">{t("links.destaqueOrdemHint")}</p>
+                <ul className="space-y-1.5">
+                  {linksDestaqueOrdenados.map((link, index) => (
+                    <li
+                      key={link.linkId}
+                      className="flex items-center gap-2 rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2"
+                    >
+                      <span className="flex-1 truncate text-sm text-white">{link.label}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleMoverDestaque(linksDestaqueOrdenados, index, -1)}
+                        disabled={index === 0}
+                        aria-label={t("links.moveUp")}
+                        className="rounded p-0.5 text-neutral-500 hover:text-white disabled:opacity-30"
+                      >
+                        <IconeChevronUp />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleMoverDestaque(linksDestaqueOrdenados, index, 1)}
+                        disabled={index === linksDestaqueOrdenados.length - 1}
+                        aria-label={t("links.moveDown")}
+                        className="rounded p-0.5 text-neutral-500 hover:text-white disabled:opacity-30"
+                      >
+                        <IconeChevronDown />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
             {!mostrarNovoLink ? (
               <button
                 type="button"
@@ -1195,6 +1387,26 @@ export default function DashboardPage() {
                   </button>
                 </div>
                 <form onSubmit={handleCriarLink} className="space-y-3">
+                  <div className="flex gap-2">
+                    {TIPOS_CONTEUDO_DISPONIVEIS.map((tipo) => (
+                      <button
+                        key={tipo}
+                        type="button"
+                        onClick={() => setTipoConteudo(tipo)}
+                        className={`flex-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
+                          tipoConteudo === tipo
+                            ? "border-orange-500 text-orange-400"
+                            : "border-neutral-800 text-neutral-400 hover:border-neutral-700"
+                        }`}
+                      >
+                        {t(`links.tipoConteudo.${tipo}`)}
+                      </button>
+                    ))}
+                  </div>
+                  {tipoConteudo !== "link" && (
+                    <p className="text-xs text-neutral-600">{t("links.tipoConteudoHint")}</p>
+                  )}
+
                   <input
                     type="text"
                     required
@@ -1203,21 +1415,64 @@ export default function DashboardPage() {
                     onChange={(e) => setLabel(e.target.value)}
                     className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-white placeholder-neutral-600 outline-none focus:border-orange-500"
                   />
-                  <input
-                    type="url"
-                    required
-                    placeholder={t("links.urlPlaceholder")}
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
-                    className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-white placeholder-neutral-600 outline-none focus:border-orange-500"
-                  />
-                  <input
-                    type="url"
-                    placeholder={t("links.iconUrlPlaceholder")}
-                    value={pictureLink}
-                    onChange={(e) => setPictureLink(e.target.value)}
-                    className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-white placeholder-neutral-600 outline-none focus:border-orange-500"
-                  />
+
+                  {tipoConteudo !== "texto" && (
+                    <input
+                      type="url"
+                      required={tipoConteudo === "link"}
+                      placeholder={tipoConteudo === "link" ? t("links.urlPlaceholder") : t("links.urlOpcionalPlaceholder")}
+                      value={url}
+                      onChange={(e) => setUrl(e.target.value)}
+                      className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-white placeholder-neutral-600 outline-none focus:border-orange-500"
+                    />
+                  )}
+
+                  {tipoConteudo === "imagem" ? (
+                    <div className="space-y-1.5">
+                      <input
+                        type="url"
+                        required
+                        placeholder={t("links.imagemUrlPlaceholder")}
+                        value={pictureLink}
+                        onChange={(e) => setPictureLink(e.target.value)}
+                        className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-white placeholder-neutral-600 outline-none focus:border-orange-500"
+                      />
+                      <label className="flex cursor-pointer items-center gap-2 text-xs text-neutral-500 hover:text-neutral-300">
+                        <input
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp"
+                          onChange={handleEnviarImagemBloco}
+                          disabled={enviandoImagemBloco}
+                          className="hidden"
+                        />
+                        <span className="underline">{t("links.uploadImagemBloco")}</span>
+                        {enviandoImagemBloco && <span>{t("uploadingPhoto")}</span>}
+                      </label>
+                    </div>
+                  ) : tipoConteudo === "link" ? (
+                    <input
+                      type="url"
+                      placeholder={t("links.iconUrlPlaceholder")}
+                      value={pictureLink}
+                      onChange={(e) => setPictureLink(e.target.value)}
+                      className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-white placeholder-neutral-600 outline-none focus:border-orange-500"
+                    />
+                  ) : null}
+
+                  {(tipoConteudo === "texto" || tipoConteudo === "imagem") && (
+                    <textarea
+                      required={tipoConteudo === "texto"}
+                      rows={3}
+                      maxLength={1000}
+                      placeholder={
+                        tipoConteudo === "texto" ? t("links.conteudoTextoPlaceholder") : t("links.conteudoLegendaPlaceholder")
+                      }
+                      value={conteudo}
+                      onChange={(e) => setConteudo(e.target.value)}
+                      className="w-full resize-none rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-white placeholder-neutral-600 outline-none focus:border-orange-500"
+                    />
+                  )}
+
                   <div className="flex gap-3">
                     <label className="flex-1 text-xs text-neutral-500">
                       {t("links.startsAt")}
@@ -1239,20 +1494,22 @@ export default function DashboardPage() {
                     </label>
                   </div>
 
-                  <label className="flex items-start gap-2 text-sm text-neutral-400">
-                    <input
-                      type="checkbox"
-                      checked={exibirComoEmbed}
-                      onChange={(e) => setExibirComoEmbed(e.target.checked)}
-                      className="mt-0.5 h-4 w-4 rounded border-neutral-700 bg-neutral-950 accent-orange-500"
-                    />
-                    <span>
-                      {t("links.embedToggle")}
-                      <span className="block text-xs text-neutral-600">{t("links.embedHint")}</span>
-                    </span>
-                  </label>
+                  {tipoConteudo === "link" && (
+                    <label className="flex items-start gap-2 text-sm text-neutral-400">
+                      <input
+                        type="checkbox"
+                        checked={exibirComoEmbed}
+                        onChange={(e) => setExibirComoEmbed(e.target.checked)}
+                        className="mt-0.5 h-4 w-4 rounded border-neutral-700 bg-neutral-950 accent-orange-500"
+                      />
+                      <span>
+                        {t("links.embedToggle")}
+                        <span className="block text-xs text-neutral-600">{t("links.embedHint")}</span>
+                      </span>
+                    </label>
+                  )}
 
-                  {exibirComoEmbed && detectarEmbed(url)?.tipo === "iframe" && (
+                  {tipoConteudo === "link" && exibirComoEmbed && detectarEmbed(url)?.tipo === "iframe" && (
                     <label className="ml-6 flex items-start gap-2 text-sm text-neutral-400">
                       <input
                         type="checkbox"
@@ -1372,6 +1629,16 @@ export default function DashboardPage() {
                           </span>
                         )}
                       </h3>
+                      <button
+                        type="button"
+                        onClick={() => handleAlternarLayoutGrupo(grupo.id, grupo.layout)}
+                        title={t("links.groups.layoutHint")}
+                        className={`rounded-md px-2.5 py-1.5 text-xs transition hover:bg-neutral-800 ${
+                          grupo.layout === "grid" ? "text-orange-400" : "text-neutral-300"
+                        }`}
+                      >
+                        {grupo.layout === "grid" ? t("links.groups.layoutGrid") : t("links.groups.layoutLista")}
+                      </button>
                       <button
                         type="button"
                         onClick={() => handleAlternarGrupoAtivo(grupo.id, grupo.ativo)}

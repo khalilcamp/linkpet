@@ -8,6 +8,7 @@ import com.lkclone.be.dto.AtualizarTemaDTO;
 import com.lkclone.be.dto.CadastroUsuarioDTO;
 import com.lkclone.be.dto.ConfirmarEmailDTO;
 import com.lkclone.be.dto.EsqueciSenhaDTO;
+import com.lkclone.be.dto.ImagemResponseDTO;
 import com.lkclone.be.dto.LoginDTO;
 import com.lkclone.be.dto.RedefinirSenhaDTO;
 import com.lkclone.be.dto.UsuarioResponseDTO;
@@ -166,6 +167,19 @@ public class UsuarioController {
         return paraDTO(atualizado);
     }
 
+    // Upload genérico de imagem — usado hoje pelo bloco de conteúdo "imagem"
+    // dos links, pra dar a opção de enviar um arquivo do computador em vez
+    // de só colar uma URL externa. Não associa a imagem a nada: só sobe pro
+    // Storage e devolve a URL pública, quem chama decide onde usar.
+    @PostMapping("/{usuarioId}/imagens")
+    public ImagemResponseDTO uploadImagem(@PathVariable Long usuarioId, @RequestParam("arquivo") MultipartFile arquivo, Authentication authentication) {
+        Usuario usuario = usuarioService.buscarPorId(usuarioId);
+        verificarDono(usuario, authentication);
+
+        String url = arquivoService.salvarImagem(arquivo);
+        return new ImagemResponseDTO(url);
+    }
+
     private void verificarDono(Usuario usuario, Authentication authentication) {
         if (!usuario.getUserName().equals(authentication.getName())) {
             throw new AccessDeniedException("Você não pode alterar dados de outro usuário");
@@ -177,6 +191,6 @@ public class UsuarioController {
                 usuario.getUserPfp(), usuario.getBio(), usuario.getTema(), usuario.getCorPersonalizada(),
                 usuario.getFonte(), usuario.getFormatoBotao(), usuario.getEstiloBotao(),
                 usuario.getPerfilVisualizacoes(), usuario.isEmailVerificado(), usuario.isCaptarContato(),
-                usuario.getUserBadges(), usuario.getPerfilTags());
+                usuario.getTipoUsuario(), usuario.getUserBadges(), usuario.getPerfilTags());
     }
 }

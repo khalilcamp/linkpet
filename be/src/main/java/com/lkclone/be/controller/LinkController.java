@@ -38,7 +38,7 @@ public class LinkController {
 
         Link link = linkService.createLink(dados.getUrl(), dados.getLabel(), dados.getPictureLink(),
                 dados.getDataInicio(), dados.getDataFim(), dados.getGrupoId(), dados.isExibirComoEmbed(),
-                dados.isEmbedCompacto(), dados.isDestaque(), dono);
+                dados.isEmbedCompacto(), dados.isDestaque(), dados.getTipoConteudo(), dados.getConteudo(), dono);
 
         return paraDTO(link);
     }
@@ -62,7 +62,8 @@ public class LinkController {
         verificarDono(dono, authentication);
 
         Link link = linkService.atualizarLink(linkId, dono, dados.getUrl(), dados.getLabel(), dados.getPictureLink(),
-                dados.getDataInicio(), dados.getDataFim(), dados.isExibirComoEmbed(), dados.isEmbedCompacto(), dados.isDestaque());
+                dados.getDataInicio(), dados.getDataFim(), dados.isExibirComoEmbed(), dados.isEmbedCompacto(), dados.isDestaque(),
+                dados.getTipoConteudo(), dados.getConteudo());
 
         return paraDTO(link);
     }
@@ -108,6 +109,18 @@ public class LinkController {
                 .collect(Collectors.toList());
     }
 
+    @PatchMapping("/destaque/reordenar")
+    public List<LinkResponseDTO> reordenarDestaque(@PathVariable Long usuarioId, @RequestBody ReordenarLinksDTO dados, Authentication authentication) {
+        Usuario dono = usuarioService.buscarPorId(usuarioId);
+        verificarDono(dono, authentication);
+
+        linkService.reordenarDestaque(dono, dados.getOrdem());
+
+        return linkService.getTodosLinks(dono).stream()
+                .map(this::paraDTO)
+                .collect(Collectors.toList());
+    }
+
     @GetMapping("/{linkId}/cliques/historico")
     public List<LinkCliqueDiaDTO> historicoCliques(@PathVariable Long usuarioId, @PathVariable Long linkId,
                                                      @RequestParam(defaultValue = "7") int dias, Authentication authentication) {
@@ -127,6 +140,6 @@ public class LinkController {
         return new LinkResponseDTO(link.getLinkId(), link.getUrl(), link.getLabel(), link.getPictureLink(),
                 link.getLink_position(), link.isAtivo(), link.getCliques(), link.getDataInicio(), link.getDataFim(),
                 link.getGrupo() != null ? link.getGrupo().getId() : null, link.isExibirComoEmbed(),
-                link.isEmbedCompacto(), link.isDestaque());
+                link.isEmbedCompacto(), link.isDestaque(), link.getDestaquePosicao(), link.getTipoConteudo(), link.getConteudo());
     }
 }

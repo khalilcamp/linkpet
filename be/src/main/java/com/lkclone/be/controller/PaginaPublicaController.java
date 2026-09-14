@@ -76,7 +76,7 @@ public class PaginaPublicaController {
                             .filter(link -> !link.isDestaque())
                             .map(this::paraDTO)
                             .collect(Collectors.toList());
-                    return new GrupoPublicoDTO(grupo.getNome(), linksDoGrupo);
+                    return new GrupoPublicoDTO(grupo.getNome(), linksDoGrupo, grupo.getLayout());
                 })
                 // grupo sem nenhum link ativo não tem o que mostrar
                 .filter(grupoDTO -> !grupoDTO.getLinks().isEmpty())
@@ -97,7 +97,7 @@ public class PaginaPublicaController {
         return new LinkResponseDTO(link.getLinkId(), link.getUrl(), link.getLabel(), link.getPictureLink(),
                 link.getLink_position(), link.isAtivo(), link.getCliques(), link.getDataInicio(), link.getDataFim(),
                 link.getGrupo() != null ? link.getGrupo().getId() : null, link.isExibirComoEmbed(),
-                link.isEmbedCompacto(), link.isDestaque());
+                link.isEmbedCompacto(), link.isDestaque(), link.getDestaquePosicao(), link.getTipoConteudo(), link.getConteudo());
     }
 
     @PostMapping("/p/{username}/pet/like")

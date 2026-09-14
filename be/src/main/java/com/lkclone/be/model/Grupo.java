@@ -23,6 +23,11 @@ public class Grupo {
     @Column(nullable = false)
     private boolean ativo = true;
 
+    // "lista" (padrão) ou "grid" — grid é exclusivo pra contas
+    // Premium/Empresa/Colaborador/Desenvolvedor, checado no GrupoService.
+    @Column(nullable = false)
+    private String layout = "lista";
+
     @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;

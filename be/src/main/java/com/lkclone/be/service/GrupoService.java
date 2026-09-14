@@ -19,14 +19,19 @@ import java.util.stream.Collectors;
 @Service
 public class GrupoService {
 
+    private static final Set<String> LAYOUTS_PERMITIDOS = Set.of("lista", "grid");
+
     private final GrupoRepository grupoRepository;
     private final LinkRepository linkRepository;
     private final MensagemService mensagemService;
+    private final UsuarioService usuarioService;
 
-    public GrupoService(GrupoRepository grupoRepository, LinkRepository linkRepository, MensagemService mensagemService) {
+    public GrupoService(GrupoRepository grupoRepository, LinkRepository linkRepository, MensagemService mensagemService,
+                         UsuarioService usuarioService) {
         this.grupoRepository = grupoRepository;
         this.linkRepository = linkRepository;
         this.mensagemService = mensagemService;
+        this.usuarioService = usuarioService;
     }
 
     public Grupo criarGrupo(Usuario dono, String nome) {
@@ -56,6 +61,19 @@ public class GrupoService {
     public Grupo alternarAtivo(Long grupoId, Usuario dono, boolean ativo) {
         Grupo grupo = buscarGrupoDoDono(grupoId, dono);
         grupo.setAtivo(ativo);
+        return grupoRepository.save(grupo);
+    }
+
+    public Grupo atualizarLayout(Long grupoId, Usuario dono, String layout) {
+        if (layout == null || !LAYOUTS_PERMITIDOS.contains(layout)) {
+            throw new IllegalArgumentException(mensagemService.get("erro.grupo.layoutInvalido", LAYOUTS_PERMITIDOS));
+        }
+        if (layout.equals("grid") && !usuarioService.ehPremium(dono)) {
+            throw new IllegalArgumentException(mensagemService.get("erro.grupo.layoutGridExigePremium"));
+        }
+
+        Grupo grupo = buscarGrupoDoDono(grupoId, dono);
+        grupo.setLayout(layout);
         return grupoRepository.save(grupo);
     }
 

@@ -1,6 +1,7 @@
 package com.lkclone.be.controller;
 
 import com.lkclone.be.dto.AtualizarGrupoAtivoDTO;
+import com.lkclone.be.dto.AtualizarLayoutGrupoDTO;
 import com.lkclone.be.dto.CriarGrupoDTO;
 import com.lkclone.be.dto.GrupoResponseDTO;
 import com.lkclone.be.dto.LinkResponseDTO;
@@ -74,6 +75,16 @@ public class GrupoController {
         return paraDTO(grupo);
     }
 
+    @PatchMapping("/{grupoId}/layout")
+    public GrupoResponseDTO atualizarLayout(@PathVariable Long usuarioId, @PathVariable Long grupoId,
+                                             @RequestBody AtualizarLayoutGrupoDTO dados, Authentication authentication) {
+        Usuario dono = usuarioService.buscarPorId(usuarioId);
+        verificarDono(dono, authentication);
+
+        Grupo grupo = grupoService.atualizarLayout(grupoId, dono, dados.getLayout());
+        return paraDTO(grupo);
+    }
+
     @DeleteMapping("/{grupoId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void excluirGrupo(@PathVariable Long usuarioId, @PathVariable Long grupoId, Authentication authentication) {
@@ -113,13 +124,13 @@ public class GrupoController {
     }
 
     private GrupoResponseDTO paraDTO(Grupo grupo) {
-        return new GrupoResponseDTO(grupo.getId(), grupo.getNome(), grupo.getPosicao(), grupo.isAtivo());
+        return new GrupoResponseDTO(grupo.getId(), grupo.getNome(), grupo.getPosicao(), grupo.isAtivo(), grupo.getLayout());
     }
 
     private LinkResponseDTO paraLinkDTO(Link link) {
         return new LinkResponseDTO(link.getLinkId(), link.getUrl(), link.getLabel(), link.getPictureLink(),
                 link.getLink_position(), link.isAtivo(), link.getCliques(), link.getDataInicio(), link.getDataFim(),
                 link.getGrupo() != null ? link.getGrupo().getId() : null, link.isExibirComoEmbed(),
-                link.isEmbedCompacto(), link.isDestaque());
+                link.isEmbedCompacto(), link.isDestaque(), link.getDestaquePosicao(), link.getTipoConteudo(), link.getConteudo());
     }
 }

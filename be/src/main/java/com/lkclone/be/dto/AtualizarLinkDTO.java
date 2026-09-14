@@ -7,7 +7,6 @@ import java.time.LocalDate;
 
 public class AtualizarLinkDTO {
 
-    @NotBlank(message = "{validation.link.url.blank}")
     @Size(max = 2048, message = "{validation.link.url.size}")
     private String url;
 
@@ -24,6 +23,11 @@ public class AtualizarLinkDTO {
     private boolean exibirComoEmbed;
     private boolean embedCompacto;
     private boolean destaque;
+
+    private String tipoConteudo = "link";
+
+    @Size(max = 1000, message = "{validation.link.conteudo.size}")
+    private String conteudo;
 
     public String getUrl() {
         return url;
@@ -87,5 +91,21 @@ public class AtualizarLinkDTO {
 
     public void setDestaque(boolean destaque) {
         this.destaque = destaque;
+    }
+
+    public String getTipoConteudo() {
+        return tipoConteudo;
+    }
+
+    public void setTipoConteudo(String tipoConteudo) {
+        this.tipoConteudo = tipoConteudo;
+    }
+
+    public String getConteudo() {
+        return conteudo;
+    }
+
+    public void setConteudo(String conteudo) {
+        this.conteudo = conteudo;
     }
 }

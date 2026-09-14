@@ -16,7 +16,8 @@ public class Link {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long linkId;
 
-    @Column(nullable = false)
+    // Obrigatória só quando tipoConteudo = "link" (checado no LinkService) —
+    // blocos de texto/imagem não precisam de URL pra funcionar.
     private String url;
     private String pictureLink;
 
@@ -56,5 +57,19 @@ public class Link {
     // topo da página pública, em vez da posição normal dele na lista/grupo.
     @Column(nullable = false)
     private boolean destaque = false;
+
+    // Posição entre os destaques (1, 2, 3...) — só tem sentido quando
+    // destaque = true. Controla a ordem esquerda→direita na linha
+    // horizontal de destaques da página pública.
+    private Integer destaquePosicao;
+
+    // "link" (padrão, botão normal), "texto" ou "imagem" — os dois últimos
+    // são blocos de conteúdo, exclusivos Premium+ (checado no LinkService).
+    @Column(nullable = false)
+    private String tipoConteudo = "link";
+
+    // Corpo do bloco de texto, ou legenda opcional do bloco de imagem.
+    @Column(columnDefinition = "TEXT")
+    private String conteudo;
 
 }

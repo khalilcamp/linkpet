@@ -32,7 +32,10 @@ function extrairYoutubeId(url: URL): string | null {
 
 function extrairSpotify(url: URL): { tipo: string; id: string } | null {
   if (!url.hostname.includes("open.spotify.com")) return null;
-  const match = url.pathname.match(/^\/(track|album|playlist|episode|show|artist)\/([a-zA-Z0-9]+)/);
+  // Links compartilhados pelo app do Spotify costumam vir com um prefixo de
+  // localidade antes do tipo, tipo /intl-pt/track/ID — por isso não ancora
+  // no início do path, só procura o padrão em qualquer posição.
+  const match = url.pathname.match(/\/(track|album|playlist|episode|show|artist)\/([a-zA-Z0-9]+)/);
   if (!match) return null;
   return { tipo: match[1], id: match[2] };
 }

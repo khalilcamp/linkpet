@@ -25,6 +25,7 @@ public class UsuarioService {
     private static final Set<String> FONTES_PERMITIDAS = Set.of("padrao", "serif", "mono", "arredondada");
     private static final Set<String> FORMATOS_BOTAO_PERMITIDOS = Set.of("quadrado", "arredondado", "pill");
     private static final Set<String> ESTILOS_BOTAO_PERMITIDOS = Set.of("preenchido", "contorno", "sombra");
+    private static final Set<String> TIPOS_USUARIO_PREMIUM = Set.of("Premium", "Empresa", "Colaborador", "Desenvolvedor");
     private static final int BIO_TAMANHO_MAXIMO = 280;
     private static final int SENHA_TAMANHO_MINIMO = 8;
     // Exige ao menos uma letra e um número, sem restringir caracteres especiais.
@@ -77,6 +78,13 @@ public class UsuarioService {
     public Usuario buscarPorId(Long id) {
         return usuarioRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException(mensagemService.get("erro.usuario.naoEncontrado")));
+    }
+
+    // Único lugar que sabe quais tipoUsuario contam como "pago" — qualquer
+    // feature gateada por plano (layout em grid, blocos de conteúdo, etc)
+    // deve checar por aqui em vez de repetir o set em cada serviço.
+    public boolean ehPremium(Usuario usuario) {
+        return TIPOS_USUARIO_PREMIUM.contains(usuario.getTipoUsuario());
     }
 
     public UsuarioService(PasswordEncoder passwordEncoder, UsuarioRepository usuarioRepository,

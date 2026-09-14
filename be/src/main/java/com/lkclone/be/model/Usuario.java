@@ -56,6 +56,11 @@ public class Usuario {
     @Column(nullable = false)
     private boolean emailVerificado = false;
 
+    // Free, Premium, Empresa, Colaborador ou Desenvolvedor. Sem endpoint
+    // próprio ainda — coluna preparatória pra próxima etapa.
+    @Column(nullable = false)
+    private String tipoUsuario = "Free";
+
     @JdbcTypeCode(SqlTypes.ARRAY)
     @Column(name = "user_badges", columnDefinition = "text[]", nullable = false)
     private List<String> userBadges = new ArrayList<>();

@@ -8,10 +8,12 @@ public class GrupoPublicoDTO {
 
     private String nome;
     private List<LinkResponseDTO> links;
+    private String layout;
 
-    public GrupoPublicoDTO(String nome, List<LinkResponseDTO> links) {
+    public GrupoPublicoDTO(String nome, List<LinkResponseDTO> links, String layout) {
         this.nome = nome;
         this.links = links;
+        this.layout = layout;
     }
 
     public String getNome() {
@@ -20,5 +22,9 @@ public class GrupoPublicoDTO {
 
     public List<LinkResponseDTO> getLinks() {
         return links;
+    }
+
+    public String getLayout() {
+        return layout;
     }
 }

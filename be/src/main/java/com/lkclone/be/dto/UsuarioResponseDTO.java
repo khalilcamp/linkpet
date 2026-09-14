@@ -17,12 +17,13 @@ public class UsuarioResponseDTO {
     private Long perfilVisualizacoes;
     private boolean emailVerificado;
     private boolean captarContato;
+    private String tipoUsuario;
     private List<String> badges;
     private List<String> tags;
 
     public UsuarioResponseDTO(Long id, String userName, String userEmail, String userPfp, String bio,
                               String tema, String corPersonalizada, String fonte, String formatoBotao, String estiloBotao,
-                              Long perfilVisualizacoes, boolean emailVerificado, boolean captarContato,
+                              Long perfilVisualizacoes, boolean emailVerificado, boolean captarContato, String tipoUsuario,
                               List<String> badges, List<String> tags) {
         this.id = id;
         this.userName = userName;
@@ -37,6 +38,7 @@ public class UsuarioResponseDTO {
         this.perfilVisualizacoes = perfilVisualizacoes;
         this.emailVerificado = emailVerificado;
         this.captarContato = captarContato;
+        this.tipoUsuario = tipoUsuario;
         this.badges = badges;
         this.tags = tags;
     }
@@ -91,6 +93,10 @@ public class UsuarioResponseDTO {
 
     public boolean isCaptarContato() {
         return captarContato;
+    }
+
+    public String getTipoUsuario() {
+        return tipoUsuario;
     }
 
     public List<String> getBadges() {

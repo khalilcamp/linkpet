@@ -73,7 +73,68 @@ function LinkCard({
   formatoBotao: string;
   estiloBotao: string;
 }) {
-  const embed = link.exibirComoEmbed ? detectarEmbed(link.url, link.embedCompacto) : null;
+  if (link.tipoConteudo === "texto") {
+    const conteudo = (
+      <div
+        className={`space-y-1 border px-4 py-3 text-left transition ${tema.card} ${classeFormatoBotao(formatoBotao)}`}
+        style={tema.estiloCard}
+      >
+        <p className={`font-medium ${tema.texto}`}>{link.label}</p>
+        {link.conteudo && <p className={`whitespace-pre-wrap text-sm ${tema.subtexto}`}>{link.conteudo}</p>}
+      </div>
+    );
+
+    if (!link.url) return conteudo;
+
+    return (
+      <a
+        href={link.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={() => {
+          registrarClique(username, link.linkId).catch(() => {});
+        }}
+        className={`block text-inherit no-underline ${tema.cardHover}`}
+      >
+        {conteudo}
+      </a>
+    );
+  }
+
+  if (link.tipoConteudo === "imagem") {
+    const conteudo = (
+      <div
+        className={`overflow-hidden border transition ${tema.card} ${classeFormatoBotao(formatoBotao)}`}
+        style={tema.estiloCard}
+      >
+        {link.pictureLink && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={link.pictureLink} alt={link.label} className="w-full object-cover" />
+        )}
+        {link.conteudo && (
+          <p className={`px-4 py-2 text-left text-sm ${tema.subtexto}`}>{link.conteudo}</p>
+        )}
+      </div>
+    );
+
+    if (!link.url) return conteudo;
+
+    return (
+      <a
+        href={link.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={() => {
+          registrarClique(username, link.linkId).catch(() => {});
+        }}
+        className={`block ${tema.cardHover}`}
+      >
+        {conteudo}
+      </a>
+    );
+  }
+
+  const embed = link.exibirComoEmbed ? detectarEmbed(link.url ?? "", link.embedCompacto) : null;
 
   if (embed?.tipo === "instagram") {
     // O card do Instagram já vem com moldura própria do widget deles —
@@ -103,9 +164,11 @@ function LinkCard({
     );
   }
 
+  const urlDoLink = link.url ?? "";
+
   return (
     <a
-      href={link.url}
+      href={urlDoLink}
       target="_blank"
       rel="noopener noreferrer"
       onClick={() => {
@@ -120,9 +183,49 @@ function LinkCard({
         // eslint-disable-next-line @next/next/no-img-element
         <img src={link.pictureLink} alt="" className="h-6 w-6 rounded" />
       ) : (
-        <IconeSocial url={link.url} />
+        <IconeSocial url={urlDoLink} />
       )}
       <span className={`flex-1 font-medium ${tema.texto}`}>{link.label}</span>
+    </a>
+  );
+}
+
+// Célula do layout "grid": só o ícone (customizado ou o favicon detectado
+// da URL), sem rótulo visível — o nome do link vira aria-label/title.
+function LinkGridItem({
+  link,
+  username,
+  tema,
+  formatoBotao,
+}: {
+  link: LinkResponseDTO;
+  username: string;
+  tema: TemaClasses;
+  formatoBotao: string;
+}) {
+  const urlDoLink = link.url ?? "";
+
+  return (
+    <a
+      href={urlDoLink}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={link.label}
+      title={link.label}
+      onClick={() => {
+        registrarClique(username, link.linkId).catch(() => {
+          // Falha ao registrar clique não deve impedir a navegação.
+        });
+      }}
+      className={`flex aspect-square items-center justify-center border transition ${tema.card} ${tema.cardHover} ${classeFormatoBotao(formatoBotao)}`}
+      style={tema.estiloCard}
+    >
+      {link.pictureLink ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={link.pictureLink} alt="" className="h-7 w-7 rounded" />
+      ) : (
+        <IconeSocial url={urlDoLink} className="h-7 w-7" />
+      )}
     </a>
   );
 }
@@ -151,7 +254,9 @@ export default function PaginaPublicaClient({
     ...grupo,
     links: [...grupo.links].sort((a, b) => a.position - b.position),
   }));
-  const linksDestaque = [...(dados.linksDestaque ?? [])].sort((a, b) => a.position - b.position);
+  const linksDestaque = [...(dados.linksDestaque ?? [])].sort(
+    (a, b) => (a.destaquePosicao ?? 0) - (b.destaquePosicao ?? 0)
+  );
   const semNenhumLink = linksSemGrupo.length === 0 && grupos.length === 0 && linksDestaque.length === 0;
 
   return (
@@ -184,16 +289,17 @@ export default function PaginaPublicaClient({
         </div>
 
         {linksDestaque.length > 0 && (
-          <div className="space-y-3">
+          <div className={linksDestaque.length > 1 ? "flex items-start gap-3" : "space-y-3"}>
             {linksDestaque.map((link) => (
-              <LinkCard
-                key={link.linkId}
-                link={link}
-                username={username}
-                tema={tema}
-                formatoBotao={dados.formatoBotao}
-                estiloBotao={dados.estiloBotao}
-              />
+              <div key={link.linkId} className={linksDestaque.length > 1 ? "min-w-0 flex-1" : undefined}>
+                <LinkCard
+                  link={link}
+                  username={username}
+                  tema={tema}
+                  formatoBotao={dados.formatoBotao}
+                  estiloBotao={dados.estiloBotao}
+                />
+              </div>
             ))}
           </div>
         )}
@@ -235,16 +341,30 @@ export default function PaginaPublicaClient({
               <h2 className={`text-left text-xs font-semibold uppercase tracking-wide ${tema.subtexto}`}>
                 {grupo.nome}
               </h2>
-              {grupo.links.map((link) => (
-                <LinkCard
-                  key={link.linkId}
-                  link={link}
-                  username={username}
-                  tema={tema}
-                  formatoBotao={dados.formatoBotao}
-                  estiloBotao={dados.estiloBotao}
-                />
-              ))}
+              {grupo.layout === "grid" ? (
+                <div className="grid grid-cols-4 gap-3">
+                  {grupo.links.map((link) => (
+                    <LinkGridItem
+                      key={link.linkId}
+                      link={link}
+                      username={username}
+                      tema={tema}
+                      formatoBotao={dados.formatoBotao}
+                    />
+                  ))}
+                </div>
+              ) : (
+                grupo.links.map((link) => (
+                  <LinkCard
+                    key={link.linkId}
+                    link={link}
+                    username={username}
+                    tema={tema}
+                    formatoBotao={dados.formatoBotao}
+                    estiloBotao={dados.estiloBotao}
+                  />
+                ))
+              )}
             </div>
           ))}
         </div>

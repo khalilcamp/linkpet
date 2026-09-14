@@ -6,12 +6,14 @@ public class GrupoResponseDTO {
     private String nome;
     private Long posicao;
     private boolean ativo;
+    private String layout;
 
-    public GrupoResponseDTO(Long id, String nome, Long posicao, boolean ativo) {
+    public GrupoResponseDTO(Long id, String nome, Long posicao, boolean ativo, String layout) {
         this.id = id;
         this.nome = nome;
         this.posicao = posicao;
         this.ativo = ativo;
+        this.layout = layout;
     }
 
     public Long getId() {
@@ -28,5 +30,9 @@ public class GrupoResponseDTO {
 
     public boolean isAtivo() {
         return ativo;
+    }
+
+    public String getLayout() {
+        return layout;
     }
 }
