@@ -136,6 +136,9 @@
       "enviando": "Enviando...",
       "obrigado": "Valeu! Seu contato foi enviado.",
       "genericError": "Erro ao enviar contato"
+    },
+    "footer": {
+      "cta": "Crie sua página grátis no LinkPet"
     }
   },
   "badges": {

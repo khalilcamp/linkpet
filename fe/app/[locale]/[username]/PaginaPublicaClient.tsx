@@ -2,11 +2,13 @@
 
 import { useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { registrarClique, urlImagem, PaginaPublicaDTO, LinkResponseDTO } from "@/lib/api";
 import { classesDoTema, TemaClasses } from "@/lib/temas";
 import { fontFamilyDaFonte, classeFormatoBotao, classeEstiloBotao } from "@/lib/aparencia";
 import { detectarEmbed } from "@/lib/embeds";
 import PetCard from "@/components/PetCard";
+import PetSvg from "@/components/PetSvg";
 import IconeSocial from "@/components/IconeSocial";
 import Badges from "@/components/Badges";
 import PerfilTags from "@/components/PerfilTags";
@@ -436,6 +438,15 @@ export default function PaginaPublicaClient({
         {dados.captarContato && (
           <CapturarContatoForm username={username} tema={tema} formatoBotao={dados.formatoBotao} />
         )}
+
+        <Link
+          href="/cadastro"
+          className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-medium transition ${tema.card} ${tema.cardHover} ${tema.texto}`}
+          style={tema.estiloCard}
+        >
+          <PetSvg cor="laranja" estagioVisual={1} className="h-4 w-4" />
+          {t("footer.cta")}
+        </Link>
       </div>
     </main>
   );
