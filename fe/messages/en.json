@@ -138,7 +138,8 @@
       "genericError": "Error sending contact"
     },
     "footer": {
-      "cta": "Create your free LinkPet page"
+      "cta": "Create your free LinkPet page",
+      "editCta": "Edit my page"
     }
   },
   "badges": {

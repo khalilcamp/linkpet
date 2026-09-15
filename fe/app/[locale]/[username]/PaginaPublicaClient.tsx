@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { registrarClique, urlImagem, PaginaPublicaDTO, LinkResponseDTO } from "@/lib/api";
+import { registrarClique, urlImagem, obterToken, buscarMeuPerfil, PaginaPublicaDTO, LinkResponseDTO } from "@/lib/api";
 import { classesDoTema, TemaClasses } from "@/lib/temas";
 import { fontFamilyDaFonte, classeFormatoBotao, classeEstiloBotao } from "@/lib/aparencia";
 import { detectarEmbed } from "@/lib/embeds";
@@ -286,6 +286,25 @@ export default function PaginaPublicaClient({
   const dados = dadosIniciais;
   const tema = classesDoTema(dados?.tema, dados?.corPersonalizada);
 
+  // Se quem está vendo a página está logado como o próprio dono dela, troca
+  // o CTA de "crie a sua" por um atalho direto pro dashboard — só dispara a
+  // checagem quando há token salvo, pra não gastar uma chamada à toa em toda
+  // visita anônima (a esmagadora maioria).
+  const [souODono, setSouODono] = useState(false);
+
+  useEffect(() => {
+    if (!dados || !obterToken()) return;
+    let cancelado = false;
+    buscarMeuPerfil()
+      .then((perfil) => {
+        if (!cancelado && perfil.userName === dados.userName) setSouODono(true);
+      })
+      .catch(() => {});
+    return () => {
+      cancelado = true;
+    };
+  }, [dados]);
+
   if (!dados) {
     return (
       <main className={`flex min-h-screen items-center justify-center ${tema.fundo}`}>
@@ -440,12 +459,12 @@ export default function PaginaPublicaClient({
         )}
 
         <Link
-          href="/cadastro"
+          href={souODono ? "/dashboard" : "/cadastro"}
           className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-medium transition ${tema.card} ${tema.cardHover} ${tema.texto}`}
           style={tema.estiloCard}
         >
           <PetSvg cor="laranja" estagioVisual={1} className="h-4 w-4" />
-          {t("footer.cta")}
+          {souODono ? t("footer.editCta") : t("footer.cta")}
         </Link>
       </div>
     </main>

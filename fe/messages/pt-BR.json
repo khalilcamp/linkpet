@@ -138,7 +138,8 @@
       "genericError": "Erro ao enviar contato"
     },
     "footer": {
-      "cta": "Crie sua página grátis no LinkPet"
+      "cta": "Crie sua página grátis no LinkPet",
+      "editCta": "Editar minha página"
     }
   },
   "badges": {
