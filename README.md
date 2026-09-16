@@ -116,6 +116,10 @@ Alguns grupos de endpoints da API (prefixo `/usuarios` salvo indicação):
 | Pet | `POST /p/{username}/pet/like` |
 | Página pública | `GET /p/{username}` |
 
+## Créditos
+
+O ícone de tentáculo usado no tema exclusivo "Octacore" é o [Curled Tentacle](https://game-icons.net/1x1/lorc/curled-tentacle.html) de Lorc, via [game-icons.net](https://game-icons.net), licenciado sob [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).
+
 ## Licença
 
 Projeto pessoal, sem licença de distribuição definida ainda.

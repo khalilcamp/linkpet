@@ -11,7 +11,7 @@ export const CORES: Record<string, string> = {
 
 export const CORES_DISPONIVEIS = Object.keys(CORES);
 
-export const CHAPEUS_DISPONIVEIS = ["nenhum", "festa", "coroa", "bone", "capacete_skyrim"];
+export const CHAPEUS_DISPONIVEIS = ["nenhum", "festa", "coroa", "bone", "capacete_skyrim", "octacore"];
 export const ROSTOS_DISPONIVEIS = ["nenhum", "oculos", "oculos_sol", "bigode"];
 export const ACESSORIOS_CORPO_DISPONIVEIS = ["nenhum", "gravata", "cachecol", "colar"];
 
@@ -41,14 +41,38 @@ export default function PetSvg({
   const dormindo = estagioVisual === 0;
   const radiante = estagioVisual === 2;
   const gradId = `pet-corpo-${useId().replace(/:/g, "")}`;
+  // O chapéu Octacore vem com o próprio esquema de cor pro corpo — a parte
+  // de cima (mais opaca) puxa pro teal da mascote, a de baixo (mais
+  // transparente) puxa pro vermelho, ecoando o tema exclusivo da badge.
+  const octacoreAtivo = chapeu === "octacore";
+  // Só o topo arredondado do corpo (a cúpula) fica mais estreito com o
+  // Octacore, pra não vazar pros lados por baixo do polvo — a base ondulada
+  // continua na largura normal, só afunilando pra se encontrar com a cúpula
+  // mais estreita (efeito de "ombros"), em vez de encolher o fantasma inteiro.
+  const cupula = octacoreAtivo ? "M35,35 A17.5,17.5 0 0 1 65,35" : "M21,35 A29,29 0 0 1 79,35";
+  const fechoCupula = octacoreAtivo ? "L35,35 Z" : "L21,35 Z";
+  const ondaBase1 = "L79,82 q-7.25,7 -14.5,0 q-7.25,-7 -14.5,0 q-7.25,7 -14.5,0 q-7.25,-7 -14.5,0 ";
+  const ondaBase2 = "L79,82 q-7.25,-7 -14.5,0 q-7.25,7 -14.5,0 q-7.25,-7 -14.5,0 q-7.25,7 -14.5,0 ";
+  const corpoPathD = `${cupula} ${ondaBase1}${fechoCupula}`;
+  const corpoAnimValues = `${cupula} ${ondaBase1}${fechoCupula};${cupula} ${ondaBase2}${fechoCupula};${cupula} ${ondaBase1}${fechoCupula}`;
 
   return (
     <svg viewBox="0 0 100 100" className={className} role="img" aria-label="Pet robô" style={{ overflow: "visible" }}>
       <defs>
         <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={CASCO} stopOpacity={1} />
-          <stop offset="55%" stopColor={CASCO} stopOpacity={0.85} />
-          <stop offset="100%" stopColor={CASCO} stopOpacity={0.2} />
+          {octacoreAtivo ? (
+            <>
+              <stop offset="0%" stopColor="#14b8a6" stopOpacity={1} />
+              <stop offset="55%" stopColor="#14b8a6" stopOpacity={0.6} />
+              <stop offset="100%" stopColor="#dc2626" stopOpacity={0.3} />
+            </>
+          ) : (
+            <>
+              <stop offset="0%" stopColor={CASCO} stopOpacity={1} />
+              <stop offset="55%" stopColor={CASCO} stopOpacity={0.85} />
+              <stop offset="100%" stopColor={CASCO} stopOpacity={0.2} />
+            </>
+          )}
         </linearGradient>
       </defs>
 
@@ -103,15 +127,12 @@ export default function PetSvg({
         )}
 
         {/* corpo: fantasminha - topo arredondado, base ondulada e animada, gradiente esmaecendo pra baixo */}
-        <path fill={`url(#${gradId})`} stroke={CASCO_SOMBRA} strokeWidth="1.5"
-          d="M21,35 A29,29 0 0 1 79,35 L79,82 q-7.25,7 -14.5,0 q-7.25,-7 -14.5,0 q-7.25,7 -14.5,0 q-7.25,-7 -14.5,0 L21,35 Z">
+        <path fill={`url(#${gradId})`} stroke={CASCO_SOMBRA} strokeWidth="1.5" d={corpoPathD}>
           <animate
             attributeName="d"
             dur="3s"
             repeatCount="indefinite"
-            values="M21,35 A29,29 0 0 1 79,35 L79,82 q-7.25,7 -14.5,0 q-7.25,-7 -14.5,0 q-7.25,7 -14.5,0 q-7.25,-7 -14.5,0 L21,35 Z;
-                    M21,35 A29,29 0 0 1 79,35 L79,82 q-7.25,-7 -14.5,0 q-7.25,7 -14.5,0 q-7.25,-7 -14.5,0 q-7.25,7 -14.5,0 L21,35 Z;
-                    M21,35 A29,29 0 0 1 79,35 L79,82 q-7.25,7 -14.5,0 q-7.25,-7 -14.5,0 q-7.25,7 -14.5,0 q-7.25,-7 -14.5,0 L21,35 Z"
+            values={corpoAnimValues}
           />
         </path>
 
@@ -249,6 +270,16 @@ export default function PetSvg({
           width="142"
           height="120"
           preserveAspectRatio="none"
+        />
+      )}
+      {chapeu === "octacore" && (
+        <image
+          href="/polvoocta.png"
+          x="-10"
+          y="-30"
+          width="120"
+          height="120"
+          preserveAspectRatio="xMidYMid meet"
         />
       )}
       </g>

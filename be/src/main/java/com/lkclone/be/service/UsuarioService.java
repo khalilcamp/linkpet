@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -21,7 +22,13 @@ import java.util.regex.Pattern;
 @Service
 public class UsuarioService {
 
-    private static final Set<String> TEMAS_PERMITIDOS = Set.of("escuro", "claro", "roxo", "verde", "sunset", "custom");
+    private static final Set<String> TEMAS_PERMITIDOS = Set.of("escuro", "claro", "roxo", "verde", "sunset", "octacore", "custom");
+
+    // Mesma ideia do PetService.CHAPEUS_EXCLUSIVOS: alguns temas só ficam
+    // disponíveis pra quem tem a badge correspondente.
+    private static final Map<String, String> TEMAS_EXCLUSIVOS = Map.of(
+            "octacore", BadgeService.BADGE_OCTACORE
+    );
     private static final Set<String> FONTES_PERMITIDAS = Set.of("padrao", "serif", "mono", "arredondada");
     private static final Set<String> FORMATOS_BOTAO_PERMITIDOS = Set.of("quadrado", "arredondado", "pill");
     private static final Set<String> ESTILOS_BOTAO_PERMITIDOS = Set.of("preenchido", "contorno", "sombra");
@@ -135,6 +142,10 @@ public class UsuarioService {
     public Usuario atualizarTema(Usuario usuario, String tema, String corPersonalizada) {
         if (tema == null || !TEMAS_PERMITIDOS.contains(tema)) {
             throw new IllegalArgumentException(mensagemService.get("erro.tema.invalido", TEMAS_PERMITIDOS));
+        }
+        String badgeNecessaria = TEMAS_EXCLUSIVOS.get(tema);
+        if (badgeNecessaria != null && !usuario.getUserBadges().contains(badgeNecessaria)) {
+            throw new IllegalArgumentException(mensagemService.get("erro.tema.temaExclusivo"));
         }
         if ("custom".equals(tema)) {
             if (corPersonalizada == null || !COR_PADRAO.matcher(corPersonalizada).matches()) {

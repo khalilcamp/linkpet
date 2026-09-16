@@ -86,6 +86,13 @@ function naoPodeDestacar(exibirComoEmbed: boolean, existemOutrosDestaques: boole
 // escolher (evita FOMO por um item que ele nem sabe como conseguir).
 const CHAPEUS_EXCLUSIVOS: Record<string, string> = {
   capacete_skyrim: "skyrim_rp",
+  octacore: "octacore",
+};
+
+// Mesma ideia acima, aplicada a temas da página pública — o tema "octacore"
+// só aparece pra quem tem a badge do colab.
+const TEMAS_EXCLUSIVOS: Record<string, string> = {
+  octacore: "octacore",
 };
 
 type Aba = (typeof ABAS)[number];
@@ -325,6 +332,11 @@ export default function DashboardPage() {
 
   const chapeusVisiveis = CHAPEUS_DISPONIVEIS.filter((opcao) => {
     const badgeNecessaria = CHAPEUS_EXCLUSIVOS[opcao];
+    return !badgeNecessaria || usuario?.badges?.includes(badgeNecessaria);
+  });
+
+  const temasVisiveis = TEMAS_DISPONIVEIS.filter((opcao) => {
+    const badgeNecessaria = TEMAS_EXCLUSIVOS[opcao];
     return !badgeNecessaria || usuario?.badges?.includes(badgeNecessaria);
   });
 
@@ -1951,7 +1963,7 @@ export default function DashboardPage() {
             <section>
               <h2 className="mb-3 text-sm font-medium text-neutral-300">{t("customize.theme")}</h2>
               <div className="flex flex-wrap items-center gap-2">
-                {TEMAS_DISPONIVEIS.map((opcao) => (
+                {temasVisiveis.map((opcao) => (
                   <button
                     key={opcao}
                     type="button"

@@ -8,11 +8,13 @@ const CORES: Record<string, string> = {
   developer: "#f97316",
   first100: "#38bdf8",
   skyrim_rp: "#b45309",
+  octacore: "#14b8a6",
 };
 
 // Badges com ícone externo (em vez de SVG desenhado à mão) entram aqui.
 const ICONES: Record<string, string> = {
   skyrim_rp: "https://img.icons8.com/?size=100&id=58622&format=png&color=000000",
+  octacore: "/polvoocta.png",
 };
 
 function Glifo({ codigo, cor }: { codigo: string; cor: string }) {

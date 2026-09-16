@@ -154,6 +154,10 @@
     "skyrim_rp": {
       "name": "Skyrim The History",
       "description": "Member of the Skyrim The History server"
+    },
+    "octacore": {
+      "name": "Octacore",
+      "description": "Octacore collaborator"
     }
   },
   "perfilTags": {
@@ -327,7 +331,8 @@
         "festa": "Party",
         "coroa": "Crown",
         "bone": "Cap",
-        "capacete_skyrim": "Nordic Helmet"
+        "capacete_skyrim": "Nordic Helmet",
+        "octacore": "Octacore"
       },
       "faces": {
         "nenhum": "None",
@@ -347,6 +352,7 @@
         "roxo": "Purple",
         "verde": "Green",
         "sunset": "Sunset",
+        "octacore": "Octacore",
         "custom": "Custom"
       }
     },

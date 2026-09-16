@@ -154,6 +154,10 @@
     "skyrim_rp": {
       "name": "Skyrim The History",
       "description": "Membro da equipe do Skyrim: The history"
+    },
+    "octacore": {
+      "name": "Octacore",
+      "description": "Colaborador do Octacore"
     }
   },
   "perfilTags": {
@@ -327,7 +331,8 @@
         "festa": "Festa",
         "coroa": "Coroa",
         "bone": "Boné",
-        "capacete_skyrim": "Elmo Nórdico"
+        "capacete_skyrim": "Elmo Nórdico",
+        "octacore": "Octacore"
       },
       "faces": {
         "nenhum": "Nenhum",
@@ -347,6 +352,7 @@
         "roxo": "Roxo",
         "verde": "Verde",
         "sunset": "Sunset",
+        "octacore": "Octacore",
         "custom": "Personalizado"
       }
     },

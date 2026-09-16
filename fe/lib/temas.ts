@@ -4,7 +4,7 @@
 
 import type { CSSProperties } from "react";
 
-export const TEMAS_DISPONIVEIS = ["escuro", "claro", "roxo", "verde", "sunset"] as const;
+export const TEMAS_DISPONIVEIS = ["escuro", "claro", "roxo", "verde", "sunset", "octacore"] as const;
 
 export type Tema = (typeof TEMAS_DISPONIVEIS)[number];
 
@@ -14,6 +14,7 @@ export const TEMA_LABEL: Record<Tema, string> = {
   roxo: "Roxo",
   verde: "Verde",
   sunset: "Sunset",
+  octacore: "Octacore",
 };
 
 export interface TemaClasses {
@@ -64,6 +65,27 @@ export const TEMA_CLASSES: Record<Tema, TemaClasses> = {
     subtexto: "text-orange-200",
     card: "border-orange-700/50 bg-black/20",
     cardHover: "hover:border-orange-400 hover:bg-black/30",
+  },
+  // Tema exclusivo do colab Octacore (badge "octacore") — dois spotlights nas
+  // cores da marca, em cantos opostos: vermelho embaixo à esquerda, teal (cor
+  // da mascote-polvo) em cima à direita. O teal é mais fraco/menor que o
+  // vermelho de propósito — sozinhos os dois em opacidade igual, o teal
+  // "grita" mais que o vermelho (o olho é mais sensível a ciano que a
+  // vermelho escuro), então essa diferença é o que faz o preto dominar no
+  // meio e as duas cores lerem como equilibradas. Igual ao "custom", usa
+  // estiloFundo pro gradiente em camadas que uma classe Tailwind sozinha não
+  // faz.
+  octacore: {
+    fundo: "bg-black",
+    texto: "text-white",
+    subtexto: "text-neutral-400",
+    card: "border-red-900/60 bg-black/70",
+    cardHover: "hover:border-teal-400/70 hover:bg-red-950/40",
+    estiloFundo: {
+      backgroundColor: "#050505",
+      backgroundImage:
+        "radial-gradient(ellipse at 85% 0%, rgba(20,184,166,0.32), transparent 48%), radial-gradient(ellipse at 15% 100%, rgba(153,20,20,0.6), transparent 58%)",
+    },
   },
 };
 
