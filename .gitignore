@@ -9,6 +9,12 @@ fe/.env*.local
 fe/tsconfig.tsbuildinfo
 fe/next-env.d.ts
 
+# --- Frontend (Cloudflare / OpenNext) ---
+fe/.open-next/
+fe/.wrangler/
+fe/.dev.vars
+fe/cloudflare-env.d.ts
+
 # --- Backend (Maven / Spring Boot) ---
 be/target/
 be/uploads/

@@ -6,11 +6,11 @@ const intlMiddleware = createMiddleware(routing);
 
 export default function middleware(request: NextRequest) {
   // Na primeira visita (sem escolha de idioma salva ainda), decide o idioma
-  // pelo país detectado via geo-IP do próprio Vercel, em vez do idioma do
+  // pelo país detectado via geo-IP da Cloudflare, em vez do idioma do
   // navegador — depois disso o next-intl guarda a escolha num cookie e
   // respeita normalmente (inclusive se o usuário trocar manualmente).
   if (!request.cookies.has("NEXT_LOCALE")) {
-    const country = request.headers.get("x-vercel-ip-country");
+    const country = request.headers.get("cf-ipcountry");
     const locale = country === "BR" ? "pt-BR" : "en";
 
     const headers = new Headers(request.headers);

@@ -177,7 +177,7 @@ async function request<T>(
   if (!response.ok) {
     let mensagem = `Erro ${response.status}`;
     try {
-      const corpo = await response.json();
+      const corpo = (await response.json()) as { message?: string; error?: string };
       mensagem = corpo.message || corpo.error || mensagem;
     } catch {
       // corpo não veio em JSON, mantém mensagem padrão
